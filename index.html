@@ -1,0 +1,782 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>DESTINY // AI MENTOR</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --green:     #00ff41;
+      --green-glow: rgba(0,255,65,0.35);
+      --green-dim:  rgba(0,255,65,0.4);
+      --cyan:      #00d4ff;
+      --amber:     #ffaa00;
+      --bg:        #000000;
+    }
+
+    html, body {
+      height: 100%;
+      background: var(--bg);
+      color: var(--green);
+      font-family: 'Courier New', Courier, monospace;
+      font-size: 14px;
+      overflow: hidden;
+    }
+
+    /* ── Scanlines ── */
+    body::after {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background: repeating-linear-gradient(
+        0deg,
+        transparent 0px,
+        transparent 3px,
+        rgba(0,0,0,0.07) 3px,
+        rgba(0,0,0,0.07) 4px
+      );
+      pointer-events: none;
+      z-index: 9999;
+    }
+
+    /* ── CRT vignette ── */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background: radial-gradient(ellipse at center, transparent 60%, rgba(0,0,0,0.55) 100%);
+      pointer-events: none;
+      z-index: 9998;
+    }
+
+    /* ── TOP BAR ── */
+    #topbar {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      height: 48px;
+      background: #000;
+      border-bottom: 1px solid var(--green);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 20px;
+      z-index: 500;
+    }
+
+    .topbar-left {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    #destiny-title {
+      font-size: 20px;
+      font-weight: bold;
+      letter-spacing: 6px;
+      color: var(--green);
+      text-shadow: 0 0 10px var(--green), 0 0 20px var(--green-glow);
+    }
+
+    #status-dot {
+      width: 9px;
+      height: 9px;
+      background: var(--green);
+      border-radius: 50%;
+      box-shadow: 0 0 8px var(--green);
+      animation: blink-dot 1.5s ease-in-out infinite;
+    }
+
+    @keyframes blink-dot {
+      0%, 100% { opacity: 1; }
+      50%       { opacity: 0.05; }
+    }
+
+    .topbar-right {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+
+    #transmissions {
+      font-size: 11px;
+      letter-spacing: 1.5px;
+      color: var(--green);
+      opacity: 0.75;
+      transition: color 0.3s;
+    }
+
+    #transmissions.warn  { color: var(--amber); opacity: 1; }
+    #transmissions.empty { color: #ff3333;      opacity: 1; }
+
+    #help-btn {
+      width: 22px;
+      height: 22px;
+      border: 1px solid var(--green);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      font-size: 12px;
+      font-weight: bold;
+      color: var(--green);
+      flex-shrink: 0;
+      transition: all 0.15s;
+      user-select: none;
+    }
+
+    #help-btn:hover {
+      background: var(--green);
+      color: #000;
+      box-shadow: 0 0 10px var(--green);
+    }
+
+    /* ── CHAT FEED ── */
+    #chat-feed {
+      position: fixed;
+      top: 48px;
+      bottom: 64px;
+      left: 0; right: 0;
+      overflow-y: auto;
+      padding: 24px 24px 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+
+    #chat-feed::-webkit-scrollbar       { width: 3px; }
+    #chat-feed::-webkit-scrollbar-track  { background: transparent; }
+    #chat-feed::-webkit-scrollbar-thumb  { background: var(--green-dim); border-radius: 2px; }
+
+    .msg {
+      line-height: 1.65;
+      word-break: break-word;
+      max-width: 740px;
+    }
+
+    .msg-destiny { color: var(--green); }
+    .msg-hero    { color: var(--cyan);  }
+    .msg-system  { color: var(--amber); font-size: 12px; opacity: 0.8; }
+
+    .msg-prefix  { opacity: 0.5; margin-right: 2px; }
+
+    /* ── Typewriter cursor ── */
+    .typing-cursor::after {
+      content: '▋';
+      margin-left: 1px;
+      color: var(--green);
+      animation: blink-dot 0.65s step-end infinite;
+    }
+
+    /* ── Glitch animation ── */
+    @keyframes glitch {
+      0%, 85%, 100% {
+        text-shadow: none;
+        transform: none;
+      }
+      86% {
+        text-shadow: -2px 0 #ff0066, 2px 0 #00e5ff;
+        transform: translateX(2px);
+      }
+      87% {
+        text-shadow: none;
+        transform: none;
+      }
+      88% {
+        text-shadow: 1px 0 #ff0066, -1px 0 #00e5ff;
+        transform: translateX(-1px) skewX(0.4deg);
+      }
+      89% {
+        text-shadow: none;
+        transform: none;
+      }
+    }
+
+    .glitch-slow { animation: glitch 11s infinite; }
+    .glitch-mid  { animation: glitch  8s infinite 3.5s; }
+    .glitch-fast { animation: glitch  6s infinite 1.8s; }
+
+    /* ── Thinking line ── */
+    #thinking-line {
+      display: none;
+      color: var(--amber);
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50%       { opacity: 0.2; }
+    }
+
+    #thinking-line.show {
+      display: block;
+      animation: pulse 0.85s ease-in-out infinite;
+    }
+
+    /* ── INPUT BAR ── */
+    #input-bar {
+      position: fixed;
+      bottom: 0; left: 0; right: 0;
+      height: 64px;
+      background: #000;
+      border-top: 1px solid var(--green);
+      display: flex;
+      align-items: center;
+      padding: 0 20px;
+    }
+
+    #input-prefix {
+      color: var(--green);
+      opacity: 0.65;
+      white-space: nowrap;
+      margin-right: 8px;
+      user-select: none;
+      flex-shrink: 0;
+    }
+
+    #chat-input {
+      flex: 1;
+      background: transparent;
+      border: none;
+      outline: none;
+      color: var(--cyan);
+      font-family: inherit;
+      font-size: 14px;
+      caret-color: var(--green);
+    }
+
+    #chat-input::placeholder {
+      color: rgba(0, 212, 255, 0.22);
+    }
+
+    #chat-input:disabled {
+      opacity: 0.35;
+      cursor: not-allowed;
+    }
+
+    /* ── CA address ── */
+    #ca-badge {
+      position: fixed;
+      bottom: 70px;
+      right: 14px;
+      font-size: 9px;
+      color: rgba(0,255,65,0.35);
+      letter-spacing: 0.4px;
+      cursor: pointer;
+      transition: color 0.2s, opacity 0.2s;
+      z-index: 400;
+      text-align: right;
+      line-height: 1.5;
+      user-select: none;
+    }
+
+    #ca-badge:hover {
+      color: var(--green);
+    }
+
+    #ca-label {
+      display: block;
+      font-size: 8px;
+      letter-spacing: 2px;
+      opacity: 0.65;
+      margin-bottom: 2px;
+    }
+
+    #ca-addr {
+      display: block;
+      max-width: 180px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    /* ── Toast ── */
+    #toast {
+      position: fixed;
+      bottom: 80px;
+      left: 50%;
+      transform: translateX(-50%) translateY(8px);
+      background: var(--green);
+      color: #000;
+      padding: 7px 18px;
+      font-size: 11px;
+      font-weight: bold;
+      letter-spacing: 2px;
+      opacity: 0;
+      transition: opacity 0.2s, transform 0.2s;
+      z-index: 700;
+      pointer-events: none;
+    }
+
+    #toast.show {
+      opacity: 1;
+      transform: translateX(-50%) translateY(0);
+    }
+
+    /* ── Help modal ── */
+    #help-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.9);
+      z-index: 800;
+      align-items: center;
+      justify-content: center;
+    }
+
+    #help-overlay.show { display: flex; }
+
+    #help-box {
+      border: 1px solid var(--green);
+      background: #000;
+      padding: 28px 30px;
+      max-width: 460px;
+      width: 90%;
+      box-shadow: 0 0 40px rgba(0,255,65,0.12);
+    }
+
+    #help-box h2 {
+      color: var(--green);
+      font-size: 12px;
+      letter-spacing: 3px;
+      margin-bottom: 22px;
+      text-shadow: 0 0 8px var(--green);
+    }
+
+    .help-topic {
+      margin-bottom: 14px;
+    }
+
+    .help-topic-name {
+      color: var(--cyan);
+      font-size: 12px;
+      letter-spacing: 1px;
+      margin-bottom: 3px;
+    }
+
+    .help-topic-desc {
+      color: var(--green);
+      font-size: 11px;
+      opacity: 0.65;
+      padding-left: 12px;
+    }
+
+    #help-close {
+      margin-top: 22px;
+      color: var(--amber);
+      font-size: 11px;
+      letter-spacing: 2px;
+      cursor: pointer;
+      opacity: 0.65;
+      transition: opacity 0.15s;
+      user-select: none;
+    }
+
+    #help-close:hover { opacity: 1; }
+
+    /* ── Limit reached overlay ── */
+    #limit-banner {
+      display: none;
+      position: fixed;
+      bottom: 64px;
+      left: 0; right: 0;
+      background: rgba(255,51,51,0.08);
+      border-top: 1px solid rgba(255,51,51,0.4);
+      padding: 8px 20px;
+      font-size: 11px;
+      color: #ff5555;
+      letter-spacing: 1.5px;
+      text-align: center;
+      z-index: 300;
+    }
+
+    #limit-banner.show { display: block; }
+
+    /* ── Mobile ── */
+    @media (max-width: 600px) {
+      #destiny-title { font-size: 16px; letter-spacing: 3px; }
+      #transmissions { font-size: 10px; letter-spacing: 1px; }
+      #chat-feed { padding: 16px 14px 10px; }
+      .msg { font-size: 13px; }
+      #ca-badge { right: 8px; font-size: 8px; max-width: 140px; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- TOP BAR -->
+  <div id="topbar">
+    <div class="topbar-left">
+      <span id="destiny-title">DESTINY</span>
+      <div id="status-dot"></div>
+    </div>
+    <div class="topbar-right">
+      <span id="transmissions">TRANSMISSIONS REMAINING: 20/20</span>
+      <div id="help-btn" title="What can DESTINY help with?">?</div>
+    </div>
+  </div>
+
+  <!-- CHAT FEED -->
+  <div id="chat-feed">
+    <div class="msg msg-system">
+      <span class="msg-prefix">// </span>SECURE CHANNEL ESTABLISHED &nbsp;·&nbsp; ENCRYPTION ACTIVE
+    </div>
+    <div class="msg msg-system">
+      <span class="msg-prefix">// </span>DESTINY v2.1 ONLINE &nbsp;·&nbsp; AWAITING TRANSMISSION
+    </div>
+  </div>
+
+  <!-- THINKING LINE (injected into feed dynamically) -->
+
+  <!-- CA ADDRESS -->
+  <div id="ca-badge" onclick="copyCA()" title="Click to copy contract address">
+    <span id="ca-label">CONTRACT ADDRESS</span>
+    <span id="ca-addr">3AwkJnZL7xrf8ffUwEsSkKndQkPSj2vfR3CqvyFpk8UP</span>
+  </div>
+
+  <!-- TOAST -->
+  <div id="toast">COPIED</div>
+
+  <!-- LIMIT BANNER -->
+  <div id="limit-banner">DAILY TRANSMISSION LIMIT REACHED — SIGNAL RESETS AT MIDNIGHT UTC</div>
+
+  <!-- INPUT BAR -->
+  <div id="input-bar">
+    <span id="input-prefix">&gt;&nbsp;HERO:&nbsp;</span>
+    <input
+      id="chat-input"
+      type="text"
+      placeholder="enter transmission..."
+      autocomplete="off"
+      spellcheck="false"
+      maxlength="500"
+    />
+  </div>
+
+  <!-- HELP MODAL -->
+  <div id="help-overlay" onclick="handleHelpOverlayClick(event)">
+    <div id="help-box">
+      <h2>// WHAT DESTINY CAN HELP WITH</h2>
+
+      <div class="help-topic">
+        <div class="help-topic-name">→ AI &amp; Machine Learning</div>
+        <div class="help-topic-desc">Models, tools, prompting, building AI products from scratch</div>
+      </div>
+
+      <div class="help-topic">
+        <div class="help-topic-name">→ Crypto &amp; Blockchain</div>
+        <div class="help-topic-desc">DeFi, wallets, tokens, on-chain mechanics, how it all works</div>
+      </div>
+
+      <div class="help-topic">
+        <div class="help-topic-name">→ Coding &amp; Shipping</div>
+        <div class="help-topic-desc">Debugging, architecture, picking the right stack, moving fast</div>
+      </div>
+
+      <div class="help-topic">
+        <div class="help-topic-name">→ Web3 Projects</div>
+        <div class="help-topic-desc">Smart contracts, NFTs, DApps, tokenomics, launch strategy</div>
+      </div>
+
+      <div class="help-topic">
+        <div class="help-topic-name">→ General Tech</div>
+        <div class="help-topic-desc">Whatever you need to learn to move forward — ask it</div>
+      </div>
+
+      <div id="help-close" onclick="closeHelp()">[ CLOSE TRANSMISSION ]</div>
+    </div>
+  </div>
+
+  <script>
+    // ── Config ────────────────────────────────────────────────────────────
+    var BACKEND      = 'https://dream-production-0bfd.up.railway.app';
+    var CA           = '3AwkJnZL7xrf8ffUwEsSkKndQkPSj2vfR3CqvyFpk8UP';
+    var DAILY_LIMIT  = 20;
+    var GLITCH_CLASSES = ['glitch-slow', 'glitch-mid', 'glitch-fast'];
+
+    // ── Visitor ID ────────────────────────────────────────────────────────
+    function getVisitorId() {
+      var id = localStorage.getItem('destiny_vid');
+      if (!id) {
+        id = typeof crypto !== 'undefined' && crypto.randomUUID
+          ? crypto.randomUUID()
+          : 'v' + Math.random().toString(36).slice(2) + Date.now().toString(36);
+        localStorage.setItem('destiny_vid', id);
+      }
+      return id;
+    }
+
+    // ── Daily usage ───────────────────────────────────────────────────────
+    function getUsage() {
+      var today = new Date().toISOString().split('T')[0];
+      try {
+        var u = JSON.parse(localStorage.getItem('destiny_usage') || 'null');
+        if (u && u.date === today) return u;
+      } catch (e) {}
+      return { date: today, count: 0 };
+    }
+
+    function incrementUsage() {
+      var u = getUsage();
+      u.count = (u.count || 0) + 1;
+      localStorage.setItem('destiny_usage', JSON.stringify(u));
+      return u.count;
+    }
+
+    function getRemaining() {
+      return Math.max(0, DAILY_LIMIT - getUsage().count);
+    }
+
+    // ── Conversation history ──────────────────────────────────────────────
+    function getHistory() {
+      try {
+        return JSON.parse(localStorage.getItem('destiny_history') || '[]');
+      } catch (e) { return []; }
+    }
+
+    function saveHistory(h) {
+      if (h.length > 24) h = h.slice(-24);
+      localStorage.setItem('destiny_history', JSON.stringify(h));
+    }
+
+    function pushHistory(role, content) {
+      var h = getHistory();
+      h.push({ role: role, content: content });
+      saveHistory(h);
+    }
+
+    // ── UI helpers ────────────────────────────────────────────────────────
+    var feed  = document.getElementById('chat-feed');
+    var input = document.getElementById('chat-input');
+    var transEl = document.getElementById('transmissions');
+    var limitBanner = document.getElementById('limit-banner');
+
+    function updateTransmissions() {
+      var rem = getRemaining();
+      transEl.textContent = 'TRANSMISSIONS REMAINING: ' + rem + '/' + DAILY_LIMIT;
+      transEl.className   = rem === 0 ? 'empty' : rem <= 5 ? 'warn' : '';
+      if (rem === 0) {
+        limitBanner.classList.add('show');
+        input.disabled = true;
+        input.placeholder = 'daily limit reached';
+      }
+    }
+
+    function scrollBottom() {
+      feed.scrollTop = feed.scrollHeight;
+    }
+
+    function escHtml(s) {
+      return s
+        .replace(/&/g,'&amp;').replace(/</g,'&lt;')
+        .replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+    }
+
+    // Append a message element; returns a promise that resolves when done
+    function appendMsg(role, text, typewriter) {
+      var div  = document.createElement('div');
+      var span = document.createElement('span');  // text node
+
+      if (role === 'destiny') {
+        div.className = 'msg msg-destiny';
+        var pre = document.createElement('span');
+        pre.className = 'msg-prefix';
+        pre.textContent = '> DESTINY: ';
+        div.appendChild(pre);
+        div.appendChild(span);
+        feed.appendChild(div);
+        scrollBottom();
+
+        if (typewriter) {
+          return new Promise(function(resolve) {
+            span.classList.add('typing-cursor');
+            var i = 0;
+            var speed = Math.max(8, Math.min(28, 2000 / text.length));
+            var iv = setInterval(function() {
+              span.textContent += text[i];
+              i++;
+              scrollBottom();
+              if (i >= text.length) {
+                clearInterval(iv);
+                span.classList.remove('typing-cursor');
+                var gc = GLITCH_CLASSES[Math.floor(Math.random() * GLITCH_CLASSES.length)];
+                div.classList.add(gc);
+                resolve();
+              }
+            }, speed);
+          });
+        } else {
+          span.textContent = text;
+          var gc = GLITCH_CLASSES[Math.floor(Math.random() * GLITCH_CLASSES.length)];
+          div.classList.add(gc);
+          return Promise.resolve();
+        }
+
+      } else if (role === 'hero') {
+        div.className = 'msg msg-hero';
+        div.innerHTML = '<span class="msg-prefix">&gt; HERO:&nbsp;</span>' + escHtml(text);
+        feed.appendChild(div);
+        scrollBottom();
+
+      } else if (role === 'system') {
+        div.className = 'msg msg-system';
+        div.innerHTML = '<span class="msg-prefix">// </span>' + escHtml(text);
+        feed.appendChild(div);
+        scrollBottom();
+      }
+
+      return Promise.resolve();
+    }
+
+    // Thinking indicator
+    var thinkEl = null;
+
+    function showThinking() {
+      thinkEl = document.createElement('div');
+      thinkEl.className = 'msg';
+      thinkEl.id = 'thinking-line';
+      thinkEl.innerHTML =
+        '<span class="msg-prefix" style="color:var(--amber)">// </span>' +
+        '<span style="color:var(--amber)">DECRYPTING RESPONSE...</span>';
+      thinkEl.classList.add('show');
+      feed.appendChild(thinkEl);
+      scrollBottom();
+    }
+
+    function hideThinking() {
+      if (thinkEl) { thinkEl.remove(); thinkEl = null; }
+    }
+
+    // ── Send message ──────────────────────────────────────────────────────
+    var isSending = false;
+
+    async function sendMessage() {
+      if (isSending) return;
+      var text = input.value.trim();
+      if (!text) return;
+
+      if (getRemaining() <= 0) {
+        input.value = '';
+        return;
+      }
+
+      input.value    = '';
+      input.disabled = true;
+      isSending      = true;
+
+      appendMsg('hero', text, false);
+      pushHistory('user', text);
+      showThinking();
+
+      try {
+        var res = await fetch(BACKEND + '/api/chat', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            visitorId: getVisitorId(),
+            message:   text,
+            history:   getHistory()
+          })
+        });
+
+        hideThinking();
+
+        if (res.status === 429) {
+          incrementUsage();
+          updateTransmissions();
+          await appendMsg('destiny', 'Signal exhausted. Return tomorrow, hero.', true);
+        } else if (res.ok) {
+          var data  = await res.json();
+          var reply = data.response || 'Signal unclear. Try again.';
+          incrementUsage();
+          updateTransmissions();
+          pushHistory('assistant', reply);
+          await appendMsg('destiny', reply, true);
+        } else {
+          await appendMsg('destiny', 'Signal interference. Stand by.', true);
+        }
+
+      } catch (err) {
+        hideThinking();
+        await appendMsg('destiny', 'Connection dropped. Check your signal.', true);
+        console.error(err);
+      }
+
+      isSending = false;
+      if (getRemaining() > 0) {
+        input.disabled = false;
+        input.focus();
+      }
+    }
+
+    // ── CA copy ───────────────────────────────────────────────────────────
+    var toastTimer = null;
+
+    function copyCA() {
+      var finish = function() {
+        var t = document.getElementById('toast');
+        t.classList.add('show');
+        clearTimeout(toastTimer);
+        toastTimer = setTimeout(function() { t.classList.remove('show'); }, 1800);
+      };
+
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(CA).then(finish).catch(function() {
+          fallbackCopy(CA); finish();
+        });
+      } else {
+        fallbackCopy(CA); finish();
+      }
+    }
+
+    function fallbackCopy(text) {
+      var ta = document.createElement('textarea');
+      ta.value = text;
+      ta.style.cssText = 'position:fixed;top:-9999px;left:-9999px;';
+      document.body.appendChild(ta);
+      ta.select();
+      try { document.execCommand('copy'); } catch(e) {}
+      document.body.removeChild(ta);
+    }
+
+    // ── Help modal ────────────────────────────────────────────────────────
+    document.getElementById('help-btn').addEventListener('click', function() {
+      document.getElementById('help-overlay').classList.add('show');
+    });
+
+    function handleHelpOverlayClick(e) {
+      if (e.target === document.getElementById('help-overlay')) closeHelp();
+    }
+
+    function closeHelp() {
+      document.getElementById('help-overlay').classList.remove('show');
+    }
+
+    // ── Keyboard ──────────────────────────────────────────────────────────
+    input.addEventListener('keydown', function(e) {
+      if (e.key === 'Enter') { e.preventDefault(); sendMessage(); }
+    });
+
+    document.addEventListener('keydown', function(e) {
+      if (e.key === 'Escape') closeHelp();
+    });
+
+    // ── Init ──────────────────────────────────────────────────────────────
+    updateTransmissions();
+
+    // Boot sequence then DESTINY welcome
+    setTimeout(function() {
+      if (getRemaining() > 0) {
+        appendMsg('destiny',
+          "You found me. Good. Ask me anything — AI, crypto, code, building. Let's make you dangerous.",
+          true
+        );
+      }
+    }, 700);
+
+    // Auto-focus input
+    setTimeout(function() { if (getRemaining() > 0) input.focus(); }, 300);
+  </script>
+</body>
+</html>
