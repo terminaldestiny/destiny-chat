@@ -3,780 +3,977 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>DESTINY // AI MENTOR</title>
+  <title>DESTINY // FIELD OPERATIVE</title>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
     :root {
       --green:     #00ff41;
-      --green-glow: rgba(0,255,65,0.35);
-      --green-dim:  rgba(0,255,65,0.4);
+      --green-g:   rgba(0,255,65,0.4);
+      --green-d:   rgba(0,255,65,0.08);
       --cyan:      #00d4ff;
       --amber:     #ffaa00;
-      --bg:        #000000;
+      --red:       #ff2a00;
+      --red-g:     rgba(255,42,0,0.45);
+      --red-d:     rgba(255,42,0,0.12);
+      --bg:        #030c15;
+      --surface:   #06121e;
     }
 
     html, body {
-      height: 100%;
-      background: var(--bg);
+      height: 100%; background: var(--bg);
       color: var(--green);
       font-family: 'Courier New', Courier, monospace;
-      font-size: 14px;
-      overflow: hidden;
+      font-size: 14px; overflow: hidden;
     }
 
-    /* ── Scanlines ── */
-    body::after {
-      content: '';
-      position: fixed;
-      inset: 0;
-      background: repeating-linear-gradient(
-        0deg,
-        transparent 0px,
-        transparent 3px,
-        rgba(0,0,0,0.07) 3px,
-        rgba(0,0,0,0.07) 4px
-      );
-      pointer-events: none;
-      z-index: 9999;
+    /* ── BACKGROUND STACK ───────────────────────────────────── */
+    #bg-matrix  { position:fixed; inset:0; z-index:1; opacity:0.04; pointer-events:none; }
+    #bg-grid    {
+      position:fixed; inset:0; z-index:2; pointer-events:none;
+      background-image:
+        linear-gradient(rgba(0,255,65,0.025) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(0,255,65,0.025) 1px, transparent 1px);
+      background-size: 48px 48px;
+    }
+    #bg-streaks { position:fixed; inset:0; z-index:3; pointer-events:none; overflow:hidden; }
+    #bg-vignette {
+      position:fixed; inset:0; z-index:4; pointer-events:none;
+      background: radial-gradient(ellipse at 50% 40%, transparent 35%, rgba(3,12,21,0.75) 100%);
+    }
+    #bg-edge {
+      position:fixed; inset:0; z-index:5; pointer-events:none;
+      animation: edge-breathe 4.5s ease-in-out infinite;
+    }
+    @keyframes edge-breathe {
+      0%,100%{ box-shadow: inset 0 0 80px rgba(0,255,65,0.055), inset 0 0 200px rgba(0,255,65,0.02); }
+      50%    { box-shadow: inset 0 0 110px rgba(0,255,65,0.1),  inset 0 0 260px rgba(0,255,65,0.04); }
+    }
+    #bg-scanlines {
+      position:fixed; inset:0; z-index:6; pointer-events:none;
+      background: repeating-linear-gradient(0deg, transparent 0, transparent 3px, rgba(0,0,0,0.06) 3px, rgba(0,0,0,0.06) 4px);
+    }
+    #bg-particles { position:fixed; inset:0; z-index:7; pointer-events:none; }
+    .particle {
+      position:absolute; border-radius:50%; opacity:0;
+      animation: ptl linear infinite;
+    }
+    @keyframes ptl {
+      0%  { opacity:0; transform:translateY(0) scale(1); }
+      15% { opacity:0.55; }
+      85% { opacity:0.2; }
+      100%{ opacity:0; transform:translateY(-150px) scale(0.15); }
     }
 
-    /* ── CRT vignette ── */
-    body::before {
-      content: '';
-      position: fixed;
-      inset: 0;
-      background: radial-gradient(ellipse at center, transparent 60%, rgba(0,0,0,0.55) 100%);
-      pointer-events: none;
-      z-index: 9998;
+    /* Rocky terrain silhouette */
+    #bg-terrain {
+      position:fixed; bottom:64px; left:0; right:0; z-index:8;
+      pointer-events:none; height:90px; opacity:0.6;
+    }
+    #bg-terrain svg { width:100%; height:100%; display:block; }
+
+    /* Red energy streak */
+    .streak {
+      position:absolute;
+      height:1.5px;
+      transform-origin:left center;
+      border-radius:2px;
+      animation:streak-pulse ease-in-out infinite;
+    }
+    @keyframes streak-pulse {
+      0%,100%{ opacity:0; transform:rotate(var(--ang)) scaleX(0.2); }
+      15%,70% { opacity:var(--op); transform:rotate(var(--ang)) scaleX(1); }
     }
 
-    /* ── TOP BAR ── */
+    /* ── BOOT ───────────────────────────────────────────────── */
+    #boot {
+      position:fixed; inset:0; background:#000; z-index:9500;
+      display:flex; flex-direction:column; justify-content:center;
+      padding:40px clamp(24px,8vw,90px);
+      transition: opacity 1s ease;
+    }
+    #boot.out { opacity:0; pointer-events:none; }
+
+    .bl {
+      font-size:12px; letter-spacing:2px; margin-bottom:7px;
+      opacity:0; animation: bl-in 0.12s ease forwards;
+    }
+    .bl-dim  { color:rgba(0,255,65,0.35); }
+    .bl-red  { color:var(--red); text-shadow:0 0 10px var(--red-g); }
+    .bl-acc  { color:var(--cyan); }
+    .bl-win  { color:var(--green); font-weight:bold;
+      text-shadow:0 0 12px var(--green), 0 0 28px var(--green-g); }
+    @keyframes bl-in {
+      from{ opacity:0; transform:translateX(-12px); }
+      to  { opacity:1; transform:none; }
+    }
+
+    /* Progress bar inside boot */
+    .boot-bar-wrap {
+      width:240px; height:3px;
+      background:rgba(0,255,65,0.1); border:1px solid rgba(0,255,65,0.2);
+      margin: 4px 0 10px; overflow:hidden; opacity:0;
+      animation: bl-in 0.12s ease forwards;
+    }
+    .boot-bar-fill {
+      height:100%; width:0;
+      background:linear-gradient(90deg,var(--red),var(--green));
+      box-shadow:0 0 8px var(--green);
+      animation:boot-fill 1.8s ease forwards;
+      animation-delay:0.5s;
+    }
+    @keyframes boot-fill { to{ width:100%; } }
+
+    /* ── MAIN UI ─────────────────────────────────────────────── */
+    #ui {
+      position:fixed; inset:0; z-index:10;
+      display:flex; flex-direction:column;
+      opacity:0; transition:opacity 0.8s ease;
+    }
+    #ui.on { opacity:1; }
+
+    /* ── TOP BAR ─────────────────────────────────────────────── */
     #topbar {
-      position: fixed;
-      top: 0; left: 0; right: 0;
-      height: 48px;
-      background: #000;
-      border-bottom: 1px solid var(--green);
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 0 20px;
-      z-index: 500;
+      height:68px; flex-shrink:0;
+      background:linear-gradient(180deg, rgba(3,12,21,0.98) 0%, rgba(6,18,30,0.92) 100%);
+      border-bottom:1px solid rgba(0,255,65,0.18);
+      display:flex; align-items:center;
+      justify-content:space-between; padding:0 20px;
+      box-shadow:0 1px 0 rgba(255,42,0,0.06), 0 4px 30px rgba(0,0,0,0.5);
     }
 
-    .topbar-left {
-      display: flex;
-      align-items: center;
-      gap: 10px;
+    /* ── AVATAR ─────────────────────────────────────────────── */
+    .tb-left { display:flex; align-items:center; gap:14px; }
+
+    #av-wrap { position:relative; width:52px; height:52px; flex-shrink:0; }
+
+    /* Outer crimson arc */
+    #av-arc-red {
+      position:absolute; inset:-6px;
+      border-radius:50%;
+      border:1.5px solid transparent;
+      border-top-color:var(--red);
+      border-right-color:var(--red);
+      opacity:0.55;
+      animation:spin-cw 5s linear infinite;
+      filter:drop-shadow(0 0 4px var(--red));
+    }
+    /* Outer green arc */
+    #av-arc-green {
+      position:absolute; inset:-6px;
+      border-radius:50%;
+      border:1.5px solid transparent;
+      border-bottom-color:var(--green);
+      border-left-color:var(--green);
+      opacity:0.4;
+      animation:spin-ccw 7s linear infinite;
+      filter:drop-shadow(0 0 4px var(--green));
+    }
+    @keyframes spin-cw  { to{ transform:rotate(360deg); } }
+    @keyframes spin-ccw { to{ transform:rotate(-360deg); } }
+
+    /* Middle ring */
+    #av-ring {
+      position:absolute; inset:-1px;
+      clip-path:polygon(50% 0%,100% 25%,100% 75%,50% 100%,0% 75%,0% 25%);
+      border:1px solid rgba(0,255,65,0.25);
+      animation:ring-breathe 3s ease-in-out infinite;
+    }
+    @keyframes ring-breathe {
+      0%,100%{ opacity:0.25; transform:scale(1.02); }
+      50%    { opacity:0.6;  transform:scale(1.07); }
     }
 
-    #destiny-title {
-      font-size: 20px;
-      font-weight: bold;
-      letter-spacing: 6px;
-      color: var(--green);
-      text-shadow: 0 0 10px var(--green), 0 0 20px var(--green-glow);
+    /* Core hexagon */
+    #av-core {
+      width:52px; height:52px;
+      clip-path:polygon(50% 0%,100% 25%,100% 75%,50% 100%,0% 75%,0% 25%);
+      background:linear-gradient(145deg,#071a07,#0a2d0a,#041408);
+      display:flex; align-items:center; justify-content:center;
+      position:relative; z-index:1;
+      animation:av-breathe 3.5s ease-in-out infinite;
+    }
+    @keyframes av-breathe {
+      0%,100%{ box-shadow:0 0 16px rgba(0,255,65,0.28); filter:brightness(0.9); }
+      50%    { box-shadow:0 0 36px rgba(0,255,65,0.5), 0 0 70px rgba(0,255,65,0.15); filter:brightness(1.15); }
+    }
+    #av-core.thinking { animation:av-think 0.4s ease-in-out infinite; }
+    @keyframes av-think {
+      0%,100%{ box-shadow:0 0 12px rgba(255,170,0,0.5); filter:brightness(0.85) hue-rotate(28deg); }
+      50%    { box-shadow:0 0 50px rgba(255,170,0,0.9), 0 0 80px rgba(255,42,0,0.3); filter:brightness(1.3) hue-rotate(32deg); }
+    }
+    #av-core.speaking { animation:av-speak 0.38s ease-in-out infinite; }
+    @keyframes av-speak {
+      0%,100%{ box-shadow:0 0 22px rgba(0,255,65,0.55); filter:brightness(1.05); }
+      50%    { box-shadow:0 0 60px rgba(0,255,65,0.85), 0 0 110px rgba(0,255,65,0.22); filter:brightness(1.35); }
     }
 
-    #status-dot {
-      width: 9px;
-      height: 9px;
-      background: var(--green);
-      border-radius: 50%;
-      box-shadow: 0 0 8px var(--green);
-      animation: blink-dot 1.5s ease-in-out infinite;
+    /* D letter */
+    #av-d {
+      font-size:22px; font-weight:900; color:var(--green);
+      text-shadow:0 0 8px var(--green), 0 0 20px var(--green-g);
+      letter-spacing:-1px; user-select:none;
+    }
+    /* Red dot accent on avatar */
+    #av-dot {
+      position:absolute; bottom:2px; right:6px;
+      width:8px; height:8px; background:var(--red);
+      border-radius:50%; z-index:2;
+      box-shadow:0 0 8px var(--red-g);
+      animation:av-dot-blink 1.8s ease-in-out infinite;
+    }
+    @keyframes av-dot-blink {
+      0%,100%{ opacity:1; box-shadow:0 0 6px var(--red-g); }
+      50%    { opacity:0.3; box-shadow:none; }
     }
 
-    @keyframes blink-dot {
-      0%, 100% { opacity: 1; }
-      50%       { opacity: 0.05; }
+    /* Identity text */
+    #id-block { display:flex; flex-direction:column; gap:3px; }
+    #id-name {
+      font-size:20px; font-weight:900; letter-spacing:6px;
+      text-shadow:0 0 12px var(--green), 0 0 28px rgba(0,255,65,0.25);
+    }
+    #id-sub {
+      display:flex; align-items:center; gap:7px;
+      font-size:9px; letter-spacing:2px; color:rgba(0,255,65,0.45);
+    }
+    #id-dot {
+      width:6px; height:6px; background:var(--green); border-radius:50%;
+      animation:id-dot-breathe 2.2s ease-in-out infinite;
+    }
+    @keyframes id-dot-breathe {
+      0%,100%{ box-shadow:0 0 4px var(--green); transform:scale(1); opacity:1; }
+      50%    { box-shadow:0 0 14px var(--green), 0 0 24px var(--green-g); transform:scale(0.8); opacity:0.6; }
     }
 
-    .topbar-right {
-      display: flex;
-      align-items: center;
-      gap: 14px;
+    /* ── HUD RIGHT ──────────────────────────────────────────── */
+    .tb-right { display:flex; align-items:center; gap:18px; }
+
+    #hud-energy { display:flex; flex-direction:column; align-items:flex-end; gap:4px; }
+    #hud-label  { font-size:8px; letter-spacing:2.5px; color:rgba(0,255,65,0.38); }
+    #hud-track  {
+      width:120px; height:5px;
+      background:rgba(0,255,65,0.07);
+      border:1px solid rgba(0,255,65,0.15);
+      position:relative; overflow:hidden;
     }
-
-    #transmissions {
-      font-size: 11px;
-      letter-spacing: 1.5px;
-      color: var(--green);
-      opacity: 0.75;
-      transition: color 0.3s;
+    /* Track glow segments */
+    #hud-track::before {
+      content:'';
+      position:absolute; inset:0;
+      background:repeating-linear-gradient(90deg,
+        transparent 0, transparent 10px,
+        rgba(0,0,0,0.3) 10px, rgba(0,0,0,0.3) 11px);
+      z-index:1;
     }
-
-    #transmissions.warn  { color: var(--amber); opacity: 1; }
-    #transmissions.empty { color: #ff3333;      opacity: 1; }
-
-    #help-btn {
-      width: 22px;
-      height: 22px;
-      border: 1px solid var(--green);
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      cursor: pointer;
-      font-size: 12px;
-      font-weight: bold;
-      color: var(--green);
-      flex-shrink: 0;
-      transition: all 0.15s;
-      user-select: none;
+    #hud-fill {
+      height:100%;
+      background:linear-gradient(90deg, rgba(255,42,0,0.6), #00cc33, #00ff41);
+      box-shadow:0 0 10px var(--green), 0 0 20px rgba(0,255,65,0.25);
+      transition:width 0.6s ease, background 0.4s;
+      width:100%; position:relative; z-index:0;
     }
+    #hud-fill.warn  { background:linear-gradient(90deg,#cc6600,var(--amber)); box-shadow:0 0 10px var(--amber); }
+    #hud-fill.empty { background:var(--red); box-shadow:0 0 10px var(--red); }
+    #hud-count { font-size:9px; letter-spacing:1px; color:rgba(0,255,65,0.45); }
 
-    #help-btn:hover {
-      background: var(--green);
-      color: #000;
-      box-shadow: 0 0 10px var(--green);
+    /* Help btn */
+    #help-btn { position:relative; width:30px; height:30px; cursor:pointer; flex-shrink:0; }
+    #h-ring1 {
+      position:absolute; inset:-3px; border-radius:50%;
+      border:1.5px solid rgba(0,255,65,0.35);
+      border-right-color:transparent; border-bottom-color:transparent;
+      animation:spin-cw 4s linear infinite;
     }
+    #h-ring2 {
+      position:absolute; inset:-1px; border-radius:50%;
+      border:1px solid rgba(255,42,0,0.3);
+      border-left-color:transparent; border-top-color:transparent;
+      animation:spin-ccw 6s linear infinite;
+    }
+    #h-core {
+      position:relative; z-index:1;
+      width:28px; height:28px; border:1px solid rgba(0,255,65,0.3);
+      border-radius:50%; display:flex; align-items:center;
+      justify-content:center; font-size:13px; font-weight:bold;
+      color:var(--green); transition:all 0.15s; user-select:none;
+      margin:1px;
+    }
+    #help-btn:hover #h-core { background:var(--green); color:#000; box-shadow:0 0 16px var(--green); }
 
-    /* ── CHAT FEED ── */
+    /* ── CHAT FEED ──────────────────────────────────────────── */
     #chat-feed {
-      position: fixed;
-      top: 48px;
-      bottom: 64px;
-      left: 0; right: 0;
-      overflow-y: auto;
-      padding: 24px 24px 16px;
-      display: flex;
-      flex-direction: column;
-      gap: 14px;
+      flex:1; overflow-y:auto; overflow-x:hidden;
+      padding:22px 26px 14px;
+      display:flex; flex-direction:column; gap:16px;
+      scroll-behavior:smooth;
+    }
+    #chat-feed::-webkit-scrollbar { width:3px; }
+    #chat-feed::-webkit-scrollbar-track { background:transparent; }
+    #chat-feed::-webkit-scrollbar-thumb { background:rgba(0,255,65,0.18); border-radius:2px; }
+
+    /* Message row */
+    .msg { display:flex; gap:12px; animation:msg-in 0.4s ease both; max-width:780px; }
+    @keyframes msg-in {
+      from{ opacity:0; transform:translateY(10px); }
+      to  { opacity:1; transform:none; }
     }
 
-    #chat-feed::-webkit-scrollbar       { width: 3px; }
-    #chat-feed::-webkit-scrollbar-track  { background: transparent; }
-    #chat-feed::-webkit-scrollbar-thumb  { background: var(--green-dim); border-radius: 2px; }
+    .msg-bar { width:2px; border-radius:2px; flex-shrink:0; margin-top:3px; min-height:36px; }
+    .msg-destiny .msg-bar { background:var(--green); box-shadow:0 0 8px var(--green); }
+    .msg-hero    .msg-bar { background:var(--cyan);  box-shadow:0 0 8px var(--cyan);  }
+    .msg-system  .msg-bar { background:var(--amber); box-shadow:0 0 6px var(--amber); min-height:14px; }
+    .msg-think   .msg-bar { background:var(--amber); box-shadow:0 0 8px var(--amber); }
 
-    .msg {
-      line-height: 1.65;
-      word-break: break-word;
-      max-width: 740px;
+    .msg-body { flex:1; min-width:0; }
+    .msg-head { display:flex; align-items:center; gap:8px; margin-bottom:5px; }
+    .msg-who  { font-size:9px; letter-spacing:3px; font-weight:bold; }
+    .msg-destiny .msg-who { color:var(--green); text-shadow:0 0 7px var(--green); }
+    .msg-hero    .msg-who { color:var(--cyan);  text-shadow:0 0 7px var(--cyan); }
+    .msg-ts  { font-size:9px; color:rgba(0,255,65,0.22); letter-spacing:1px; }
+    .msg-hero .msg-ts { color:rgba(0,212,255,0.22); }
+
+    /* Signal strength bars on DESTINY messages */
+    .msg-sig { display:flex; align-items:flex-end; gap:1.5px; margin-left:4px; }
+    .msg-sig span {
+      display:block; width:2px; background:var(--green);
+      opacity:0.5; border-radius:1px;
     }
+    .msg-sig span:nth-child(1){height:4px}
+    .msg-sig span:nth-child(2){height:6px}
+    .msg-sig span:nth-child(3){height:9px}
+    .msg-sig span:nth-child(4){height:12px; opacity:0.2;}
 
-    .msg-destiny { color: var(--green); }
-    .msg-hero    { color: var(--cyan);  }
-    .msg-system  { color: var(--amber); font-size: 12px; opacity: 0.8; }
-
-    .msg-prefix  { opacity: 0.5; margin-right: 2px; }
-
-    /* ── Typewriter cursor ── */
-    .typing-cursor::after {
-      content: '▋';
-      margin-left: 1px;
-      color: var(--green);
-      animation: blink-dot 0.65s step-end infinite;
+    .msg-text {
+      font-size:13.5px; line-height:1.72; word-break:break-word;
     }
+    .msg-destiny .msg-text { color:rgba(0,255,65,0.88); }
+    .msg-hero    .msg-text { color:rgba(0,212,255,0.88); }
+    .msg-system  .msg-text { color:rgba(255,170,0,0.7); font-size:11px; letter-spacing:0.5px; }
 
-    /* ── Glitch animation ── */
+    /* Destiny text glow-in */
+    @keyframes glow-in {
+      0%  { text-shadow:0 0 24px var(--green); opacity:0.35; }
+      55% { text-shadow:0 0 7px var(--green); }
+      100%{ text-shadow:none; opacity:1; }
+    }
+    .glow-in { animation:glow-in 0.8s ease both; }
+
+    /* Glitch */
     @keyframes glitch {
-      0%, 85%, 100% {
-        text-shadow: none;
-        transform: none;
-      }
-      86% {
-        text-shadow: -2px 0 #ff0066, 2px 0 #00e5ff;
-        transform: translateX(2px);
-      }
-      87% {
-        text-shadow: none;
-        transform: none;
-      }
-      88% {
-        text-shadow: 1px 0 #ff0066, -1px 0 #00e5ff;
-        transform: translateX(-1px) skewX(0.4deg);
-      }
-      89% {
-        text-shadow: none;
-        transform: none;
-      }
+      0%,85%,100%{ text-shadow:none; transform:none; }
+      86%{ text-shadow:-2px 0 var(--red), 2px 0 #00e5ff; transform:translateX(2px); }
+      87%{ text-shadow:none; transform:none; }
+      88%{ text-shadow:1.5px 0 var(--red), -1.5px 0 #00e5ff; transform:skewX(0.5deg) translateX(-1px); }
+      89%{ text-shadow:none; transform:none; }
+    }
+    .glitching { animation:glitch 9s ease-in-out infinite; }
+
+    /* Think text */
+    .think-text {
+      color:var(--amber) !important;
+      animation:think-scr 1s ease-in-out infinite;
+    }
+    @keyframes think-scr {
+      0%,100%{ opacity:1;   text-shadow:none; letter-spacing:0.6px; }
+      40%    { opacity:0.7; text-shadow:-1px 0 var(--amber); letter-spacing:1px; }
+      50%    { opacity:0.25; text-shadow:1px 0 var(--red), -1px 0 var(--amber); letter-spacing:0.1px; }
+      60%    { opacity:0.8; }
     }
 
-    .glitch-slow { animation: glitch 11s infinite; }
-    .glitch-mid  { animation: glitch  8s infinite 3.5s; }
-    .glitch-fast { animation: glitch  6s infinite 1.8s; }
+    /* Typewriter cursor */
+    .tcur::after {
+      content:'▋'; margin-left:1px; color:var(--green);
+      animation:tcur-blink 0.65s step-end infinite;
+    }
+    @keyframes tcur-blink { 0%,100%{opacity:1} 50%{opacity:0} }
 
-    /* ── Thinking line ── */
-    #thinking-line {
-      display: none;
-      color: var(--amber);
+    /* Scan line */
+    .scan {
+      position:fixed; left:0; right:0; height:2px; z-index:8500; pointer-events:none;
+      animation:scan-go 0.7s cubic-bezier(.4,0,1,1) forwards;
+    }
+    @keyframes scan-go {
+      from{ top:68px; opacity:1; }
+      to  { top:100vh; opacity:0; }
     }
 
-    @keyframes pulse {
-      0%, 100% { opacity: 1; }
-      50%       { opacity: 0.2; }
+    /* ── INPUT ──────────────────────────────────────────────── */
+    #input-area {
+      flex-shrink:0; height:66px;
+      background:linear-gradient(0deg, rgba(3,12,21,0.98) 0%, rgba(6,18,30,0.92) 100%);
+      border-top:1px solid rgba(0,255,65,0.14);
+      display:flex; align-items:center; padding:0 18px; gap:10px;
+      transition:border-color 0.3s, box-shadow 0.3s;
+      box-shadow:0 -4px 30px rgba(0,0,0,0.5);
     }
-
-    #thinking-line.show {
-      display: block;
-      animation: pulse 0.85s ease-in-out infinite;
+    #input-area.hot {
+      border-top-color:rgba(0,255,65,0.45);
+      box-shadow:0 -1px 0 rgba(255,42,0,0.08), 0 -8px 28px rgba(0,255,65,0.06);
     }
-
-    /* ── INPUT BAR ── */
-    #input-bar {
-      position: fixed;
-      bottom: 0; left: 0; right: 0;
-      height: 64px;
-      background: #000;
-      border-top: 1px solid var(--green);
-      display: flex;
-      align-items: center;
-      padding: 0 20px;
+    #input-pfx { color:var(--green); opacity:0.4; font-size:13px;
+      white-space:nowrap; user-select:none; flex-shrink:0; }
+    #input-box {
+      flex:1; border:1px solid rgba(0,255,65,0.1);
+      padding:9px 14px; transition:border-color 0.3s, box-shadow 0.3s;
+      background:rgba(0,255,65,0.015);
     }
-
-    #input-prefix {
-      color: var(--green);
-      opacity: 0.65;
-      white-space: nowrap;
-      margin-right: 8px;
-      user-select: none;
-      flex-shrink: 0;
+    #input-box.hot {
+      border-color:rgba(0,255,65,0.4);
+      box-shadow:0 0 18px rgba(0,255,65,0.07), inset 0 0 10px rgba(0,255,65,0.02);
     }
-
     #chat-input {
-      flex: 1;
-      background: transparent;
-      border: none;
-      outline: none;
-      color: var(--cyan);
-      font-family: inherit;
-      font-size: 14px;
-      caret-color: var(--green);
+      width:100%; background:transparent; border:none; outline:none;
+      color:var(--cyan); font-family:inherit; font-size:13.5px; caret-color:var(--green);
+    }
+    #chat-input::placeholder { color:rgba(0,212,255,0.18); }
+    #chat-input:disabled { opacity:0.3; cursor:not-allowed; }
+
+    /* EQ bars */
+    #eq { display:flex; align-items:flex-end; gap:2px; height:22px;
+      opacity:0; transition:opacity 0.2s; flex-shrink:0; }
+    #eq.on { opacity:1; }
+    #eq span {
+      display:block; width:3px; border-radius:1px;
+      background:var(--green); box-shadow:0 0 4px var(--green);
+      animation:eq-alt 0.6s ease-in-out infinite alternate;
+    }
+    #eq span:nth-child(1){animation-duration:.5s;animation-delay:0s}
+    #eq span:nth-child(2){animation-duration:.7s;animation-delay:.1s}
+    #eq span:nth-child(3){animation-duration:.4s;animation-delay:.05s}
+    #eq span:nth-child(4){animation-duration:.8s;animation-delay:.15s}
+    #eq span:nth-child(5){animation-duration:.55s;animation-delay:.08s}
+    @keyframes eq-alt { from{height:3px} to{height:20px} }
+
+    /* Send button */
+    #send-btn {
+      width:38px; height:38px; flex-shrink:0;
+      clip-path:polygon(50% 0%,100% 25%,100% 75%,50% 100%,0% 75%,0% 25%);
+      background:rgba(0,255,65,0.07);
+      display:flex; align-items:center; justify-content:center;
+      color:var(--green); font-size:15px; cursor:pointer; user-select:none;
+      position:relative; transition:all 0.2s;
+      animation:send-pulse 2.5s ease-in-out infinite;
+    }
+    #send-btn::before {
+      content:''; position:absolute; inset:0;
+      clip-path:polygon(50% 0%,100% 25%,100% 75%,50% 100%,0% 75%,0% 25%);
+      border:1px solid rgba(0,255,65,0.35); pointer-events:none;
+    }
+    #send-btn:hover { background:rgba(0,255,65,0.18); filter:drop-shadow(0 0 10px var(--green)); }
+    @keyframes send-pulse {
+      0%,100%{ filter:drop-shadow(0 0 4px rgba(0,255,65,0.2)); }
+      50%    { filter:drop-shadow(0 0 12px rgba(0,255,65,0.5)); }
     }
 
-    #chat-input::placeholder {
-      color: rgba(0, 212, 255, 0.22);
-    }
-
-    #chat-input:disabled {
-      opacity: 0.35;
-      cursor: not-allowed;
-    }
-
-    /* ── CA address ── */
+    /* ── CA BADGE ──────────────────────────────────────────── */
     #ca-badge {
-      position: fixed;
-      bottom: 70px;
-      right: 14px;
-      font-size: 9px;
-      color: rgba(0,255,65,0.35);
-      letter-spacing: 0.4px;
-      cursor: pointer;
-      transition: color 0.2s, opacity 0.2s;
-      z-index: 400;
-      text-align: right;
-      line-height: 1.5;
-      user-select: none;
+      position:fixed; bottom:72px; right:14px;
+      font-size:9px; text-align:right; cursor:pointer; z-index:50;
+      user-select:none; line-height:1.6;
     }
-
-    #ca-badge:hover {
-      color: var(--green);
+    #ca-inner {
+      display:inline-block; padding:5px 10px;
+      border:1px solid rgba(0,255,65,0.09);
+      background:rgba(3,12,21,0.85);
+      color:rgba(0,255,65,0.27); letter-spacing:0.3px;
+      transition:all 0.35s; position:relative; overflow:hidden;
     }
-
-    #ca-label {
-      display: block;
-      font-size: 8px;
-      letter-spacing: 2px;
-      opacity: 0.65;
-      margin-bottom: 2px;
+    #ca-inner::before {
+      content:''; position:absolute;
+      top:0; left:-100%; width:50%; height:100%;
+      background:linear-gradient(90deg, transparent, rgba(255,42,0,0.06), rgba(0,255,65,0.07), transparent);
+      animation:ca-shimmer 4s ease-in-out infinite;
     }
-
-    #ca-addr {
-      display: block;
-      max-width: 180px;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      white-space: nowrap;
+    @keyframes ca-shimmer { 0%{left:-100%} 100%{left:230%} }
+    #ca-badge:hover #ca-inner {
+      border-color:rgba(0,255,65,0.32); color:rgba(0,255,65,0.75);
+      box-shadow:0 0 16px rgba(0,255,65,0.09);
     }
+    #ca-lbl { display:block; font-size:7px; letter-spacing:2.5px; opacity:0.5; margin-bottom:2px; }
 
-    /* ── Toast ── */
+    /* ── TOAST ─────────────────────────────────────────────── */
     #toast {
-      position: fixed;
-      bottom: 80px;
-      left: 50%;
-      transform: translateX(-50%) translateY(8px);
-      background: var(--green);
-      color: #000;
-      padding: 7px 18px;
-      font-size: 11px;
-      font-weight: bold;
-      letter-spacing: 2px;
-      opacity: 0;
-      transition: opacity 0.2s, transform 0.2s;
-      z-index: 700;
-      pointer-events: none;
+      position:fixed; bottom:84px; left:50%;
+      transform:translateX(-50%) translateY(8px);
+      background:var(--green); color:#000;
+      padding:7px 20px; font-size:10px; font-weight:bold;
+      letter-spacing:2.5px; opacity:0;
+      transition:all 0.2s; z-index:800; pointer-events:none;
+      clip-path:polygon(10px 0%, calc(100% - 10px) 0%, 100% 50%, calc(100% - 10px) 100%, 10px 100%, 0% 50%);
     }
+    #toast.on { opacity:1; transform:translateX(-50%) translateY(0); }
 
-    #toast.show {
-      opacity: 1;
-      transform: translateX(-50%) translateY(0);
-    }
-
-    /* ── Help modal ── */
-    #help-overlay {
-      display: none;
-      position: fixed;
-      inset: 0;
-      background: rgba(0,0,0,0.9);
-      z-index: 800;
-      align-items: center;
-      justify-content: center;
-    }
-
-    #help-overlay.show { display: flex; }
-
-    #help-box {
-      border: 1px solid var(--green);
-      background: #000;
-      padding: 28px 30px;
-      max-width: 460px;
-      width: 90%;
-      box-shadow: 0 0 40px rgba(0,255,65,0.12);
-    }
-
-    #help-box h2 {
-      color: var(--green);
-      font-size: 12px;
-      letter-spacing: 3px;
-      margin-bottom: 22px;
-      text-shadow: 0 0 8px var(--green);
-    }
-
-    .help-topic {
-      margin-bottom: 14px;
-    }
-
-    .help-topic-name {
-      color: var(--cyan);
-      font-size: 12px;
-      letter-spacing: 1px;
-      margin-bottom: 3px;
-    }
-
-    .help-topic-desc {
-      color: var(--green);
-      font-size: 11px;
-      opacity: 0.65;
-      padding-left: 12px;
-    }
-
-    #help-close {
-      margin-top: 22px;
-      color: var(--amber);
-      font-size: 11px;
-      letter-spacing: 2px;
-      cursor: pointer;
-      opacity: 0.65;
-      transition: opacity 0.15s;
-      user-select: none;
-    }
-
-    #help-close:hover { opacity: 1; }
-
-    /* ── Limit reached overlay ── */
+    /* ── LIMIT BANNER ──────────────────────────────────────── */
     #limit-banner {
-      display: none;
-      position: fixed;
-      bottom: 64px;
-      left: 0; right: 0;
-      background: rgba(255,51,51,0.08);
-      border-top: 1px solid rgba(255,51,51,0.4);
-      padding: 8px 20px;
-      font-size: 11px;
-      color: #ff5555;
-      letter-spacing: 1.5px;
-      text-align: center;
-      z-index: 300;
+      display:none; flex-shrink:0;
+      background:rgba(255,42,0,0.05); border-top:1px solid rgba(255,42,0,0.22);
+      padding:7px 20px; font-size:10px;
+      color:rgba(255,80,80,0.8); letter-spacing:1.5px; text-align:center;
     }
+    #limit-banner.on { display:block; }
 
-    #limit-banner.show { display: block; }
+    /* ── HELP MODAL ─────────────────────────────────────────── */
+    #help-ovl {
+      display:none; position:fixed; inset:0;
+      background:rgba(3,12,21,0.93); z-index:9000;
+      align-items:center; justify-content:center;
+    }
+    #help-ovl.on { display:flex; }
+    #help-box {
+      border:1px solid rgba(0,255,65,0.3);
+      border-top:2px solid var(--red);
+      background:rgba(4,14,24,0.99); padding:30px 32px;
+      max-width:460px; width:90%;
+      box-shadow:0 0 80px rgba(0,255,65,0.09), 0 0 40px rgba(255,42,0,0.05), inset 0 0 40px rgba(0,255,65,0.015);
+    }
+    #help-box h2 {
+      font-size:11px; letter-spacing:3px; margin-bottom:22px;
+      text-shadow:0 0 8px var(--green);
+      border-bottom:1px solid rgba(0,255,65,0.1); padding-bottom:12px;
+    }
+    .ht { margin-bottom:14px; }
+    .ht-n { color:var(--cyan); font-size:11px; letter-spacing:1.5px; margin-bottom:3px; }
+    .ht-d { color:rgba(0,255,65,0.44); font-size:11px; padding-left:10px; }
+    #help-close {
+      margin-top:22px; border-top:1px solid rgba(255,42,0,0.12);
+      padding-top:12px; color:var(--amber); font-size:10px;
+      letter-spacing:2px; cursor:pointer; opacity:0.6; transition:opacity 0.15s; user-select:none;
+    }
+    #help-close:hover { opacity:1; }
 
-    /* ── Mobile ── */
-    @media (max-width: 600px) {
-      #destiny-title { font-size: 16px; letter-spacing: 3px; }
-      #transmissions { font-size: 10px; letter-spacing: 1px; }
-      #chat-feed { padding: 16px 14px 10px; }
-      .msg { font-size: 13px; }
-      #ca-badge { right: 8px; font-size: 8px; max-width: 140px; }
+    /* ── MOBILE ─────────────────────────────────────────────── */
+    @media(max-width:600px){
+      #id-name{ font-size:16px; letter-spacing:3px; }
+      #hud-track{ width:75px; }
+      #chat-feed{ padding:14px 14px 10px; }
+      .msg-text{ font-size:13px; }
+      #ca-badge{ display:none; }
+      #topbar,#input-area{ padding:0 12px; }
     }
   </style>
 </head>
 <body>
 
-  <!-- TOP BAR -->
+<!-- Background -->
+<canvas id="bg-matrix"></canvas>
+<div id="bg-grid"></div>
+<div id="bg-streaks"></div>
+<div id="bg-vignette"></div>
+<div id="bg-edge"></div>
+<div id="bg-scanlines"></div>
+<div id="bg-particles"></div>
+
+<!-- Rocky terrain silhouette (from image) -->
+<div id="bg-terrain">
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 90" preserveAspectRatio="none">
+    <path d="M0,55 L30,42 L65,52 L95,32 L130,48 L170,24 L210,42 L245,34 L280,50 L315,20 L355,40 L390,28 L425,46 L460,35 L500,52 L540,30 L575,44 L610,22 L650,40 L685,32 L720,50 L758,28 L795,44 L830,36 L868,54 L905,32 L942,48 L978,28 L1015,44 L1052,35 L1088,52 L1122,30 L1158,46 L1195,36 L1232,54 L1268,38 L1305,50 L1340,32 L1375,46 L1440,40 L1440,90 L0,90 Z"
+      fill="#030c15" opacity="0.9"/>
+    <path d="M0,68 L50,58 L100,66 L150,50 L200,62 L255,52 L305,65 L355,54 L405,68 L455,56 L510,66 L560,52 L615,65 L665,56 L720,68 L775,55 L825,66 L875,54 L928,68 L978,56 L1030,65 L1080,52 L1135,66 L1185,55 L1240,68 L1290,56 L1345,65 L1390,58 L1440,66 L1440,90 L0,90 Z"
+      fill="rgba(6,14,26,0.85)"/>
+  </svg>
+</div>
+
+<!-- Boot -->
+<div id="boot"></div>
+
+<!-- UI -->
+<div id="ui">
   <div id="topbar">
-    <div class="topbar-left">
-      <span id="destiny-title">DESTINY</span>
-      <div id="status-dot"></div>
+    <div class="tb-left">
+      <div id="av-wrap">
+        <div id="av-arc-red"></div>
+        <div id="av-arc-green"></div>
+        <div id="av-ring"></div>
+        <div id="av-core">
+          <div id="av-d">D</div>
+        </div>
+        <div id="av-dot"></div>
+      </div>
+      <div id="id-block">
+        <div id="id-name">DESTINY</div>
+        <div id="id-sub">
+          <div id="id-dot"></div>
+          <span>FIELD OPERATIVE · ONLINE</span>
+        </div>
+      </div>
     </div>
-    <div class="topbar-right">
-      <span id="transmissions">TRANSMISSIONS REMAINING: 20/20</span>
-      <div id="help-btn" title="What can DESTINY help with?">?</div>
-    </div>
-  </div>
-
-  <!-- CHAT FEED -->
-  <div id="chat-feed">
-    <div class="msg msg-system">
-      <span class="msg-prefix">// </span>SECURE CHANNEL ESTABLISHED &nbsp;·&nbsp; ENCRYPTION ACTIVE
-    </div>
-    <div class="msg msg-system">
-      <span class="msg-prefix">// </span>DESTINY v2.1 ONLINE &nbsp;·&nbsp; AWAITING TRANSMISSION
-    </div>
-  </div>
-
-  <!-- THINKING LINE (injected into feed dynamically) -->
-
-  <!-- CA ADDRESS -->
-  <div id="ca-badge" onclick="copyCA()" title="Click to copy contract address">
-    <span id="ca-label">CONTRACT ADDRESS</span>
-    <span id="ca-addr">3AwkJnZL7xrf8ffUwEsSkKndQkPSj2vfR3CqvyFpk8UP</span>
-  </div>
-
-  <!-- TOAST -->
-  <div id="toast">COPIED</div>
-
-  <!-- LIMIT BANNER -->
-  <div id="limit-banner">DAILY TRANSMISSION LIMIT REACHED — SIGNAL RESETS AT MIDNIGHT UTC</div>
-
-  <!-- INPUT BAR -->
-  <div id="input-bar">
-    <span id="input-prefix">&gt;&nbsp;HERO:&nbsp;</span>
-    <input
-      id="chat-input"
-      type="text"
-      placeholder="enter transmission..."
-      autocomplete="off"
-      spellcheck="false"
-      maxlength="500"
-    />
-  </div>
-
-  <!-- HELP MODAL -->
-  <div id="help-overlay" onclick="handleHelpOverlayClick(event)">
-    <div id="help-box">
-      <h2>// WHAT DESTINY CAN HELP WITH</h2>
-
-      <div class="help-topic">
-        <div class="help-topic-name">→ AI &amp; Machine Learning</div>
-        <div class="help-topic-desc">Models, tools, prompting, building AI products from scratch</div>
+    <div class="tb-right">
+      <div id="hud-energy">
+        <div id="hud-label">TRANSMISSIONS</div>
+        <div id="hud-track"><div id="hud-fill"></div></div>
+        <div id="hud-count">20 / 20</div>
       </div>
-
-      <div class="help-topic">
-        <div class="help-topic-name">→ Crypto &amp; Blockchain</div>
-        <div class="help-topic-desc">DeFi, wallets, tokens, on-chain mechanics, how it all works</div>
+      <div id="help-btn" onclick="openHelp()">
+        <div id="h-ring1"></div>
+        <div id="h-ring2"></div>
+        <div id="h-core">?</div>
       </div>
-
-      <div class="help-topic">
-        <div class="help-topic-name">→ Coding &amp; Shipping</div>
-        <div class="help-topic-desc">Debugging, architecture, picking the right stack, moving fast</div>
-      </div>
-
-      <div class="help-topic">
-        <div class="help-topic-name">→ Web3 Projects</div>
-        <div class="help-topic-desc">Smart contracts, NFTs, DApps, tokenomics, launch strategy</div>
-      </div>
-
-      <div class="help-topic">
-        <div class="help-topic-name">→ General Tech</div>
-        <div class="help-topic-desc">Whatever you need to learn to move forward — ask it</div>
-      </div>
-
-      <div id="help-close" onclick="closeHelp()">[ CLOSE TRANSMISSION ]</div>
     </div>
   </div>
 
-  <script>
-    // ── Config ────────────────────────────────────────────────────────────
-    var BACKEND      = 'https://dream-production-0bfd.up.railway.app';
-    var CA           = '3AwkJnZL7xrf8ffUwEsSkKndQkPSj2vfR3CqvyFpk8UP';
-    var DAILY_LIMIT  = 20;
-    var GLITCH_CLASSES = ['glitch-slow', 'glitch-mid', 'glitch-fast'];
+  <div id="chat-feed"></div>
+  <div id="limit-banner">DAILY TRANSMISSIONS EXHAUSTED — SIGNAL RESETS AT MIDNIGHT UTC</div>
 
-    // ── Visitor ID ────────────────────────────────────────────────────────
-    function getVisitorId() {
-      var id = localStorage.getItem('destiny_vid');
-      if (!id) {
-        id = typeof crypto !== 'undefined' && crypto.randomUUID
-          ? crypto.randomUUID()
-          : 'v' + Math.random().toString(36).slice(2) + Date.now().toString(36);
-        localStorage.setItem('destiny_vid', id);
-      }
-      return id;
+  <div id="input-area">
+    <span id="input-pfx">&gt;&nbsp;HERO:&nbsp;</span>
+    <div id="input-box">
+      <input id="chat-input" type="text" placeholder="enter transmission..."
+        autocomplete="off" spellcheck="false" maxlength="500"/>
+    </div>
+    <div id="eq"><span></span><span></span><span></span><span></span><span></span></div>
+    <div id="send-btn" onclick="sendMsg()">&#9654;</div>
+  </div>
+</div>
+
+<!-- CA -->
+<div id="ca-badge" onclick="copyCA()">
+  <div id="ca-inner">
+    <span id="ca-lbl">CONTRACT ADDRESS</span>
+    3AwkJnZL7xrf8ffUwEsSkKndQkPSj2vfR3CqvyFpk8UP
+  </div>
+</div>
+<div id="toast">COPIED</div>
+
+<!-- Help -->
+<div id="help-ovl" onclick="handleOvl(event)">
+  <div id="help-box">
+    <h2>// WHAT DESTINY CAN HELP WITH</h2>
+    <div class="ht"><div class="ht-n">→ AI &amp; Machine Learning</div><div class="ht-d">Models, tools, prompting, building AI products from scratch</div></div>
+    <div class="ht"><div class="ht-n">→ Crypto &amp; Blockchain</div><div class="ht-d">DeFi, wallets, tokens, on-chain mechanics, how it all works</div></div>
+    <div class="ht"><div class="ht-n">→ Coding &amp; Shipping</div><div class="ht-d">Debugging, architecture, picking the right stack, moving fast</div></div>
+    <div class="ht"><div class="ht-n">→ Web3 Projects</div><div class="ht-d">Smart contracts, NFTs, DApps, tokenomics, launch strategy</div></div>
+    <div class="ht"><div class="ht-n">→ General Tech</div><div class="ht-d">Whatever you need to learn to move forward — ask it</div></div>
+    <div id="help-close" onclick="closeHelp()">[ CLOSE TRANSMISSION ]</div>
+  </div>
+</div>
+
+<script>
+var BACKEND     = 'https://dream-production-0bfd.up.railway.app';
+var CA          = '3AwkJnZL7xrf8ffUwEsSkKndQkPSj2vfR3CqvyFpk8UP';
+var DAILY_LIMIT = 20;
+
+// ── Matrix rain (with occasional red chars) ───────────────────────
+(function(){
+  var c=document.getElementById('bg-matrix'), ctx=c.getContext('2d');
+  var CHARS='01アイウエオカキクケコサシスセソタナニヌネノ';
+  var SZ=14, cols, drops, last=0;
+  function resize(){
+    c.width=window.innerWidth; c.height=window.innerHeight;
+    cols=Math.floor(c.width/SZ);
+    drops=Array.from({length:cols},function(){return Math.random()*-60|0;});
+  }
+  resize(); window.addEventListener('resize',resize);
+  function draw(ts){
+    if(ts-last<95){requestAnimationFrame(draw);return;} last=ts;
+    ctx.fillStyle='rgba(3,12,21,0.065)';
+    ctx.fillRect(0,0,c.width,c.height);
+    for(var i=0;i<cols;i++){
+      // occasional crimson character for drama
+      var isRed=Math.random()<0.012;
+      ctx.fillStyle=isRed?'rgba(255,42,0,0.9)':'#00ff41';
+      ctx.font=SZ+'px Courier New';
+      ctx.fillText(CHARS[Math.random()*CHARS.length|0], i*SZ, drops[i]*SZ);
+      if(drops[i]*SZ>c.height&&Math.random()>0.972) drops[i]=0;
+      drops[i]++;
+    }
+    requestAnimationFrame(draw);
+  }
+  requestAnimationFrame(draw);
+})();
+
+// ── Red energy streaks (from the image's sky) ─────────────────────
+(function(){
+  var container=document.getElementById('bg-streaks');
+  var configs=[
+    {top:8,  left:10, w:220, ang:-22, dur:8,  delay:0,   op:0.22},
+    {top:15, left:45, w:160, ang:-18, dur:11, delay:2.5, op:0.16},
+    {top:5,  left:60, w:300, ang:-25, dur:14, delay:0.8, op:0.19},
+    {top:22, left:20, w:140, ang:-15, dur:9,  delay:4,   op:0.13},
+    {top:12, left:70, w:200, ang:-28, dur:12, delay:1.5, op:0.2},
+    {top:30, left:5,  w:180, ang:-20, dur:10, delay:6,   op:0.11},
+    {top:18, left:80, w:120, ang:-16, dur:7,  delay:3,   op:0.25},
+    {top:8,  left:35, w:260, ang:-23, dur:15, delay:5.5, op:0.15},
+  ];
+  configs.forEach(function(cfg){
+    var s=document.createElement('div');
+    s.className='streak';
+    s.style.cssText=[
+      'top:'+cfg.top+'%',
+      'left:'+cfg.left+'%',
+      'width:'+cfg.w+'px',
+      'background:linear-gradient(90deg,transparent,rgba(255,60,0,0.85),rgba(255,120,20,0.5),transparent)',
+      'box-shadow:0 0 6px rgba(255,42,0,0.4),0 0 14px rgba(255,42,0,0.2)',
+      '--ang:'+cfg.ang+'deg',
+      '--op:'+cfg.op,
+      'animation-duration:'+cfg.dur+'s',
+      'animation-delay:'+cfg.delay+'s',
+    ].join(';');
+    container.appendChild(s);
+  });
+})();
+
+// ── Particles ─────────────────────────────────────────────────────
+(function(){
+  var pc=document.getElementById('bg-particles');
+  for(var i=0;i<30;i++){
+    var p=document.createElement('div');
+    p.className='particle';
+    var sz=Math.random()>0.65?2:1;
+    var isRed=Math.random()<0.15;
+    p.style.cssText=[
+      'left:'+(Math.random()*100)+'%',
+      'bottom:'+(Math.random()*80)+'%',
+      'width:'+sz+'px','height:'+sz+'px',
+      'background:'+(isRed?'var(--red)':Math.random()>0.75?'var(--cyan)':'var(--green)'),
+      'animation-duration:'+(8+Math.random()*14)+'s',
+      'animation-delay:'+(Math.random()*14)+'s',
+    ].join(';');
+    pc.appendChild(p);
+  }
+})();
+
+// ── Boot sequence ─────────────────────────────────────────────────
+var bootEl=document.getElementById('boot');
+var uiEl=document.getElementById('ui');
+var inputEl=document.getElementById('chat-input');
+
+var BOOT=[
+  {t:'DESTINY FIELD TERMINAL v2.1',              c:''},
+  {t:'NEURAL MESH LOADING...',                    c:'dim'},
+  {t:'BAR', c:'bar'},
+  {t:'ENCRYPTION LAYER: AES-256 · ACTIVE',       c:'acc'},
+  {t:'LOCATING OPERATIVE...',                     c:'dim'},
+  {t:'SIGNAL LOCK: CONFIRMED',                    c:'acc'},
+  {t:'THREAT ENVIRONMENT: ACTIVE',               c:'red'},
+  {t:'BIOMETRIC CALIBRATION: COMPLETE',          c:'dim'},
+  {t:'RESPONSE MATRIX: PRIMED',                  c:''},
+  {t:'──────────────────────────────────────',   c:'dim'},
+  {t:'> CHANNEL OPEN. MAKE IT COUNT, HERO.',     c:'win'},
+];
+
+function runBoot(){
+  var i=0;
+  (function next(){
+    if(i>=BOOT.length){
+      setTimeout(function(){
+        bootEl.classList.add('out');
+        uiEl.classList.add('on');
+        setTimeout(function(){bootEl.style.display='none';},1000);
+        setTimeout(function(){
+          addMsg('system','SECURE CHANNEL ESTABLISHED · ENCRYPTION ACTIVE');
+          addMsg('system','DESTINY v2.1 ONLINE · AWAITING TRANSMISSION');
+        },300);
+        setTimeout(function(){
+          addMsg('destiny',
+            "You found me. Good. Ask me anything — AI, crypto, code, building. Let's make you dangerous.",
+            true);
+        },1000);
+        setTimeout(function(){if(getRemaining()>0)inputEl.focus();},600);
+      },500);
+      return;
+    }
+    var b=BOOT[i++];
+    if(b.c==='bar'){
+      var w=document.createElement('div');
+      w.className='boot-bar-wrap';
+      var f=document.createElement('div');
+      f.className='boot-bar-fill'; w.appendChild(f);
+      bootEl.appendChild(w);
+    } else {
+      var el=document.createElement('div');
+      el.className='bl'+(b.c?' bl-'+b.c:'');
+      el.textContent=b.t; bootEl.appendChild(el);
+    }
+    setTimeout(next,135+Math.random()*75);
+  })();
+}
+setTimeout(runBoot,200);
+
+// ── Storage ───────────────────────────────────────────────────────
+function getVid(){
+  var id=localStorage.getItem('destiny_vid');
+  if(!id){
+    id=(crypto.randomUUID?crypto.randomUUID():'v'+Math.random().toString(36).slice(2)+Date.now().toString(36));
+    localStorage.setItem('destiny_vid',id);
+  }
+  return id;
+}
+function getUsage(){
+  var today=new Date().toISOString().slice(0,10);
+  try{var u=JSON.parse(localStorage.getItem('destiny_usage')||'null');if(u&&u.date===today)return u;}catch(e){}
+  return{date:today,count:0};
+}
+function incUsage(){var u=getUsage();u.count++;localStorage.setItem('destiny_usage',JSON.stringify(u));}
+function getRemaining(){return Math.max(0,DAILY_LIMIT-getUsage().count);}
+
+function getHist(){try{return JSON.parse(localStorage.getItem('destiny_hist')||'[]');}catch(e){return[];}}
+function saveHist(h){if(h.length>24)h=h.slice(-24);localStorage.setItem('destiny_hist',JSON.stringify(h));}
+function pushHist(role,content){var h=getHist();h.push({role:role,content:content});saveHist(h);}
+
+// ── HUD ───────────────────────────────────────────────────────────
+var fillEl=document.getElementById('hud-fill');
+var countEl=document.getElementById('hud-count');
+var bannerEl=document.getElementById('limit-banner');
+
+function updateHUD(){
+  var rem=getRemaining();
+  fillEl.style.width=(rem/DAILY_LIMIT*100)+'%';
+  countEl.textContent=rem+' / '+DAILY_LIMIT;
+  fillEl.className=rem===0?'empty':rem<=5?'warn':'';
+  if(rem===0){bannerEl.classList.add('on');inputEl.disabled=true;inputEl.placeholder='daily limit reached';}
+}
+updateHUD();
+
+function ts(){
+  return[new Date().getHours(),new Date().getMinutes(),new Date().getSeconds()]
+    .map(function(n){return('0'+n).slice(-2);}).join(':');
+}
+
+// ── Messages ──────────────────────────────────────────────────────
+var feed=document.getElementById('chat-feed');
+var avCore=document.getElementById('av-core');
+var GDELAYS=['0s','3.2s','6.8s','1.5s','8s'];
+
+function addMsg(role,text,typewriter){
+  var outer=document.createElement('div');
+  outer.className='msg msg-'+role;
+
+  var bar=document.createElement('div'); bar.className='msg-bar'; outer.appendChild(bar);
+  var body=document.createElement('div'); body.className='msg-body';
+
+  if(role!=='system'){
+    var hdr=document.createElement('div'); hdr.className='msg-head';
+
+    var who=document.createElement('span'); who.className='msg-who';
+    who.textContent=role==='destiny'?'DESTINY':'HERO'; hdr.appendChild(who);
+
+    if(role==='destiny'){
+      // signal bars
+      var sig=document.createElement('div'); sig.className='msg-sig';
+      for(var b=0;b<4;b++){var s=document.createElement('span');sig.appendChild(s);}
+      hdr.appendChild(sig);
     }
 
-    // ── Daily usage ───────────────────────────────────────────────────────
-    function getUsage() {
-      var today = new Date().toISOString().split('T')[0];
-      try {
-        var u = JSON.parse(localStorage.getItem('destiny_usage') || 'null');
-        if (u && u.date === today) return u;
-      } catch (e) {}
-      return { date: today, count: 0 };
-    }
+    var stamp=document.createElement('span'); stamp.className='msg-ts';
+    stamp.textContent=ts(); hdr.appendChild(stamp);
+    body.appendChild(hdr);
+  }
 
-    function incrementUsage() {
-      var u = getUsage();
-      u.count = (u.count || 0) + 1;
-      localStorage.setItem('destiny_usage', JSON.stringify(u));
-      return u.count;
-    }
+  var txt=document.createElement('div'); txt.className='msg-text';
+  if(role==='system')       txt.textContent='// '+text;
+  else if(role==='hero')    txt.textContent=text;
+  body.appendChild(txt); outer.appendChild(body); feed.appendChild(outer);
+  feed.scrollTop=feed.scrollHeight;
 
-    function getRemaining() {
-      return Math.max(0, DAILY_LIMIT - getUsage().count);
-    }
-
-    // ── Conversation history ──────────────────────────────────────────────
-    function getHistory() {
-      try {
-        return JSON.parse(localStorage.getItem('destiny_history') || '[]');
-      } catch (e) { return []; }
-    }
-
-    function saveHistory(h) {
-      if (h.length > 24) h = h.slice(-24);
-      localStorage.setItem('destiny_history', JSON.stringify(h));
-    }
-
-    function pushHistory(role, content) {
-      var h = getHistory();
-      h.push({ role: role, content: content });
-      saveHistory(h);
-    }
-
-    // ── UI helpers ────────────────────────────────────────────────────────
-    var feed  = document.getElementById('chat-feed');
-    var input = document.getElementById('chat-input');
-    var transEl = document.getElementById('transmissions');
-    var limitBanner = document.getElementById('limit-banner');
-
-    function updateTransmissions() {
-      var rem = getRemaining();
-      transEl.textContent = 'TRANSMISSIONS REMAINING: ' + rem + '/' + DAILY_LIMIT;
-      transEl.className   = rem === 0 ? 'empty' : rem <= 5 ? 'warn' : '';
-      if (rem === 0) {
-        limitBanner.classList.add('show');
-        input.disabled = true;
-        input.placeholder = 'daily limit reached';
-      }
-    }
-
-    function scrollBottom() {
-      feed.scrollTop = feed.scrollHeight;
-    }
-
-    function escHtml(s) {
-      return s
-        .replace(/&/g,'&amp;').replace(/</g,'&lt;')
-        .replace(/>/g,'&gt;').replace(/"/g,'&quot;');
-    }
-
-    // Append a message element; returns a promise that resolves when done
-    function appendMsg(role, text, typewriter) {
-      var div  = document.createElement('div');
-      var span = document.createElement('span');  // text node
-
-      if (role === 'destiny') {
-        div.className = 'msg msg-destiny';
-        var pre = document.createElement('span');
-        pre.className = 'msg-prefix';
-        pre.textContent = '> DESTINY: ';
-        div.appendChild(pre);
-        div.appendChild(span);
-        feed.appendChild(div);
-        scrollBottom();
-
-        if (typewriter) {
-          return new Promise(function(resolve) {
-            span.classList.add('typing-cursor');
-            var i = 0;
-            var speed = Math.max(8, Math.min(28, 2000 / text.length));
-            var iv = setInterval(function() {
-              span.textContent += text[i];
-              i++;
-              scrollBottom();
-              if (i >= text.length) {
-                clearInterval(iv);
-                span.classList.remove('typing-cursor');
-                var gc = GLITCH_CLASSES[Math.floor(Math.random() * GLITCH_CLASSES.length)];
-                div.classList.add(gc);
-                resolve();
-              }
-            }, speed);
-          });
-        } else {
-          span.textContent = text;
-          var gc = GLITCH_CLASSES[Math.floor(Math.random() * GLITCH_CLASSES.length)];
-          div.classList.add(gc);
-          return Promise.resolve();
+  if(role==='destiny'&&typewriter){
+    return new Promise(function(resolve){
+      txt.classList.add('tcur');
+      var i=0, speed=Math.max(8,Math.min(26,2000/text.length));
+      var iv=setInterval(function(){
+        txt.textContent+=text[i++];
+        feed.scrollTop=feed.scrollHeight;
+        if(i>=text.length){
+          clearInterval(iv);
+          txt.classList.remove('tcur');
+          txt.classList.add('glow-in','glitching');
+          txt.style.animationDelay=GDELAYS[Math.floor(Math.random()*GDELAYS.length)];
+          resolve();
         }
-
-      } else if (role === 'hero') {
-        div.className = 'msg msg-hero';
-        div.innerHTML = '<span class="msg-prefix">&gt; HERO:&nbsp;</span>' + escHtml(text);
-        feed.appendChild(div);
-        scrollBottom();
-
-      } else if (role === 'system') {
-        div.className = 'msg msg-system';
-        div.innerHTML = '<span class="msg-prefix">// </span>' + escHtml(text);
-        feed.appendChild(div);
-        scrollBottom();
-      }
-
-      return Promise.resolve();
-    }
-
-    // Thinking indicator
-    var thinkEl = null;
-
-    function showThinking() {
-      thinkEl = document.createElement('div');
-      thinkEl.className = 'msg';
-      thinkEl.id = 'thinking-line';
-      thinkEl.innerHTML =
-        '<span class="msg-prefix" style="color:var(--amber)">// </span>' +
-        '<span style="color:var(--amber)">DECRYPTING RESPONSE...</span>';
-      thinkEl.classList.add('show');
-      feed.appendChild(thinkEl);
-      scrollBottom();
-    }
-
-    function hideThinking() {
-      if (thinkEl) { thinkEl.remove(); thinkEl = null; }
-    }
-
-    // ── Send message ──────────────────────────────────────────────────────
-    var isSending = false;
-
-    async function sendMessage() {
-      if (isSending) return;
-      var text = input.value.trim();
-      if (!text) return;
-
-      if (getRemaining() <= 0) {
-        input.value = '';
-        return;
-      }
-
-      input.value    = '';
-      input.disabled = true;
-      isSending      = true;
-
-      appendMsg('hero', text, false);
-      pushHistory('user', text);
-      showThinking();
-
-      try {
-        var res = await fetch(BACKEND + '/api/chat', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            visitorId: getVisitorId(),
-            message:   text,
-            history:   getHistory()
-          })
-        });
-
-        hideThinking();
-
-        if (res.status === 429) {
-          incrementUsage();
-          updateTransmissions();
-          await appendMsg('destiny', 'Signal exhausted. Return tomorrow, hero.', true);
-        } else if (res.ok) {
-          var data  = await res.json();
-          var reply = data.response || 'Signal unclear. Try again.';
-          incrementUsage();
-          updateTransmissions();
-          pushHistory('assistant', reply);
-          await appendMsg('destiny', reply, true);
-        } else {
-          await appendMsg('destiny', 'Signal interference. Stand by.', true);
-        }
-
-      } catch (err) {
-        hideThinking();
-        await appendMsg('destiny', 'Connection dropped. Check your signal.', true);
-        console.error(err);
-      }
-
-      isSending = false;
-      if (getRemaining() > 0) {
-        input.disabled = false;
-        input.focus();
-      }
-    }
-
-    // ── CA copy ───────────────────────────────────────────────────────────
-    var toastTimer = null;
-
-    function copyCA() {
-      var finish = function() {
-        var t = document.getElementById('toast');
-        t.classList.add('show');
-        clearTimeout(toastTimer);
-        toastTimer = setTimeout(function() { t.classList.remove('show'); }, 1800);
-      };
-
-      if (navigator.clipboard && navigator.clipboard.writeText) {
-        navigator.clipboard.writeText(CA).then(finish).catch(function() {
-          fallbackCopy(CA); finish();
-        });
-      } else {
-        fallbackCopy(CA); finish();
-      }
-    }
-
-    function fallbackCopy(text) {
-      var ta = document.createElement('textarea');
-      ta.value = text;
-      ta.style.cssText = 'position:fixed;top:-9999px;left:-9999px;';
-      document.body.appendChild(ta);
-      ta.select();
-      try { document.execCommand('copy'); } catch(e) {}
-      document.body.removeChild(ta);
-    }
-
-    // ── Help modal ────────────────────────────────────────────────────────
-    document.getElementById('help-btn').addEventListener('click', function() {
-      document.getElementById('help-overlay').classList.add('show');
+      },speed);
     });
+  }
+  return Promise.resolve();
+}
 
-    function handleHelpOverlayClick(e) {
-      if (e.target === document.getElementById('help-overlay')) closeHelp();
-    }
+// Thinking
+var thinkEl=null;
+function showThink(){
+  thinkEl=document.createElement('div'); thinkEl.className='msg msg-think';
+  var bar=document.createElement('div'); bar.className='msg-bar'; thinkEl.appendChild(bar);
+  var body=document.createElement('div'); body.className='msg-body';
+  var txt=document.createElement('div'); txt.className='msg-text think-text';
+  txt.textContent='// DECRYPTING RESPONSE...'; body.appendChild(txt); thinkEl.appendChild(body);
+  feed.appendChild(thinkEl); feed.scrollTop=feed.scrollHeight;
+  avCore.className='thinking';
+}
+function hideThink(){if(thinkEl){thinkEl.remove();thinkEl=null;}}
 
-    function closeHelp() {
-      document.getElementById('help-overlay').classList.remove('show');
-    }
+// Scan line — split green/red like the image
+function scanLine(){
+  var sl=document.createElement('div'); sl.className='scan';
+  sl.style.background='linear-gradient(90deg,transparent,var(--red) 20%,var(--green) 50%,var(--red) 80%,transparent)';
+  sl.style.boxShadow='0 0 16px var(--green),0 0 30px var(--red-g)';
+  document.body.appendChild(sl);
+  setTimeout(function(){sl.remove();},800);
+}
 
-    // ── Keyboard ──────────────────────────────────────────────────────────
-    input.addEventListener('keydown', function(e) {
-      if (e.key === 'Enter') { e.preventDefault(); sendMessage(); }
+// ── Send ──────────────────────────────────────────────────────────
+var sending=false;
+var eqEl=document.getElementById('eq');
+
+async function sendMsg(){
+  if(sending||!inputEl.value.trim()||getRemaining()<=0)return;
+  var text=inputEl.value.trim();
+  inputEl.value=''; inputEl.disabled=true;
+  eqEl.classList.remove('on'); sending=true;
+
+  addMsg('hero',text,false);
+  pushHist('user',text);
+  showThink();
+
+  try{
+    var res=await fetch(BACKEND+'/api/chat',{
+      method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({visitorId:getVid(),message:text,history:getHist()})
     });
+    hideThink(); avCore.className='speaking'; scanLine();
 
-    document.addEventListener('keydown', function(e) {
-      if (e.key === 'Escape') closeHelp();
-    });
+    var reply;
+    if(res.status===429){
+      reply='Signal exhausted. Return tomorrow, hero.'; incUsage(); updateHUD();
+    } else if(res.ok){
+      var data=await res.json();
+      reply=data.response||'Signal unclear. Try again.';
+      incUsage(); updateHUD(); pushHist('assistant',reply);
+    } else {
+      reply='Signal interference. Stand by.';
+    }
+    await addMsg('destiny',reply,true);
+  } catch(e){
+    hideThink(); await addMsg('destiny','Connection dropped. Check your signal.',true);
+  }
 
-    // ── Init ──────────────────────────────────────────────────────────────
-    updateTransmissions();
+  avCore.className=''; sending=false;
+  if(getRemaining()>0){inputEl.disabled=false;inputEl.focus();}
+}
 
-    // Boot sequence then DESTINY welcome
-    setTimeout(function() {
-      if (getRemaining() > 0) {
-        appendMsg('destiny',
-          "You found me. Good. Ask me anything — AI, crypto, code, building. Let's make you dangerous.",
-          true
-        );
-      }
-    }, 700);
+// ── Input events ──────────────────────────────────────────────────
+var inputArea=document.getElementById('input-area');
+var inputBox=document.getElementById('input-box');
 
-    // Auto-focus input
-    setTimeout(function() { if (getRemaining() > 0) input.focus(); }, 300);
-  </script>
+inputEl.addEventListener('focus',function(){inputArea.classList.add('hot');inputBox.classList.add('hot');});
+inputEl.addEventListener('blur',function(){inputArea.classList.remove('hot');inputBox.classList.remove('hot');});
+inputEl.addEventListener('input',function(){eqEl.classList.toggle('on',inputEl.value.length>0);});
+inputEl.addEventListener('keydown',function(e){if(e.key==='Enter'){e.preventDefault();sendMsg();}});
+document.addEventListener('keydown',function(e){if(e.key==='Escape')closeHelp();});
+
+// ── CA copy ───────────────────────────────────────────────────────
+var toastT=null;
+function copyCA(){
+  function done(){
+    var t=document.getElementById('toast');t.classList.add('on');
+    clearTimeout(toastT);toastT=setTimeout(function(){t.classList.remove('on');},1800);
+  }
+  if(navigator.clipboard)navigator.clipboard.writeText(CA).then(done).catch(function(){fbCopy();done();});
+  else{fbCopy();done();}
+}
+function fbCopy(){var ta=document.createElement('textarea');ta.value=CA;ta.style.cssText='position:fixed;top:-9999px';document.body.appendChild(ta);ta.select();try{document.execCommand('copy');}catch(e){}document.body.removeChild(ta);}
+
+// ── Help ──────────────────────────────────────────────────────────
+function openHelp(){document.getElementById('help-ovl').classList.add('on');}
+function closeHelp(){document.getElementById('help-ovl').classList.remove('on');}
+function handleOvl(e){if(e.target.id==='help-ovl')closeHelp();}
+</script>
 </body>
 </html>
