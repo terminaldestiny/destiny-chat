@@ -169,6 +169,18 @@
     .tscan-ftr { border-top:1px solid rgba(0,255,65,0.07);margin-top:12px;padding-top:8px;font-size:7px;letter-spacing:1.5px;color:rgba(0,255,65,0.22); }
     @media(max-width:600px){ .tscan-grid{ grid-template-columns:1fr; } }
 
+    /* Corner brackets */
+    #cor-tl,#cor-tr,#cor-bl,#cor-br {
+      position:fixed;width:20px;height:20px;pointer-events:none;z-index:20;opacity:0.18;
+    }
+    #cor-tl { top:74px;left:6px;  border-top:1px solid var(--green);border-left:1px solid var(--green); }
+    #cor-tr { top:74px;right:6px; border-top:1px solid var(--green);border-right:1px solid var(--green); }
+    #cor-bl { bottom:108px;left:6px;  border-bottom:1px solid var(--green);border-left:1px solid var(--green); }
+    #cor-br { bottom:108px;right:6px; border-bottom:1px solid var(--green);border-right:1px solid var(--green); }
+
+    /* Live clock */
+    #id-clock { color:rgba(0,255,65,0.28);letter-spacing:1px;font-size:9px;font-variant-numeric:tabular-nums; }
+
     /* Command strip */
     #cmd-bar {
       flex-shrink:0;display:flex;align-items:center;gap:6px;
@@ -639,6 +651,8 @@
 </div>
 
 <div id="nvg-overlay"></div>
+<div id="cor-tl"></div><div id="cor-tr"></div>
+<div id="cor-bl"></div><div id="cor-br"></div>
 <div id="boot"></div>
 
 <div id="ui">
@@ -658,6 +672,7 @@
         <div id="id-sub">
           <div id="id-dot"></div>
           <span>FIELD OPERATIVE</span>
+          <span id="id-clock"></span>
         </div>
       </div>
     </div>
@@ -815,6 +830,19 @@ function showCallsignPrompt(resume){
   inp.addEventListener('keydown',function(e){if(e.key==='Enter'){e.preventDefault();confirm();}});
 }
 
+function loadChatHistory(){
+  var h=getHist().filter(function(m){return m.role==='user'||m.role==='assistant';});
+  if(!h.length)return false;
+  var userCount=h.filter(function(m){return m.role==='user';}).length;
+  addSys('SESSION RESUMED · '+userCount+' PRIOR EXCHANGE'+(userCount===1?'':'S')+' LOADED');
+  h.forEach(function(msg){
+    if(msg.role==='user')addHero(msg.content);
+    else if(msg.role==='assistant')addDestiny(msg.content,false);
+  });
+  feed.scrollTop=feed.scrollHeight;
+  return true;
+}
+
 function finishBoot(){
   var last=document.createElement('div');last.className='bl bl-win';
   last.textContent='> CHANNEL OPEN. MAKE IT COUNT, '+(CALLSIGN||'HERO')+'.';
@@ -824,12 +852,17 @@ function finishBoot(){
     setTimeout(function(){bootEl.style.display='none';},1000);
     document.getElementById('input-pfx').textContent='> '+(CALLSIGN||'HERO')+':';
     playSound('boot-up');
-    setTimeout(function(){addDestiny("You found me. Good. Ask me anything — AI, crypto, code, building. Let's make you dangerous.",true);},900);
+    setTimeout(function(){
+      var hadHistory=loadChatHistory();
+      if(!hadHistory){
+        addDestiny("You found me. Good. Ask me anything — AI, crypto, code, building. Let's make you dangerous.",true);
+        var eggTimer=setTimeout(function(){
+          if(getHist().length===0&&getRemaining()>0)addDestiny("...Kept you waiting, huh?",true);
+        },45000);
+        inputEl.addEventListener('keydown',function(){clearTimeout(eggTimer);},{once:true});
+      }
+    },900);
     setTimeout(function(){if(getRemaining()>0)inputEl.focus();},600);
-    var eggTimer=setTimeout(function(){
-      if(getHist().length===0&&getRemaining()>0)addDestiny("...Kept you waiting, huh?",true);
-    },45000);
-    inputEl.addEventListener('keydown',function(){clearTimeout(eggTimer);},{once:true});
   },500);
 }
 
@@ -1387,6 +1420,35 @@ inputEl.addEventListener('paste',function(e){
 });
 inputEl.addEventListener('keydown',function(e){if(e.key==='Enter'){e.preventDefault();hideScanHint();sendMsg();}});
 document.addEventListener('keydown',function(e){if(e.key==='Escape'){closeHelp();hideScanHint();}});
+
+// ── Live UTC clock ────────────────────────────────────────────────
+(function(){
+  var el=document.getElementById('id-clock');
+  function tick(){
+    var n=new Date();
+    el.textContent=[n.getUTCHours(),n.getUTCMinutes(),n.getUTCSeconds()].map(function(x){return('0'+x).slice(-2);}).join(':')+'Z';
+  }
+  tick();setInterval(tick,1000);
+})();
+
+// ── Rotating input placeholder ────────────────────────────────────
+(function(){
+  var hints=[
+    'enter transmission...',
+    'paste a CA to scan...',
+    'ask me anything...',
+    'what do you need to know...',
+    'drop a contract address...',
+    'what\'s your next move...',
+  ];
+  var i=0;
+  setInterval(function(){
+    if(document.activeElement!==inputEl&&!inputEl.value){
+      i=(i+1)%hints.length;
+      inputEl.placeholder=hints[i];
+    }
+  },4000);
+})();
 
 // ── CA ────────────────────────────────────────────────────────────
 var toastT=null;
