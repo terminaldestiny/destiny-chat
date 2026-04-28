@@ -635,7 +635,7 @@
     <div class="ht"><div class="ht-n">→ Coding &amp; Shipping</div><div class="ht-d">Debugging, architecture, picking the right stack, moving fast</div></div>
     <div class="ht"><div class="ht-n">→ Web3 Projects</div><div class="ht-d">Smart contracts, NFTs, DApps, tokenomics, launch strategy</div></div>
     <div class="ht"><div class="ht-n">→ General Tech</div><div class="ht-d">Whatever you need to learn to move forward — ask it</div></div>
-    <div class="ht"><div class="ht-n">→ Terminal Commands</div><div class="ht-d">Type /help in chat to see all available field commands</div></div>
+    <div class="ht"><div class="ht-n">→ Terminal Commands</div><div class="ht-d">Type /help · includes /nvg, /freq, /debrief, /mute and more</div></div>
     <div id="help-close" onclick="closeHelp()">[ CLOSE TRANSMISSION ]</div>
   </div>
 </div>
@@ -739,8 +739,8 @@ function finishBoot(){
     bootEl.classList.add('out');uiEl.classList.add('on');
     setTimeout(function(){bootEl.style.display='none';},1000);
     document.getElementById('input-pfx').textContent='> '+(CALLSIGN||'HERO')+':';
-    setTimeout(function(){addSys('CODEC 140.85 · SECURE CHANNEL ESTABLISHED');addSys('DESTINY ONLINE · AWAITING TRANSMISSION');},300);
-    setTimeout(function(){addDestiny("You found me. Good. Ask me anything — AI, crypto, code, building. Let's make you dangerous.",true);},1000);
+    playSound('boot-up');
+    setTimeout(function(){addDestiny("You found me. Good. Ask me anything — AI, crypto, code, building. Let's make you dangerous.",true);},900);
     setTimeout(function(){if(getRemaining()>0)inputEl.focus();},600);
     var eggTimer=setTimeout(function(){
       if(getHist().length===0&&getRemaining()>0)addDestiny("...Kept you waiting, huh?",true);
@@ -800,6 +800,7 @@ updateHUD();
 function alertFlash(){
   var f=document.createElement('div');f.className='alert-flash';document.body.appendChild(f);
   setTimeout(function(){f.remove();},700);
+  playSound('alert');
 }
 
 function ts(){return[new Date().getHours(),new Date().getMinutes(),new Date().getSeconds()].map(function(n){return('0'+n).slice(-2);}).join(':');}
@@ -867,6 +868,7 @@ function addDestiny(text,typewriter){
   w.appendChild(cw);feed.appendChild(w);feed.scrollTop=feed.scrollHeight;
 
   if(typewriter){
+    playSound('codec-open');
     return new Promise(function(resolve){
       cw.classList.add('transmitting');
       ctxt.classList.add('tcur');
@@ -927,6 +929,66 @@ function scanLine(){
   document.body.appendChild(sl);setTimeout(function(){sl.remove();},800);
 }
 
+// ── Sound engine ─────────────────────────────────────────────────
+var _actx=null,_muted=false;
+function _ctx(){
+  if(!_actx)_actx=new(window.AudioContext||window.webkitAudioContext)();
+  if(_actx.state==='suspended')_actx.resume();
+  return _actx;
+}
+function playSound(type){
+  if(_muted)return;
+  try{
+    var ctx=_ctx();
+    if(type==='codec-open'){
+      [880,1100,1320].forEach(function(f,i){
+        var o=ctx.createOscillator(),g=ctx.createGain();
+        o.connect(g);g.connect(ctx.destination);
+        o.type='sine';o.frequency.value=f;
+        var t=ctx.currentTime+i*0.12;
+        g.gain.setValueAtTime(0,t);
+        g.gain.linearRampToValueAtTime(0.18,t+0.025);
+        g.gain.exponentialRampToValueAtTime(0.001,t+0.1);
+        o.start(t);o.stop(t+0.12);
+      });
+    } else if(type==='tx-send'){
+      var o=ctx.createOscillator(),g=ctx.createGain();
+      o.connect(g);g.connect(ctx.destination);
+      o.type='square';o.frequency.value=440;
+      g.gain.setValueAtTime(0.07,ctx.currentTime);
+      g.gain.exponentialRampToValueAtTime(0.001,ctx.currentTime+0.07);
+      o.start(ctx.currentTime);o.stop(ctx.currentTime+0.08);
+    } else if(type==='boot-up'){
+      [440,660].forEach(function(f,i){
+        var o=ctx.createOscillator(),g=ctx.createGain();
+        o.connect(g);g.connect(ctx.destination);
+        o.type='sine';o.frequency.value=f;
+        var t=ctx.currentTime+i*0.24;
+        g.gain.setValueAtTime(0,t);
+        g.gain.linearRampToValueAtTime(0.2,t+0.04);
+        g.gain.exponentialRampToValueAtTime(0.001,t+0.22);
+        o.start(t);o.stop(t+0.25);
+      });
+    } else if(type==='alert'){
+      var o=ctx.createOscillator(),g=ctx.createGain();
+      o.connect(g);g.connect(ctx.destination);
+      o.type='triangle';
+      o.frequency.setValueAtTime(1100,ctx.currentTime);
+      o.frequency.exponentialRampToValueAtTime(440,ctx.currentTime+0.16);
+      g.gain.setValueAtTime(0.25,ctx.currentTime);
+      g.gain.exponentialRampToValueAtTime(0.001,ctx.currentTime+0.18);
+      o.start(ctx.currentTime);o.stop(ctx.currentTime+0.2);
+    } else if(type==='cmd-blip'){
+      var o=ctx.createOscillator(),g=ctx.createGain();
+      o.connect(g);g.connect(ctx.destination);
+      o.type='sine';o.frequency.value=1320;
+      g.gain.setValueAtTime(0.07,ctx.currentTime);
+      g.gain.exponentialRampToValueAtTime(0.001,ctx.currentTime+0.04);
+      o.start(ctx.currentTime);o.stop(ctx.currentTime+0.05);
+    }
+  }catch(e){}
+}
+
 // ── Terminal commands ─────────────────────────────────────────────
 var sending=false,eqEl=document.getElementById('eq');
 
@@ -938,6 +1000,7 @@ function addCmd(lines){
   txt.innerHTML=lines.join('<br>');
   cw.appendChild(bar);cw.appendChild(txt);w.appendChild(cw);
   feed.appendChild(w);feed.scrollTop=feed.scrollHeight;
+  playSound('cmd-blip');
 }
 
 var STATUS_POOL=[
@@ -995,8 +1058,14 @@ function handleCommand(raw){
         '/nvg      toggle night vision goggles',
         '/clear    wipe feed and memory',
         '/debrief  summarize this mission',
+        '/mute     toggle sound on/off',
         '/help     this list'
       ]);break;
+    case '/mute':
+      _muted=!_muted;
+      addCmd([_muted?'// AUDIO MUTED · SILENT RUNNING':'// AUDIO ONLINE · CODEC FREQUENCIES ACTIVE']);
+      if(!_muted)setTimeout(function(){playSound('cmd-blip');},20);
+      break;
     case '/debrief':
       runDebrief();break;
     default:
@@ -1037,6 +1106,7 @@ async function sendMsg(){
   inputEl.value='';eqEl.classList.remove('on');
   if(text.startsWith('/')){handleCommand(text);return;}
   if(sending||getRemaining()<=0)return;
+  playSound('tx-send');
   inputEl.disabled=true;sending=true;
   addHero(text);pushHist('user',text);showThink();
   try{
