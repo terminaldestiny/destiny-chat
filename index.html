@@ -97,6 +97,41 @@
     }
     @keyframes bfill { to{ width:100%; } }
 
+    /* Boot callsign input */
+    .boot-prompt {
+      display:flex;align-items:center;gap:8px;
+      font-size:12px;letter-spacing:2px;color:var(--cyan);
+      margin-bottom:7px;opacity:0;animation:bl-in 0.12s ease forwards;
+    }
+    .boot-prompt span { opacity:0.65; }
+    #boot-callsign-input {
+      background:transparent;border:none;border-bottom:1px solid rgba(0,212,255,0.5);
+      outline:none;color:var(--cyan);font-family:inherit;
+      font-size:12px;letter-spacing:3px;caret-color:var(--green);
+      width:180px;text-transform:uppercase;
+    }
+
+    /* NVG mode */
+    body.nvg #ui {
+      filter:saturate(0) brightness(1.5) sepia(1) hue-rotate(88deg) saturate(7) brightness(0.65);
+    }
+    body.nvg #bg-matrix  { filter:hue-rotate(0deg); opacity:0.09; }
+    body.nvg #bg-terrain { filter:saturate(0) hue-rotate(88deg) saturate(5); }
+    #nvg-overlay {
+      display:none;position:fixed;inset:0;z-index:9996;pointer-events:none;
+      background:rgba(0,255,65,0.03);
+      animation:nvg-flicker 0.12s steps(2) infinite;
+    }
+    body.nvg #nvg-overlay { display:block; }
+    @keyframes nvg-flicker { 0%{opacity:1} 50%{opacity:0.85} 100%{opacity:1} }
+
+    /* Command output messages */
+    .cmd-wrap {
+      display:flex;gap:8px;align-items:flex-start;max-width:760px;
+    }
+    .cmd-bar { width:2px;flex-shrink:0;margin-top:3px;min-height:14px;border-radius:1px;background:rgba(0,255,65,0.35);box-shadow:0 0 5px rgba(0,255,65,0.3); }
+    .cmd-text { font-size:11px;letter-spacing:1.5px;color:rgba(0,255,65,0.55);line-height:1.6; }
+
     /* ── MAIN UI ───────────────────────────────────── */
     #ui { position:fixed;inset:0;z-index:10;display:flex;flex-direction:column;opacity:0;transition:opacity 0.8s; }
     #ui.on { opacity:1; }
@@ -157,7 +192,7 @@
       0%,100%{ filter:brightness(1.04) saturate(1);box-shadow:0 0 22px rgba(0,255,65,0.52); }
       50%    { filter:brightness(1.3) saturate(1.15);box-shadow:0 0 60px rgba(0,255,65,0.82),0 0 110px rgba(0,255,65,0.2); }
     }
-    #av-img { width:100%;height:100%;object-fit:cover;object-position:center 18%;display:block; }
+    #av-img { width:100%;height:100%;object-fit:cover;object-position:62% 34%;display:block; }
     #av-dot {
       position:absolute;bottom:2px;right:6px;
       width:8px;height:8px;background:var(--red);border-radius:50%;z-index:2;
@@ -257,7 +292,7 @@
     .codec-portrait-img {
       width:58px;height:58px;
       clip-path:polygon(50% 0%,100% 25%,100% 75%,50% 100%,0% 75%,0% 25%);
-      object-fit:cover;object-position:center 18%;
+      object-fit:cover;object-position:62% 34%;
       display:block;filter:saturate(0.75) brightness(0.82);
     }
     /* Portrait scanlines */
@@ -373,7 +408,7 @@
     .think-portrait-img {
       width:58px;height:58px;
       clip-path:polygon(50% 0%,100% 25%,100% 75%,50% 100%,0% 75%,0% 25%);
-      object-fit:cover;object-position:center 18%;display:block;
+      object-fit:cover;object-position:62% 34%;display:block;
       filter:saturate(0.4) brightness(0.7) hue-rotate(20deg);
       animation:think-portrait 0.5s ease-in-out infinite;
     }
@@ -523,6 +558,7 @@
   </svg>
 </div>
 
+<div id="nvg-overlay"></div>
 <div id="boot"></div>
 
 <div id="ui">
@@ -590,6 +626,7 @@
     <div class="ht"><div class="ht-n">→ Coding &amp; Shipping</div><div class="ht-d">Debugging, architecture, picking the right stack, moving fast</div></div>
     <div class="ht"><div class="ht-n">→ Web3 Projects</div><div class="ht-d">Smart contracts, NFTs, DApps, tokenomics, launch strategy</div></div>
     <div class="ht"><div class="ht-n">→ General Tech</div><div class="ht-d">Whatever you need to learn to move forward — ask it</div></div>
+    <div class="ht"><div class="ht-n">→ Terminal Commands</div><div class="ht-d">Type /help in chat to see all available field commands</div></div>
     <div id="help-close" onclick="closeHelp()">[ CLOSE TRANSMISSION ]</div>
   </div>
 </div>
@@ -598,6 +635,7 @@
 var BACKEND='https://dream-production-0bfd.up.railway.app';
 var CA='3AwkJnZL7xrf8ffUwEsSkKndQkPSj2vfR3CqvyFpk8UP';
 var DAILY_LIMIT=20;
+var CALLSIGN=localStorage.getItem('destiny_callsign')||null;
 
 // ── Matrix rain ───────────────────────────────────────────────────
 (function(){
@@ -656,25 +694,54 @@ var BOOT=[
   {t:'THREAT ENVIRONMENT: ACTIVE',c:'red'},
   {t:'RESPONSE MATRIX: PRIMED',c:'dim'},
   {t:'────────────────────────────────────────',c:'dim'},
-  {t:'> CHANNEL OPEN. MAKE IT COUNT, HERO.',c:'win'},
 ];
+
+function showCallsignPrompt(resume){
+  var bp=document.createElement('div');bp.className='boot-prompt';
+  var lbl=document.createElement('span');lbl.textContent='IDENTIFY OPERATIVE ▸';
+  var inp=document.createElement('input');
+  inp.id='boot-callsign-input';inp.type='text';inp.placeholder='ENTER CALLSIGN';
+  inp.maxLength=20;inp.autocomplete='off';inp.spellcheck=false;
+  bp.appendChild(lbl);bp.appendChild(inp);bootEl.appendChild(bp);
+  setTimeout(function(){inp.focus();},60);
+  inp.addEventListener('keydown',function(e){
+    if(e.key==='Enter'){
+      var name=inp.value.trim().toUpperCase().replace(/[^A-Z0-9 _\-]/g,'').slice(0,16);
+      if(!name)name='OPERATIVE';
+      CALLSIGN=name;
+      localStorage.setItem('destiny_callsign',CALLSIGN);
+      bp.remove();
+      var cf=document.createElement('div');cf.className='bl bl-acc';
+      cf.textContent='OPERATIVE '+CALLSIGN+' · CONFIRMED';
+      bootEl.appendChild(cf);
+      setTimeout(resume,350);
+    }
+  });
+}
+
+function finishBoot(){
+  var last=document.createElement('div');last.className='bl bl-win';
+  last.textContent='> CHANNEL OPEN. MAKE IT COUNT, '+(CALLSIGN||'HERO')+'.';
+  bootEl.appendChild(last);
+  setTimeout(function(){
+    bootEl.classList.add('out');uiEl.classList.add('on');
+    setTimeout(function(){bootEl.style.display='none';},1000);
+    document.getElementById('input-pfx').textContent='> '+(CALLSIGN||'HERO')+':';
+    setTimeout(function(){addSys('CODEC 140.85 · SECURE CHANNEL ESTABLISHED');addSys('DESTINY ONLINE · AWAITING TRANSMISSION');},300);
+    setTimeout(function(){addDestiny("You found me. Good. Ask me anything — AI, crypto, code, building. Let's make you dangerous.",true);},1000);
+    setTimeout(function(){if(getRemaining()>0)inputEl.focus();},600);
+    var eggTimer=setTimeout(function(){
+      if(getHist().length===0&&getRemaining()>0)addDestiny("...Kept you waiting, huh?",true);
+    },45000);
+    inputEl.addEventListener('keydown',function(){clearTimeout(eggTimer);},{once:true});
+  },500);
+}
+
 function runBoot(){
   var i=0;
   (function next(){
-    if(i>=BOOT.length){
-      setTimeout(function(){
-        bootEl.classList.add('out');uiEl.classList.add('on');
-        setTimeout(function(){bootEl.style.display='none';},1000);
-        setTimeout(function(){addSys('CODEC 140.85 · SECURE CHANNEL ESTABLISHED');addSys('DESTINY ONLINE · AWAITING TRANSMISSION');},300);
-        setTimeout(function(){addDestiny("You found me. Good. Ask me anything — AI, crypto, code, building. Let's make you dangerous.",true);},1000);
-        setTimeout(function(){if(getRemaining()>0)inputEl.focus();},600);
-        // MGS easter egg — "Kept you waiting, huh?" after 45s idle
-        var eggTimer=setTimeout(function(){
-          if(getHist().length===0&&getRemaining()>0)addDestiny("...Kept you waiting, huh?",true);
-        },45000);
-        inputEl.addEventListener('keydown',function(){clearTimeout(eggTimer);},{once:true});
-      },500);return;
-    }
+    if(i===5&&!CALLSIGN){showCallsignPrompt(next);return;}
+    if(i>=BOOT.length){finishBoot();return;}
     var b=BOOT[i++];
     if(b.c==='bar'){
       var w=document.createElement('div');w.className='boot-bar-wrap';
@@ -695,6 +762,13 @@ function getRemaining(){return Math.max(0,DAILY_LIMIT-getUsage().count);}
 function getHist(){try{return JSON.parse(localStorage.getItem('destiny_hist')||'[]');}catch(e){return[];}}
 function saveHist(h){if(h.length>24)h=h.slice(-24);localStorage.setItem('destiny_hist',JSON.stringify(h));}
 function pushHist(role,content){var h=getHist();h.push({role:role,content:content});saveHist(h);}
+function getHistForAPI(){
+  var h=getHist();
+  if(CALLSIGN&&(h.length===0||h[0].content!=='My callsign is '+CALLSIGN+'.')){
+    return [{role:'user',content:'My callsign is '+CALLSIGN+'.'},{role:'assistant',content:'Copy that, '+CALLSIGN+'. Frequency locked.'}].concat(h);
+  }
+  return h;
+}
 
 // ── HUD ───────────────────────────────────────────────────────────
 var fillEl=document.getElementById('hud-fill'),cntEl=document.getElementById('hud-cnt'),bannerEl=document.getElementById('limit-banner');
@@ -738,7 +812,7 @@ function addHero(text){
   var body=document.createElement('div');body.className='hero-body';
   var head=document.createElement('div');head.className='hero-head';
   var ts_=document.createElement('span');ts_.className='hero-ts';ts_.textContent=ts();
-  var name=document.createElement('span');name.className='hero-name';name.textContent='HERO';
+  var name=document.createElement('span');name.className='hero-name';name.textContent=CALLSIGN||'HERO';
   head.appendChild(ts_);head.appendChild(name);
   var txt=document.createElement('div');txt.className='hero-text';txt.textContent=text;
   body.appendChild(head);body.appendChild(txt);
@@ -839,19 +913,123 @@ function scanLine(){
   document.body.appendChild(sl);setTimeout(function(){sl.remove();},800);
 }
 
-// ── Send ──────────────────────────────────────────────────────────
+// ── Terminal commands ─────────────────────────────────────────────
 var sending=false,eqEl=document.getElementById('eq');
 
+function addCmd(lines){
+  var w=document.createElement('div');w.className='msg';
+  var cw=document.createElement('div');cw.className='cmd-wrap';
+  var bar=document.createElement('div');bar.className='cmd-bar';
+  var txt=document.createElement('div');txt.className='cmd-text';
+  txt.innerHTML=lines.join('<br>');
+  cw.appendChild(bar);cw.appendChild(txt);w.appendChild(cw);
+  feed.appendChild(w);feed.scrollTop=feed.scrollHeight;
+}
+
+var STATUS_POOL=[
+  'GRID SECTOR 7 · HOSTILE SIGNATURES DETECTED · STANDBY',
+  'NEURAL UPLINK: 98% · ZERO PACKET LOSS · CHANNEL SECURE',
+  'OPERATIVE STATUS: ACTIVE · THREAT LEVEL: ELEVATED',
+  'LAST BREACH: 14H AGO · PERIMETER STABLE · MONITORING',
+  'FIREBASE ALPHA INTACT · SECONDARY SITE UNDER PRESSURE · ADAPTING',
+  'COMMS JAM ATTEMPT AT 04:22 UTC · COUNTERED · SOURCE FLAGGED',
+  'DEEP SCAN IN PROGRESS · 3 ANOMALIES DETECTED · UNDER REVIEW',
+  'ALL SYSTEMS NOMINAL · GRID POWER: 94% · WEAPONS HOT',
+];
+
+function handleCommand(raw){
+  var cmd=raw.trim().split(/\s+/)[0].toLowerCase();
+  switch(cmd){
+    case '/status':
+      addCmd([
+        '// FIELD STATUS REPORT',
+        STATUS_POOL[Math.floor(Math.random()*STATUS_POOL.length)],
+        'TIMESTAMP: '+ts()+' UTC'
+      ]);break;
+    case '/freq':
+      addCmd([
+        '// SCANNING ACTIVE FREQUENCIES...',
+        '▸ 140.85  DESTINY     ONLINE',
+        '  141.12  ELIZA       DORMANT',
+        '  141.80  ???????     SIGNAL DETECTED',
+        '  142.31  -------     STATIC'
+      ]);break;
+    case '/clear':
+      while(feed.firstChild)feed.removeChild(feed.firstChild);
+      localStorage.removeItem('destiny_hist');
+      addSys('FEED CLEARED · MEMORY WIPED · CHANNEL STILL OPEN');
+      break;
+    case '/who':
+      addCmd([
+        '// OPERATIVE IDENTIFICATION',
+        'DESIGNATION  :  DESTINY',
+        'UNIT TYPE    :  FIELD AI · MENTOR CLASS',
+        'FREQ         :  140.85 · CODEC SECURED',
+        'UPTIME       :  CONTINUOUS',
+        'SKILLS       :  AI · CRYPTO · CODE · WEB3 · SURVIVAL'
+      ]);break;
+    case '/nvg':
+      document.body.classList.toggle('nvg');
+      addCmd([document.body.classList.contains('nvg')?'// NVG ENABLED · SWITCHING TO THERMAL OPTICS':'// NVG DISABLED · STANDARD OPTICS RESTORED']);
+      break;
+    case '/help':
+      addCmd([
+        '// AVAILABLE COMMANDS',
+        '/status   field status report',
+        '/freq     scan known frequencies',
+        '/who      operative identification',
+        '/nvg      toggle night vision goggles',
+        '/clear    wipe feed and memory',
+        '/debrief  summarize this mission',
+        '/help     this list'
+      ]);break;
+    case '/debrief':
+      runDebrief();break;
+    default:
+      addCmd(['// UNKNOWN COMMAND: '+raw,'type /help for available commands']);
+  }
+}
+
+async function runDebrief(){
+  var hist=getHist();
+  if(hist.length<2){addCmd(['// NO TRANSMISSIONS TO DEBRIEF · START A CONVERSATION FIRST']);return;}
+  if(getRemaining()<=0){addCmd(['// SIGNAL EXHAUSTED · CANNOT RUN DEBRIEF']);return;}
+  addCmd(['// INITIATING MISSION DEBRIEF...']);
+  inputEl.disabled=true;showThink();sending=true;
+  try{
+    var res=await fetch(BACKEND+'/api/chat',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({
+      visitorId:getVid(),
+      message:'Give me a 2-3 line tactical debrief of what we covered. Be concise and direct.',
+      history:getHistForAPI()
+    })});
+    hideThink();avCore.className='speaking';scanLine();
+    if(res.ok){
+      var data=await res.json();
+      var reply=data.response||'Mission data corrupted.';
+      incUsage();updateHUD();pushHist('assistant',reply);
+      await addDestiny(reply,true);
+    } else {
+      await addDestiny('Debrief signal lost.',true);
+    }
+  }catch(e){hideThink();await addDestiny('Debrief failed. Connection dropped.',true);}
+  avCore.className='';sending=false;
+  if(getRemaining()>0){inputEl.disabled=false;inputEl.focus();}
+}
+
+// ── Send ──────────────────────────────────────────────────────────
 async function sendMsg(){
-  if(sending||!inputEl.value.trim()||getRemaining()<=0)return;
   var text=inputEl.value.trim();
-  inputEl.value='';inputEl.disabled=true;eqEl.classList.remove('on');sending=true;
+  if(!text)return;
+  inputEl.value='';eqEl.classList.remove('on');
+  if(text.startsWith('/')){handleCommand(text);return;}
+  if(sending||getRemaining()<=0)return;
+  inputEl.disabled=true;sending=true;
   addHero(text);pushHist('user',text);showThink();
   try{
-    var res=await fetch(BACKEND+'/api/chat',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({visitorId:getVid(),message:text,history:getHist()})});
+    var res=await fetch(BACKEND+'/api/chat',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({visitorId:getVid(),message:text,history:getHistForAPI()})});
     hideThink();avCore.className='speaking';scanLine();
     var reply;
-    if(res.status===429){reply='Signal exhausted. Return tomorrow, hero.';incUsage();updateHUD();}
+    if(res.status===429){reply='Signal exhausted. Return tomorrow, '+(CALLSIGN||'hero')+'.';incUsage();updateHUD();}
     else if(res.ok){var data=await res.json();reply=data.response||'Signal unclear. Try again.';incUsage();updateHUD();pushHist('assistant',reply);}
     else{reply='Signal interference. Stand by.';}
     await addDestiny(reply,true);
