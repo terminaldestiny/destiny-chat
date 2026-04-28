@@ -587,7 +587,6 @@
         <div id="id-sub">
           <div id="id-dot"></div>
           <span>FIELD OPERATIVE</span>
-          <span id="id-freq">// FREQ 140.85</span>
         </div>
       </div>
     </div>
@@ -860,9 +859,8 @@ function addDestiny(text,typewriter){
   var cc=document.createElement('div');cc.className='codec-content';
   var ch=document.createElement('div');ch.className='codec-head';
   var cn=document.createElement('span');cn.className='codec-name';cn.textContent='DESTINY';
-  var cf=document.createElement('span');cf.className='codec-freq';cf.textContent='140.85';
   var ct=document.createElement('span');ct.className='codec-ts';ct.textContent=ts();
-  ch.appendChild(cn);ch.appendChild(cf);ch.appendChild(ct);
+  ch.appendChild(cn);ch.appendChild(ct);
   var ctxt=document.createElement('div');ctxt.className='codec-text';
   cc.appendChild(ch);cc.appendChild(ctxt);cw.appendChild(cc);
   w.appendChild(cw);feed.appendChild(w);feed.scrollTop=feed.scrollHeight;
@@ -912,8 +910,7 @@ function showThink(){
   var tc=document.createElement('div');tc.className='think-content';
   var th=document.createElement('div');th.className='think-head';
   var thn=document.createElement('span');thn.className='think-name';thn.textContent='DESTINY';
-  var thf=document.createElement('span');thf.className='think-freq';thf.textContent='140.85';
-  th.appendChild(thn);th.appendChild(thf);
+  th.appendChild(thn);
   var tt=document.createElement('div');tt.className='think-text';tt.textContent='DECRYPTING RESPONSE...';
   tc.appendChild(th);tc.appendChild(tt);tw.appendChild(tc);
   thinkEl.appendChild(tw);feed.appendChild(thinkEl);feed.scrollTop=feed.scrollHeight;
