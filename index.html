@@ -208,10 +208,8 @@
       border-color:var(--cyan);color:var(--cyan);background:rgba(0,212,255,0.06);
       box-shadow:0 0 10px rgba(0,212,255,0.1);
     }
-    .cmd-chip-more { letter-spacing:4px;padding:5px 14px; }
-    #cmd-bar.expanded .cmd-chip-more { border-color:rgba(0,255,65,0.42);color:var(--green);background:rgba(0,255,65,0.05); }
-    .cmd-chip-extra { display:none; }
-    #cmd-bar.expanded .cmd-chip-extra { display:inline-flex;align-items:center; }
+    .cmd-chip-disconnect { border-color:rgba(255,42,0,0.3);color:rgba(255,42,0,0.6); }
+    .cmd-chip-disconnect:hover,.cmd-chip-disconnect:active { border-color:var(--red);color:var(--red);background:rgba(255,42,0,0.06); }
     .cmd-chip-wallet { border-color:rgba(255,170,0,0.35);color:rgba(255,170,0,0.65); }
     .cmd-chip-wallet:hover,.cmd-chip-wallet:active { border-color:var(--amber);color:var(--amber);background:rgba(255,170,0,0.06); }
     .cmd-chip-wallet.verified { border-color:rgba(0,212,255,0.5);color:var(--cyan);background:rgba(0,212,255,0.06); }
@@ -755,13 +753,7 @@
     <button class="cmd-chip" onclick="quickCmd('/clear')">/clear</button>
     <button class="cmd-chip cmd-chip-wallet" id="wallet-btn" onclick="connectWallet()">⬡ CONNECT</button>
     <button class="cmd-chip" id="model-toggle-btn" onclick="toggleModel()">⬡ HAIKU</button>
-    <button class="cmd-chip cmd-chip-more" id="cmd-more-btn" onclick="toggleMoreCmds()">· · ·</button>
-    <button class="cmd-chip cmd-chip-extra" onclick="quickCmd('/status')">/status</button>
-    <button class="cmd-chip cmd-chip-extra" onclick="quickCmd('/freq')">/freq</button>
-    <button class="cmd-chip cmd-chip-extra" onclick="quickCmd('/debrief')">/debrief</button>
-    <button class="cmd-chip cmd-chip-extra" onclick="quickCmd('/nvg')">/nvg</button>
-    <button class="cmd-chip cmd-chip-extra" onclick="quickCmd('/who')">/who</button>
-    <button class="cmd-chip cmd-chip-extra" onclick="quickCmd('/mute')">/mute</button>
+    <button class="cmd-chip cmd-chip-disconnect" id="disconnect-btn" onclick="disconnectWallet()" style="display:none">⬡ DISCONNECT</button>
   </div>
 
   <div id="scan-hint" onclick="confirmScanHint()"></div>
@@ -818,6 +810,8 @@ function applyTierUI(tier,balance){
   var badge=document.getElementById('tier-badge');
   var wBtn=document.getElementById('wallet-btn');
   var mBtn=document.getElementById('model-toggle-btn');
+  var dBtn=document.getElementById('disconnect-btn');
+  dBtn.style.display='inline-flex';
   if(tier==='operative'){
     badge.textContent='OPERATIVE';badge.style.display='inline-block';
     wBtn.textContent='⬡ VERIFIED';wBtn.classList.add('verified');
@@ -1517,8 +1511,18 @@ function toggleModel(){
     addCmd(['// MODEL SWITCHED → HAIKU · STANDARD MODE']);
   }
 }
-function toggleMoreCmds(){
-  document.getElementById('cmd-bar').classList.toggle('expanded');
+function disconnectWallet(){
+  clearSession();
+  ACTIVE_MODEL='haiku';
+  var badge=document.getElementById('tier-badge');
+  var wBtn=document.getElementById('wallet-btn');
+  var mBtn=document.getElementById('model-toggle-btn');
+  var dBtn=document.getElementById('disconnect-btn');
+  badge.style.display='none';
+  wBtn.textContent='⬡ CONNECT';wBtn.classList.remove('verified');wBtn.disabled=false;
+  mBtn.textContent='⬡ HAIKU';mBtn.style.borderColor='';mBtn.style.color='';
+  dBtn.style.display='none';
+  addCmd(['// WALLET DISCONNECTED · SESSION CLEARED']);
 }
 function quickCmd(cmd){
   if(cmd==='/scan'){
