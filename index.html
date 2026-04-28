@@ -6,6 +6,7 @@
   <title>DESTINY // CODEC 140.85</title>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    button,input,[onclick] { -webkit-tap-highlight-color:transparent; touch-action:manipulation; }
 
     :root {
       --green:   #00ff41;
@@ -284,7 +285,7 @@
       0%,100%{ filter:brightness(1.04) saturate(1);box-shadow:0 0 22px rgba(0,255,65,0.52); }
       50%    { filter:brightness(1.3) saturate(1.15);box-shadow:0 0 60px rgba(0,255,65,0.82),0 0 110px rgba(0,255,65,0.2); }
     }
-    #av-img { width:100%;height:100%;object-fit:cover;object-position:62% 34%;display:block;transform:scale(1.55);transform-origin:62% 30%; }
+    #av-img { width:100%;height:100%;object-fit:cover;object-position:62% 34%;display:block;transform:scale(1.9);transform-origin:63% 26%; }
     #av-dot {
       position:absolute;bottom:2px;right:6px;
       width:8px;height:8px;background:var(--red);border-radius:50%;z-index:2;
@@ -624,13 +625,53 @@
     #help-close:hover { opacity:1; }
 
     @media(max-width:600px){
-      #id-name{ font-size:16px;letter-spacing:3px; }
-      #hud-track{ width:75px; }
-      #chat-feed{ padding:12px 12px 10px; }
-      .codec-text,.hero-text{ font-size:13px; }
-      #ca-badge{ display:none; }
-      #topbar,#input-area{ padding:0 12px; }
-      .codec-portrait-col,.think-portrait-col{ display:none; }
+      /* ── Topbar ── */
+      #topbar { height:58px; padding:0 12px; }
+      .tb-left { gap:10px; }
+      .tb-right { gap:10px; }
+      #av-wrap { width:44px; height:44px; }
+      #av-core { width:44px; height:44px; }
+      #av-arc-r,#av-arc-g { inset:-4px; }
+      #id-name { font-size:15px; letter-spacing:2px; }
+      #id-sub { gap:4px; letter-spacing:1.5px; font-size:8px; }
+      #id-clock { display:none; }
+      #hud-lbl { display:none; }
+      #hud-track { width:55px; }
+      #hud-cnt { font-size:8px; }
+      #help-btn { width:36px; height:36px; }
+      #h-core { width:34px; height:34px; font-size:14px; }
+
+      /* ── Chat feed ── */
+      #chat-feed { padding:10px 10px 8px; }
+      .codec-text,.hero-text { font-size:13px; }
+      .codec-portrait-col,.think-portrait-col { display:none; }
+      .codec-wrap,.think-wrap { padding:8px 10px 10px; }
+      .hero-wrap { max-width:100%; }
+
+      /* ── Input ── */
+      #input-area { height:56px; padding:0 10px; }
+      #chat-input { font-size:16px; } /* prevent iOS auto-zoom */
+      #input-pfx { font-size:11px; letter-spacing:1px; }
+      #send-btn { width:42px; height:42px; }
+
+      /* ── Cmd bar ── */
+      #cmd-bar { padding:6px 10px; gap:6px; }
+      .cmd-chip { padding:8px 12px; font-size:9px; min-height:34px; }
+
+      /* ── Scan hint ── */
+      #scan-hint { padding:6px 10px; font-size:9px; letter-spacing:1.5px; }
+
+      /* ── Scan panel ── */
+      .tscan-grid { grid-template-columns:1fr; }
+      .tscan-name { font-size:13px; }
+
+      /* ── Corner brackets ── */
+      #cor-tl,#cor-tr { top:62px; }
+      #cor-bl,#cor-br { bottom:94px; }
+
+      /* ── CA / misc ── */
+      #ca-badge { display:none; }
+      #help-box { padding:22px 20px; }
     }
   </style>
 </head>
