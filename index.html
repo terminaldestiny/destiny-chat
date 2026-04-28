@@ -272,7 +272,7 @@
       0%,100%{ filter:brightness(1.04) saturate(1);box-shadow:0 0 22px rgba(0,255,65,0.52); }
       50%    { filter:brightness(1.3) saturate(1.15);box-shadow:0 0 60px rgba(0,255,65,0.82),0 0 110px rgba(0,255,65,0.2); }
     }
-    #av-img { width:100%;height:100%;object-fit:cover;object-position:62% 34%;display:block; }
+    #av-img { width:100%;height:100%;object-fit:cover;object-position:62% 34%;display:block;transform:scale(1.55);transform-origin:62% 30%; }
     #av-dot {
       position:absolute;bottom:2px;right:6px;
       width:8px;height:8px;background:var(--red);border-radius:50%;z-index:2;
@@ -862,10 +862,15 @@ function saveHist(h){if(h.length>24)h=h.slice(-24);localStorage.setItem('destiny
 function pushHist(role,content){var h=getHist();h.push({role:role,content:content});saveHist(h);}
 function getHistForAPI(){
   var h=getHist();
+  var calibration=[
+    {role:'user',content:'Keep every response to 2-3 sentences maximum. Short, sharp, no padding.'},
+    {role:'assistant',content:'Understood. Short and sharp — that\'s my operating mode.'}
+  ];
+  var base=calibration;
   if(CALLSIGN&&(h.length===0||h[0].content!=='My callsign is '+CALLSIGN+'.')){
-    return [{role:'user',content:'My callsign is '+CALLSIGN+'.'},{role:'assistant',content:'Copy that, '+CALLSIGN+'. Frequency locked.'}].concat(h);
+    base=calibration.concat([{role:'user',content:'My callsign is '+CALLSIGN+'.'},{role:'assistant',content:'Copy that, '+CALLSIGN+'. Frequency locked.'}]);
   }
-  return h;
+  return base.concat(h);
 }
 
 // ── HUD ───────────────────────────────────────────────────────────
@@ -1195,7 +1200,7 @@ async function runScan(addr){
     // DESTINY analysis
     inputEl.disabled=true;sending=true;showThink();
     var summary='TOKEN: '+pdata.name+' ('+pdata.sym+')\nPRICE: '+pdata.price+(chg!==null?' ('+chg+'% 24h)':'')+'\nLIQUIDITY: '+pdata.liq+'\n24H VOLUME: '+pdata.vol24+'\nMKT CAP: '+pdata.mcap+'\nAGE: '+pdata.age+'\nDEX: '+pdata.dex+' on '+pdata.chain+'\nBUYS/SELLS 24h: '+pdata.buys+'/'+pdata.sells;
-    var apiRes=await fetch(BACKEND+'/api/chat',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({visitorId:getVid(),message:'Field intel on this token. Give me a sharp 3-4 line tactical risk assessment — call out any red flags, anything that stands out. Be direct.\n\n'+summary,history:getHistForAPI()})});
+    var apiRes=await fetch(BACKEND+'/api/chat',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({visitorId:getVid(),message:'This is a token contract address (CA) on '+pdata.chain+' — not a wallet. Give me a 2-3 sentence risk assessment based on this on-chain data. Call out red flags directly.\n\n'+summary,history:getHistForAPI()})});
     hideThink();avCore.className='speaking';scanLine();
     if(apiRes.ok){
       var d=await apiRes.json();var reply=d.response||'Scan data received. Analysis unavailable.';
