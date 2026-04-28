@@ -99,9 +99,9 @@
 
     /* Boot callsign input */
     .boot-prompt {
-      display:flex;align-items:center;gap:8px;
+      display:flex;align-items:center;gap:10px;flex-wrap:wrap;
       font-size:12px;letter-spacing:2px;color:var(--cyan);
-      margin-bottom:7px;opacity:0;animation:bl-in 0.12s ease forwards;
+      margin-top:16px;margin-bottom:4px;opacity:0;animation:bl-in 0.18s ease forwards;
     }
     .boot-prompt span { opacity:0.65; }
     #boot-callsign-input {
@@ -109,6 +109,15 @@
       outline:none;color:var(--cyan);font-family:inherit;
       font-size:12px;letter-spacing:3px;caret-color:var(--green);
       width:180px;text-transform:uppercase;
+    }
+    #boot-confirm-btn {
+      background:transparent;border:1px solid rgba(0,212,255,0.45);
+      color:var(--cyan);font-family:inherit;font-size:10px;letter-spacing:2.5px;
+      padding:5px 14px;cursor:pointer;transition:all 0.15s;
+    }
+    #boot-confirm-btn:hover,#boot-confirm-btn:active {
+      background:rgba(0,212,255,0.12);border-color:var(--cyan);
+      box-shadow:0 0 12px rgba(0,212,255,0.2);
     }
 
     /* NVG mode */
@@ -702,21 +711,24 @@ function showCallsignPrompt(resume){
   var inp=document.createElement('input');
   inp.id='boot-callsign-input';inp.type='text';inp.placeholder='ENTER CALLSIGN';
   inp.maxLength=20;inp.autocomplete='off';inp.spellcheck=false;
-  bp.appendChild(lbl);bp.appendChild(inp);bootEl.appendChild(bp);
-  setTimeout(function(){inp.focus();},60);
-  inp.addEventListener('keydown',function(e){
-    if(e.key==='Enter'){
-      var name=inp.value.trim().toUpperCase().replace(/[^A-Z0-9 _\-]/g,'').slice(0,16);
-      if(!name)name='OPERATIVE';
-      CALLSIGN=name;
-      localStorage.setItem('destiny_callsign',CALLSIGN);
-      bp.remove();
-      var cf=document.createElement('div');cf.className='bl bl-acc';
-      cf.textContent='OPERATIVE '+CALLSIGN+' · CONFIRMED';
-      bootEl.appendChild(cf);
-      setTimeout(resume,350);
-    }
-  });
+  var btn=document.createElement('button');
+  btn.id='boot-confirm-btn';btn.type='button';btn.textContent='CONFIRM';
+  bp.appendChild(lbl);bp.appendChild(inp);bp.appendChild(btn);
+  bootEl.appendChild(bp);
+  setTimeout(function(){inp.focus();},80);
+  function confirm(){
+    var name=inp.value.trim().toUpperCase().replace(/[^A-Z0-9 _\-]/g,'').slice(0,16);
+    if(!name)name='OPERATIVE';
+    CALLSIGN=name;
+    localStorage.setItem('destiny_callsign',CALLSIGN);
+    bp.remove();
+    var cf=document.createElement('div');cf.className='bl bl-acc';
+    cf.textContent='OPERATIVE '+CALLSIGN+' · CONFIRMED';
+    bootEl.appendChild(cf);
+    setTimeout(resume,350);
+  }
+  btn.addEventListener('click',confirm);
+  inp.addEventListener('keydown',function(e){if(e.key==='Enter'){e.preventDefault();confirm();}});
 }
 
 function finishBoot(){
@@ -740,8 +752,10 @@ function finishBoot(){
 function runBoot(){
   var i=0;
   (function next(){
-    if(i===5&&!CALLSIGN){showCallsignPrompt(next);return;}
-    if(i>=BOOT.length){finishBoot();return;}
+    if(i>=BOOT.length){
+      if(!CALLSIGN){showCallsignPrompt(finishBoot);}else{finishBoot();}
+      return;
+    }
     var b=BOOT[i++];
     if(b.c==='bar'){
       var w=document.createElement('div');w.className='boot-bar-wrap';
