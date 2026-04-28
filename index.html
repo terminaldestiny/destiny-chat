@@ -141,6 +141,34 @@
     .cmd-bar { width:2px;flex-shrink:0;margin-top:3px;min-height:14px;border-radius:1px;background:rgba(0,255,65,0.35);box-shadow:0 0 5px rgba(0,255,65,0.3); }
     .cmd-text { font-size:11px;letter-spacing:1.5px;color:rgba(0,255,65,0.55);line-height:1.6; }
 
+    /* Token scan panel */
+    .tscan-wrap {
+      border:1px solid rgba(0,255,65,0.2);border-left:2px solid var(--green);
+      background:var(--panel);max-width:760px;position:relative;overflow:hidden;
+    }
+    .tscan-wrap::before {
+      content:'';position:absolute;inset:0;pointer-events:none;z-index:0;
+      background:repeating-linear-gradient(0deg,transparent,transparent 3px,rgba(0,255,65,0.012) 3px,rgba(0,255,65,0.012) 4px);
+    }
+    .tscan-hdr {
+      background:rgba(0,255,65,0.06);border-bottom:1px solid rgba(0,255,65,0.1);
+      padding:6px 14px;display:flex;justify-content:space-between;align-items:center;
+      font-size:8px;letter-spacing:3px;color:rgba(0,255,65,0.45);position:relative;z-index:1;
+    }
+    .tscan-body { padding:14px 14px 12px;position:relative;z-index:1; }
+    .tscan-token { margin-bottom:6px; }
+    .tscan-name { font-size:15px;font-weight:bold;letter-spacing:2px;color:var(--green);text-shadow:0 0 8px rgba(0,255,65,0.28); }
+    .tscan-sym { font-size:10px;letter-spacing:2px;color:rgba(0,255,65,0.42);margin-left:10px; }
+    .tscan-addr { font-size:8px;letter-spacing:1px;color:rgba(0,255,65,0.2);margin-bottom:14px;word-break:break-all; }
+    .tscan-grid { display:grid;grid-template-columns:1fr 1fr;gap:10px 28px; }
+    .tscan-row { display:flex;flex-direction:column;gap:3px; }
+    .tscan-lbl { font-size:8px;letter-spacing:2.5px;color:rgba(0,255,65,0.32); }
+    .tscan-val { font-size:12px;letter-spacing:1px;color:rgba(0,255,65,0.85); }
+    .tscan-pos { color:#00ff88;font-size:10px;margin-left:7px; }
+    .tscan-neg { color:var(--red);font-size:10px;margin-left:7px; }
+    .tscan-ftr { border-top:1px solid rgba(0,255,65,0.07);margin-top:12px;padding-top:8px;font-size:7px;letter-spacing:1.5px;color:rgba(0,255,65,0.22); }
+    @media(max-width:600px){ .tscan-grid{ grid-template-columns:1fr; } }
+
     /* ── MAIN UI ───────────────────────────────────── */
     #ui { position:fixed;inset:0;z-index:10;display:flex;flex-direction:column;opacity:0;transition:opacity 0.8s; }
     #ui.on { opacity:1; }
@@ -1011,9 +1039,127 @@ var STATUS_POOL=[
   'ALL SYSTEMS NOMINAL · GRID POWER: 94% · WEAPONS HOT',
 ];
 
+// ── Token scanner ─────────────────────────────────────────────────
+function fmtPrice(p){
+  var n=parseFloat(p);if(isNaN(n))return 'N/A';
+  if(n>=1000)return '$'+fmtNum(n);
+  if(n>=1)return '$'+n.toFixed(2);
+  if(n>=0.01)return '$'+n.toFixed(4);
+  if(n>=0.000001)return '$'+n.toFixed(8).replace(/\.?0+$/,'');
+  return '$'+n.toExponential(3);
+}
+function fmtNum(n){
+  n=parseFloat(n);if(isNaN(n)||n===0)return 'N/A';
+  if(n>=1e9)return (n/1e9).toFixed(2)+'B';
+  if(n>=1e6)return (n/1e6).toFixed(2)+'M';
+  if(n>=1e3)return (n/1e3).toFixed(1)+'K';
+  return n.toFixed(2);
+}
+function getAge(ts_ms){
+  var ms=Date.now()-ts_ms;
+  var d=Math.floor(ms/86400000);
+  if(d>=365)return Math.floor(d/365)+'y '+Math.floor((d%365)/30)+'mo';
+  if(d>=30)return Math.floor(d/30)+'mo';
+  if(d>=1)return d+' day'+(d===1?'':'s');
+  var h=Math.floor(ms/3600000);
+  if(h>=1)return h+'h';
+  return Math.max(1,Math.floor(ms/60000))+'min';
+}
+function showScanPanel(p){
+  var w=document.createElement('div');w.className='msg';
+  var panel=document.createElement('div');panel.className='tscan-wrap';
+  // Header
+  var hdr=document.createElement('div');hdr.className='tscan-hdr';
+  var hl=document.createElement('span');hl.textContent='// TOKEN SCAN';
+  var hr=document.createElement('span');hr.textContent=p.chain+(p.dex?' · '+p.dex:'');
+  hdr.appendChild(hl);hdr.appendChild(hr);panel.appendChild(hdr);
+  // Body
+  var body=document.createElement('div');body.className='tscan-body';
+  var tn=document.createElement('div');tn.className='tscan-token';
+  var nm=document.createElement('span');nm.className='tscan-name';nm.textContent=p.name;
+  var sm=document.createElement('span');sm.className='tscan-sym';sm.textContent=p.sym;
+  tn.appendChild(nm);tn.appendChild(sm);body.appendChild(tn);
+  var ad=document.createElement('div');ad.className='tscan-addr';ad.textContent=p.addr.slice(0,20)+'...'+p.addr.slice(-8);body.appendChild(ad);
+  var grid=document.createElement('div');grid.className='tscan-grid';
+  var chgTxt=p.change24!==null&&p.change24!==undefined?(p.change24>=0?'▲ +':'▼ ')+p.change24+'%':'—';
+  var chgCls=p.change24>0?'tscan-pos':p.change24<0?'tscan-neg':'';
+  [
+    {l:'PRICE',v:p.price,x:chgTxt,xc:chgCls},
+    {l:'LIQUIDITY',v:p.liq},
+    {l:'24H VOLUME',v:p.vol24},
+    {l:'MKT CAP / FDV',v:p.mcap},
+    {l:'TOKEN AGE',v:p.age},
+    {l:'BUYS / SELLS 24H',v:p.buys+' / '+p.sells},
+  ].forEach(function(r){
+    var row=document.createElement('div');row.className='tscan-row';
+    var lbl=document.createElement('div');lbl.className='tscan-lbl';lbl.textContent=r.l;
+    var val=document.createElement('div');val.className='tscan-val';val.textContent=r.v;
+    if(r.x){var ex=document.createElement('span');ex.className=r.xc;ex.textContent=r.x;val.appendChild(ex);}
+    row.appendChild(lbl);row.appendChild(val);grid.appendChild(row);
+  });
+  body.appendChild(grid);
+  var ft=document.createElement('div');ft.className='tscan-ftr';
+  ft.textContent='SOURCE: DEXSCREENER'+(p.pairCount>1?' · '+p.pairCount+' PAIRS FOUND, SHOWING HIGHEST LIQUIDITY':'')+' · '+ts();
+  body.appendChild(ft);
+  panel.appendChild(body);
+  w.appendChild(panel);feed.appendChild(w);feed.scrollTop=feed.scrollHeight;
+}
+async function runScan(addr){
+  addr=(addr||'').trim();
+  if(addr.length<20){addCmd(['// USAGE: /scan [contract address]','Paste the full token contract address.']);return;}
+  if(sending){addCmd(['// CHANNEL BUSY · WAIT FOR CURRENT TRANSMISSION']);return;}
+  if(getRemaining()<=0){addCmd(['// SIGNAL EXHAUSTED · CANNOT COMPLETE SCAN']);return;}
+  addCmd(['// SCANNING: '+addr.slice(0,10)+'...'+addr.slice(-6),'QUERYING DEXSCREENER...']);
+  try{
+    var res=await fetch('https://api.dexscreener.com/latest/dex/tokens/'+encodeURIComponent(addr));
+    if(!res.ok)throw new Error('API '+res.status);
+    var data=await res.json();
+    if(!data.pairs||!data.pairs.length){
+      addCmd(['// NO MARKET DATA FOUND','Token not listed on any tracked exchange.','Double-check the contract address.']);return;
+    }
+    var pair=data.pairs.slice().sort(function(a,b){return((b.liquidity&&b.liquidity.usd)||0)-((a.liquidity&&a.liquidity.usd)||0);})[0];
+    var chg=pair.priceChange&&pair.priceChange.h24!==undefined?parseFloat(pair.priceChange.h24):null;
+    var pdata={
+      name:(pair.baseToken&&pair.baseToken.name)||'UNKNOWN',
+      sym:(pair.baseToken&&pair.baseToken.symbol)||'???',
+      price:pair.priceUsd?fmtPrice(pair.priceUsd):'N/A',
+      change24:chg,
+      liq:pair.liquidity&&pair.liquidity.usd?'$'+fmtNum(pair.liquidity.usd):'N/A',
+      vol24:pair.volume&&pair.volume.h24?'$'+fmtNum(pair.volume.h24):'N/A',
+      mcap:pair.marketCap?'$'+fmtNum(pair.marketCap):(pair.fdv?'~$'+fmtNum(pair.fdv):'N/A'),
+      age:pair.pairCreatedAt?getAge(pair.pairCreatedAt):'unknown',
+      dex:pair.dexId?(pair.dexId.charAt(0).toUpperCase()+pair.dexId.slice(1)):'',
+      chain:(pair.chainId||'unknown').toUpperCase(),
+      buys:(pair.txns&&pair.txns.h24&&pair.txns.h24.buys)||0,
+      sells:(pair.txns&&pair.txns.h24&&pair.txns.h24.sells)||0,
+      addr:addr,pairCount:data.pairs.length
+    };
+    showScanPanel(pdata);
+    // DESTINY analysis
+    inputEl.disabled=true;sending=true;showThink();
+    var summary='TOKEN: '+pdata.name+' ('+pdata.sym+')\nPRICE: '+pdata.price+(chg!==null?' ('+chg+'% 24h)':'')+'\nLIQUIDITY: '+pdata.liq+'\n24H VOLUME: '+pdata.vol24+'\nMKT CAP: '+pdata.mcap+'\nAGE: '+pdata.age+'\nDEX: '+pdata.dex+' on '+pdata.chain+'\nBUYS/SELLS 24h: '+pdata.buys+'/'+pdata.sells;
+    var apiRes=await fetch(BACKEND+'/api/chat',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({visitorId:getVid(),message:'Field intel on this token. Give me a sharp 3-4 line tactical risk assessment — call out any red flags, anything that stands out. Be direct.\n\n'+summary,history:getHistForAPI()})});
+    hideThink();avCore.className='speaking';scanLine();
+    if(apiRes.ok){
+      var d=await apiRes.json();var reply=d.response||'Scan data received. Analysis unavailable.';
+      incUsage();updateHUD();pushHist('assistant',reply);await addDestiny(reply,true);
+    }else{await addDestiny('Scan complete. Analysis signal lost.',true);}
+  }catch(e){
+    hideThink();
+    addCmd(['// SCAN FAILED','Error: '+(e.message||'connection error')]);
+    avCore.className='';sending=false;
+    if(getRemaining()>0){inputEl.disabled=false;inputEl.focus();}
+    return;
+  }
+  avCore.className='';sending=false;
+  if(getRemaining()>0){inputEl.disabled=false;inputEl.focus();}
+}
+
 function handleCommand(raw){
   var cmd=raw.trim().split(/\s+/)[0].toLowerCase();
   switch(cmd){
+    case '/scan':
+      runScan(raw.trim().slice(5).trim());break;
     case '/status':
       addCmd([
         '// FIELD STATUS REPORT',
@@ -1049,14 +1195,15 @@ function handleCommand(raw){
     case '/help':
       addCmd([
         '// AVAILABLE COMMANDS',
-        '/status   field status report',
-        '/freq     scan known frequencies',
-        '/who      operative identification',
-        '/nvg      toggle night vision goggles',
-        '/clear    wipe feed and memory',
-        '/debrief  summarize this mission',
-        '/mute     toggle sound on/off',
-        '/help     this list'
+        '/scan [ca]  token intel — price, liquidity, risk',
+        '/status     field status report',
+        '/freq       scan known frequencies',
+        '/who        operative identification',
+        '/nvg        toggle night vision',
+        '/clear      wipe feed and memory',
+        '/debrief    summarize this mission',
+        '/mute       toggle sound on/off',
+        '/help       this list'
       ]);break;
     case '/mute':
       _muted=!_muted;
