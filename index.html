@@ -752,7 +752,7 @@
     <button class="cmd-chip cmd-chip-scan" onclick="quickCmd('/scan')">⬡ SCAN TOKEN</button>
     <button class="cmd-chip" onclick="quickCmd('/clear')">/clear</button>
     <button class="cmd-chip cmd-chip-wallet" id="wallet-btn" onclick="connectWallet()">⬡ CONNECT</button>
-    <button class="cmd-chip" id="model-toggle-btn" onclick="toggleModel()">⬡ HAIKU</button>
+    <button class="cmd-chip" id="model-toggle-btn" onclick="toggleModel()">⬡ SONNET 🔒</button>
     <button class="cmd-chip cmd-chip-disconnect" id="disconnect-btn" onclick="disconnectWallet()" style="display:none">⬡ DISCONNECT</button>
   </div>
 
@@ -821,6 +821,8 @@ function applyTierUI(tier,balance){
   } else {
     badge.style.display='none';
     wBtn.textContent='⬡ RECRUIT';wBtn.classList.remove('verified');
+    mBtn.textContent='⬡ SONNET 🔒';mBtn.style.borderColor='';mBtn.style.color='';
+    ACTIVE_MODEL='haiku';
   }
 }
 
@@ -1498,19 +1500,11 @@ var scanHintEl=document.getElementById('scan-hint');
 var _pendingScanAddr=null;
 
 function toggleModel(){
-  ACTIVE_MODEL=(ACTIVE_MODEL==='haiku')?'sonnet':'haiku';
-  var btn=document.getElementById('model-toggle-btn');
-  if(ACTIVE_MODEL==='sonnet'){
-    btn.textContent='⬡ SONNET';
-    btn.style.borderColor='rgba(0,212,255,0.6)';
-    btn.style.color='var(--cyan)';
-    addCmd(['// MODEL SWITCHED → SONNET · UPGRADED INTELLIGENCE ACTIVE']);
-  } else {
-    btn.textContent='⬡ HAIKU';
-    btn.style.borderColor='';
-    btn.style.color='';
-    addCmd(['// MODEL SWITCHED → HAIKU · STANDARD MODE']);
+  if(getTier()!=='operative'){
+    addCmd(['// SONNET LOCKED · HOLD 10,000+ DESTINY TO UNLOCK · CONNECT WALLET TO VERIFY']);
+    return;
   }
+  addCmd(['// OPERATIVE · SONNET 4.6 ACTIVE · UPGRADED INTELLIGENCE ONLINE']);
 }
 function disconnectWallet(){
   clearSession();
@@ -1521,7 +1515,7 @@ function disconnectWallet(){
   var dBtn=document.getElementById('disconnect-btn');
   badge.style.display='none';
   wBtn.textContent='⬡ CONNECT';wBtn.classList.remove('verified');wBtn.disabled=false;
-  mBtn.textContent='⬡ HAIKU';mBtn.style.borderColor='';mBtn.style.color='';
+  mBtn.textContent='⬡ SONNET 🔒';mBtn.style.borderColor='';mBtn.style.color='';
   dBtn.style.display='none';
   addCmd(['// WALLET DISCONNECTED · SESSION CLEARED']);
 }
