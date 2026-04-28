@@ -679,6 +679,11 @@
       #cor-tl,#cor-tr { top:62px; }
       #cor-bl,#cor-br { bottom:94px; }
 
+      /* ── Kill heavy animations on mobile ── */
+      #bg-edge { animation:none; }
+      #bg-scanlines { display:none; }
+      .codec-wave span { animation:none; }
+
       /* ── CA / misc ── */
       #ca-badge { display:none; }
       #help-box { padding:22px 20px; }
@@ -827,8 +832,12 @@ function applyTierUI(tier,balance){
 
 async function connectWallet(){
   var wBtn=document.getElementById('wallet-btn');
-  var provider=window.phantom?.solana||window.backpack?.solana||window.solana;
-  if(!provider){addCmd(['// NO WALLET DETECTED · INSTALL PHANTOM OR BACKPACK']);return;}
+  var provider=window.phantom?.solana||window.backpack?.solana||(window.solana?.isPhantom||window.solana?.isBackpack?window.solana:null);
+  if(!provider){
+    addCmd(['// NO WALLET DETECTED · OPEN THIS SITE INSIDE PHANTOM OR BACKPACK BROWSER']);
+    addCmd(['// PHANTOM: TAP BROWSER TAB → NAVIGATE TO THIS URL']);
+    return;
+  }
   wBtn.textContent='⬡ CONNECTING...';wBtn.disabled=true;
   try{
     await provider.connect();
@@ -838,7 +847,7 @@ async function connectWallet(){
 
     var ch=await fetch(BACKEND+'/api/challenge').then(function(r){return r.json();});
     var message=new TextEncoder().encode('DESTINY verification: '+ch.nonce);
-    var signed=await provider.signMessage(message,'utf8');
+    var signed=await provider.signMessage(message);
     var signature=signed.signature||signed;
     addCmd(['// SIGNATURE CONFIRMED · CHECKING TOKEN BALANCE...']);
 
@@ -869,13 +878,15 @@ async function connectWallet(){
 
 // ── Matrix rain ───────────────────────────────────────────────────
 (function(){
+  var isMobile=window.innerWidth<=600;
+  if(isMobile){return;} // skip on mobile — too heavy
   var c=document.getElementById('bg-matrix'),ctx=c.getContext('2d');
   var CHARS='01アイウエオカキクケコサシスセソタナニヌネノ';
   var SZ=14,cols,drops,last=0;
   function resize(){c.width=window.innerWidth;c.height=window.innerHeight;cols=Math.floor(c.width/SZ);drops=Array.from({length:cols},function(){return Math.random()*-60|0;});}
   resize();window.addEventListener('resize',resize);
   function draw(ts){
-    if(ts-last<95){requestAnimationFrame(draw);return;}last=ts;
+    if(ts-last<110){requestAnimationFrame(draw);return;}last=ts;
     ctx.fillStyle='rgba(3,12,21,0.065)';ctx.fillRect(0,0,c.width,c.height);
     for(var i=0;i<cols;i++){
       var isRed=Math.random()<0.011;
@@ -892,6 +903,7 @@ async function connectWallet(){
 
 // ── Red energy streaks ────────────────────────────────────────────
 (function(){
+  if(window.innerWidth<=600)return; // skip on mobile
   var ct=document.getElementById('bg-streaks');
   [{top:8,left:10,w:220,ang:-22,dur:8,delay:0,op:0.21},{top:15,left:45,w:160,ang:-18,dur:11,delay:2.5,op:0.15},{top:5,left:60,w:300,ang:-25,dur:14,delay:0.8,op:0.18},{top:22,left:20,w:140,ang:-15,dur:9,delay:4,op:0.12},{top:12,left:70,w:200,ang:-28,dur:12,delay:1.5,op:0.2},{top:30,left:5,w:180,ang:-20,dur:10,delay:6,op:0.1},{top:18,left:80,w:120,ang:-16,dur:7,delay:3,op:0.24},{top:8,left:35,w:260,ang:-23,dur:15,delay:5.5,op:0.14}]
   .forEach(function(cfg){
@@ -903,6 +915,7 @@ async function connectWallet(){
 
 // ── Particles ─────────────────────────────────────────────────────
 (function(){
+  if(window.innerWidth<=600)return; // skip on mobile
   var pc=document.getElementById('bg-particles');
   for(var i=0;i<30;i++){
     var p=document.createElement('div');p.className='ptl';
