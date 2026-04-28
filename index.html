@@ -993,10 +993,6 @@ function finishBoot(){
       var hadHistory=loadChatHistory();
       if(!hadHistory){
         addDestiny("You found me. Good. Ask me anything — AI, crypto, code, building. Let's make you dangerous.",true);
-        var eggTimer=setTimeout(function(){
-          if(getHist().length===0&&getRemaining()>0)addDestiny("...Kept you waiting, huh?",true);
-        },45000);
-        inputEl.addEventListener('keydown',function(){clearTimeout(eggTimer);},{once:true});
       }
     },900);
     setTimeout(function(){if(getRemaining()>0)inputEl.focus();},600);
