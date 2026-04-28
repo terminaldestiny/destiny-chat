@@ -1092,7 +1092,8 @@ function addDestiny(text,typewriter,modelTag){
   var lbl=document.createElement('div');lbl.className='codec-label';
   var ll=document.createElement('span');ll.className='codec-label-left';ll.textContent='CODEC TRANSMISSION';
   var lr=document.createElement('span');lr.className='codec-label-right';
-  lr.textContent=modelTag?'FREQ 140.85 · '+modelTag.toUpperCase():'FREQ 140.85';
+  var MODEL_DISPLAY={sonnet:'SONNET 4.6',haiku:'HAIKU 4.5'};
+  lr.textContent=modelTag?'FREQ 140.85 · '+(MODEL_DISPLAY[modelTag]||modelTag.toUpperCase()):'FREQ 140.85';
   if(modelTag==='sonnet')lr.style.color='var(--cyan)';
   lbl.appendChild(ll);lbl.appendChild(lr);cw.appendChild(lbl);
 
