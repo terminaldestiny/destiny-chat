@@ -1488,12 +1488,23 @@ async function sendMsg(){
   playSound('tx-send');
   inputEl.disabled=true;sending=true;
   addHero(text);pushHist('user',text);showThink();
+  // Detect expired session before sending
+  var _sess=JSON.parse(localStorage.getItem('destiny_session')||'null');
+  if(_sess&&_sess.expires<=Date.now()){disconnectWallet();addCmd(['// SESSION EXPIRED · RECONNECT WALLET TO RESTORE SONNET ACCESS']);}
+
   try{
     var res=await fetch(BACKEND+'/api/chat',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({visitorId:getVid(),model:ACTIVE_MODEL,sessionToken:getSessionToken(),message:text,history:getHistForAPI()})});
     hideThink();avCore.className='speaking';scanLine();
     var reply,modelUsed;
     if(res.status===429){reply='Signal exhausted. Return tomorrow, '+(CALLSIGN||'hero')+'.';incUsage();updateHUD();await addDestiny(reply,true);}
-    else if(res.ok){var data=await res.json();reply=data.response||'Signal unclear. Try again.';modelUsed=data.model;incUsage();updateHUD();pushHist('assistant',reply);await addDestiny(reply,true,modelUsed);}
+    else if(res.ok){
+      var data=await res.json();
+      reply=data.response||'Signal unclear. Try again.';modelUsed=data.model;
+      incUsage();updateHUD();pushHist('assistant',reply);await addDestiny(reply,true,modelUsed);
+      var rem=typeof data.remaining==='number'?data.remaining:null;
+      if(rem!==null&&rem<=10&&rem>0)addCmd(['// '+rem+' TRANSMISSION'+(rem===1?'':'S')+' REMAINING TODAY']);
+      if(rem===0)addCmd(['// DAILY LIMIT REACHED · RESETS AT MIDNIGHT UTC']);
+    }
     else{reply='Signal interference. Stand by.';await addDestiny(reply,true);}
   }catch(e){hideThink();await addDestiny('Connection dropped. Check your signal.',true);}
   avCore.className='';sending=false;
