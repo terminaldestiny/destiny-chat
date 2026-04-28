@@ -1250,7 +1250,10 @@ function addCmd(lines){
   var cw=document.createElement('div');cw.className='cmd-wrap';
   var bar=document.createElement('div');bar.className='cmd-bar';
   var txt=document.createElement('div');txt.className='cmd-text';
-  txt.innerHTML=lines.join('<br>');
+  lines.forEach(function(line,i){
+    txt.appendChild(document.createTextNode(line));
+    if(i<lines.length-1)txt.appendChild(document.createElement('br'));
+  });
   cw.appendChild(bar);cw.appendChild(txt);w.appendChild(cw);
   feed.appendChild(w);feed.scrollTop=feed.scrollHeight;
   playSound('cmd-blip');
