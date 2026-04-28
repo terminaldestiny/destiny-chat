@@ -780,12 +780,12 @@
 <div id="help-ovl" onclick="handleOvl(event)">
   <div id="help-box">
     <h2>// WHAT DESTINY CAN HELP WITH</h2>
-    <div class="ht"><div class="ht-n">→ AI &amp; Machine Learning</div><div class="ht-d">Models, tools, prompting, building AI products from scratch</div></div>
-    <div class="ht"><div class="ht-n">→ Crypto &amp; Blockchain</div><div class="ht-d">DeFi, wallets, tokens, on-chain mechanics, how it all works</div></div>
-    <div class="ht"><div class="ht-n">→ Coding &amp; Shipping</div><div class="ht-d">Debugging, architecture, picking the right stack, moving fast</div></div>
+    <div class="ht"><div class="ht-n">→ AI &amp; Building</div><div class="ht-d">Claude Code, Cursor, v0, Bolt — tools first, always. Ask her what to use.</div></div>
+    <div class="ht"><div class="ht-n">→ Crypto &amp; DeFi</div><div class="ht-d">Wallets, tokens, on-chain analysis, $DESTINY ecosystem, token safety</div></div>
+    <div class="ht"><div class="ht-n">→ Coding &amp; Shipping</div><div class="ht-d">Debugging, stack choices, architecture, moving fast with AI</div></div>
     <div class="ht"><div class="ht-n">→ Web3 Projects</div><div class="ht-d">Smart contracts, NFTs, DApps, tokenomics, launch strategy</div></div>
-    <div class="ht"><div class="ht-n">→ General Tech</div><div class="ht-d">Whatever you need to learn to move forward — ask it</div></div>
-    <div class="ht"><div class="ht-n">→ Terminal Commands</div><div class="ht-d">Type /help · includes /nvg, /freq, /debrief, /mute and more</div></div>
+    <div class="ht"><div class="ht-n">→ Unlock Sonnet 4.6</div><div class="ht-d">Hold 500,000+ $DESTINY · connect Phantom or Backpack · verify on-chain</div></div>
+    <div class="ht"><div class="ht-n">→ Terminal Commands</div><div class="ht-d">/scan /status /freq /who /nvg /clear /debrief /mute · type /help in chat</div></div>
     <div id="help-close" onclick="closeHelp()">[ CLOSE TRANSMISSION ]</div>
   </div>
 </div>
@@ -1431,7 +1431,12 @@ function handleCommand(raw){
         '/clear      wipe feed and memory',
         '/debrief    summarize this mission',
         '/mute       toggle sound on/off',
-        '/help       this list'
+        '/help       this list',
+        '──────────────────────────────',
+        '// UNLOCK SONNET 4.6',
+        'hold 500,000+ $DESTINY · connect wallet · verify on-chain',
+        'CA: 3AwkJnZL7xrf8ffUwEsSkKndQkPSj2vfR3CqvyFpk8UP',
+        'operatives get sonnet + 100 msg/day · recruits get haiku + 20/day'
       ]);break;
     case '/mute':
       _muted=!_muted;
@@ -1501,7 +1506,7 @@ var _pendingScanAddr=null;
 
 function toggleModel(){
   if(getTier()!=='operative'){
-    addCmd(['// SONNET LOCKED · HOLD 50,000+ DESTINY TO UNLOCK · CONNECT WALLET TO VERIFY']);
+    addCmd(['// SONNET LOCKED · HOLD 500,000+ DESTINY TO UNLOCK · CONNECT WALLET TO VERIFY']);
     return;
   }
   addCmd(['// OPERATIVE · SONNET 4.6 ACTIVE · UPGRADED INTELLIGENCE ONLINE']);
