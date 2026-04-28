@@ -212,6 +212,14 @@
     #cmd-bar.expanded .cmd-chip-more { border-color:rgba(0,255,65,0.42);color:var(--green);background:rgba(0,255,65,0.05); }
     .cmd-chip-extra { display:none; }
     #cmd-bar.expanded .cmd-chip-extra { display:inline-flex;align-items:center; }
+    .cmd-chip-wallet { border-color:rgba(255,170,0,0.35);color:rgba(255,170,0,0.65); }
+    .cmd-chip-wallet:hover,.cmd-chip-wallet:active { border-color:var(--amber);color:var(--amber);background:rgba(255,170,0,0.06); }
+    .cmd-chip-wallet.verified { border-color:rgba(0,212,255,0.5);color:var(--cyan);background:rgba(0,212,255,0.06); }
+    #tier-badge {
+      display:none;font-size:8px;letter-spacing:2px;padding:2px 7px;
+      border:1px solid rgba(0,212,255,0.4);color:var(--cyan);
+      background:rgba(0,212,255,0.06);margin-left:6px;
+    }
 
     /* Paste-to-scan hint bar */
     #scan-hint {
@@ -285,7 +293,7 @@
       0%,100%{ filter:brightness(1.04) saturate(1);box-shadow:0 0 22px rgba(0,255,65,0.52); }
       50%    { filter:brightness(1.3) saturate(1.15);box-shadow:0 0 60px rgba(0,255,65,0.82),0 0 110px rgba(0,255,65,0.2); }
     }
-    #av-img { width:100%;height:100%;object-fit:cover;object-position:62% 34%;display:block;transform:scale(1.9);transform-origin:63% 26%; }
+    #av-img { width:100%;height:100%;object-fit:cover;object-position:50% 10%;display:block;transform:scale(2.2);transform-origin:50% 12%; }
     #av-dot {
       position:absolute;bottom:2px;right:6px;
       width:8px;height:8px;background:var(--red);border-radius:50%;z-index:2;
@@ -368,8 +376,8 @@
       padding:0 10px;
       font-size:8px;letter-spacing:3px;color:rgba(0,255,65,0.5);
     }
-    .codec-label-left { color:rgba(0,255,65,0.55); }
-    .codec-label-right { color:rgba(255,42,0,0.5); }
+    .codec-label-left { color:rgba(0,255,65,0.55);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:52%; }
+    .codec-label-right { color:rgba(255,42,0,0.5);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:52%; }
 
     /* Portrait column */
     .codec-portrait-col {
@@ -715,6 +723,7 @@
         <div id="id-sub">
           <div id="id-dot"></div>
           <span>FIELD OPERATIVE</span>
+          <span id="tier-badge"></span>
           <span id="id-clock"></span>
         </div>
       </div>
@@ -739,6 +748,8 @@
   <div id="cmd-bar">
     <button class="cmd-chip cmd-chip-scan" onclick="quickCmd('/scan')">⬡ SCAN TOKEN</button>
     <button class="cmd-chip" onclick="quickCmd('/clear')">/clear</button>
+    <button class="cmd-chip cmd-chip-wallet" id="wallet-btn" onclick="connectWallet()">⬡ CONNECT</button>
+    <button class="cmd-chip" id="model-toggle-btn" onclick="toggleModel()">⬡ HAIKU</button>
     <button class="cmd-chip cmd-chip-more" id="cmd-more-btn" onclick="toggleMoreCmds()">· · ·</button>
     <button class="cmd-chip cmd-chip-extra" onclick="quickCmd('/status')">/status</button>
     <button class="cmd-chip cmd-chip-extra" onclick="quickCmd('/freq')">/freq</button>
@@ -787,6 +798,74 @@ var BACKEND='https://dream-production-0bfd.up.railway.app';
 var CA='3AwkJnZL7xrf8ffUwEsSkKndQkPSj2vfR3CqvyFpk8UP';
 var DAILY_LIMIT=20;
 var CALLSIGN=localStorage.getItem('destiny_callsign')||null;
+var ACTIVE_MODEL='haiku';
+
+// ── Session / tier ────────────────────────────────────────────────
+function getSession(){
+  try{var s=JSON.parse(localStorage.getItem('destiny_session')||'null');return(s&&s.expires>Date.now())?s:null;}catch(e){return null;}
+}
+function saveSession(s){localStorage.setItem('destiny_session',JSON.stringify(s));}
+function clearSession(){localStorage.removeItem('destiny_session');}
+function getSessionToken(){var s=getSession();return s?s.sessionToken:null;}
+function getTier(){var s=getSession();return s?s.tier:'recruit';}
+
+function applyTierUI(tier,balance){
+  var badge=document.getElementById('tier-badge');
+  var wBtn=document.getElementById('wallet-btn');
+  var mBtn=document.getElementById('model-toggle-btn');
+  if(tier==='operative'){
+    badge.textContent='OPERATIVE';badge.style.display='inline-block';
+    wBtn.textContent='⬡ VERIFIED';wBtn.classList.add('verified');
+    mBtn.textContent='⬡ SONNET';
+    mBtn.style.borderColor='rgba(0,212,255,0.6)';mBtn.style.color='var(--cyan)';
+    ACTIVE_MODEL='sonnet';
+  } else {
+    badge.style.display='none';
+    wBtn.textContent='⬡ RECRUIT';wBtn.classList.remove('verified');
+  }
+}
+
+async function connectWallet(){
+  var wBtn=document.getElementById('wallet-btn');
+  var provider=window.phantom?.solana||window.backpack?.solana||window.solana;
+  if(!provider){addCmd(['// NO WALLET DETECTED · INSTALL PHANTOM OR BACKPACK']);return;}
+  wBtn.textContent='⬡ CONNECTING...';wBtn.disabled=true;
+  try{
+    await provider.connect();
+    var wallet=provider.publicKey.toString();
+    addCmd(['// WALLET LINKED · '+wallet.slice(0,8)+'...'+wallet.slice(-4)]);
+    addCmd(['// REQUESTING VERIFICATION CHALLENGE...']);
+
+    var ch=await fetch(BACKEND+'/api/challenge').then(function(r){return r.json();});
+    var message=new TextEncoder().encode('DESTINY verification: '+ch.nonce);
+    var signed=await provider.signMessage(message,'utf8');
+    var signature=signed.signature||signed;
+    addCmd(['// SIGNATURE CONFIRMED · CHECKING TOKEN BALANCE...']);
+
+    var result=await fetch(BACKEND+'/api/verify',{
+      method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({wallet:wallet,nonce:ch.nonce,signature:Array.from(signature)})
+    }).then(function(r){return r.json();});
+
+    if(result.error){
+      addCmd(['// VERIFICATION FAILED · '+result.error.toUpperCase()]);
+      wBtn.textContent='⬡ CONNECT';wBtn.disabled=false;return;
+    }
+
+    saveSession({sessionToken:result.sessionToken,tier:result.tier,balance:result.balance,wallet:wallet,expires:Date.now()+3600000});
+    applyTierUI(result.tier,result.balance);
+
+    if(result.tier==='operative'){
+      addCmd(['// OPERATIVE CONFIRMED · '+result.balance.toLocaleString()+' DESTINY HELD · SONNET UNLOCKED']);
+    } else {
+      addCmd(['// RECRUIT STATUS · '+result.balance.toLocaleString()+' DESTINY HELD · NEED '+result.minTokens.toLocaleString()+' TO UNLOCK SONNET']);
+    }
+  }catch(e){
+    addCmd(['// CONNECTION ERROR · '+(e.message||'UNKNOWN').toUpperCase()]);
+    wBtn.textContent='⬡ CONNECT';wBtn.disabled=false;
+  }
+  wBtn.disabled=false;
+}
 
 // ── Matrix rain ───────────────────────────────────────────────────
 (function(){
@@ -895,6 +974,8 @@ function finishBoot(){
     setTimeout(function(){bootEl.style.display='none';},1000);
     document.getElementById('input-pfx').textContent='> '+(CALLSIGN||'HERO')+':';
     playSound('boot-up');
+    var existingSession=getSession();
+    if(existingSession)applyTierUI(existingSession.tier,existingSession.balance);
     setTimeout(function(){
       var hadHistory=loadChatHistory();
       if(!hadHistory){
@@ -939,8 +1020,8 @@ function pushHist(role,content){var h=getHist();h.push({role:role,content:conten
 function getHistForAPI(){
   var h=getHist();
   var calibration=[
-    {role:'user',content:'Keep every response to 2-3 sentences maximum. Short, sharp, no padding.'},
-    {role:'assistant',content:'Understood. Short and sharp — that\'s my operating mode.'}
+    {role:'user',content:'Keep every response to 2-3 sentences maximum. Short, sharp, no padding. When someone wants to build something, recommend AI tools like Claude Code or Cursor first — never tell them to just go learn a language from scratch.'},
+    {role:'assistant',content:'Understood. Short, sharp, AI-first — that\'s my operating mode.'}
   ];
   var base=calibration;
   if(CALLSIGN&&(h.length===0||h[0].content!=='My callsign is '+CALLSIGN+'.')){
@@ -1000,14 +1081,16 @@ function addHero(text){
   feed.appendChild(w);feed.scrollTop=feed.scrollHeight;
 }
 
-function addDestiny(text,typewriter){
+function addDestiny(text,typewriter,modelTag){
   var w=document.createElement('div');w.className='msg';
   var cw=document.createElement('div');cw.className='codec-wrap';
 
   // Top label bar
   var lbl=document.createElement('div');lbl.className='codec-label';
   var ll=document.createElement('span');ll.className='codec-label-left';ll.textContent='CODEC TRANSMISSION';
-  var lr=document.createElement('span');lr.className='codec-label-right';lr.textContent='FREQ 140.85';
+  var lr=document.createElement('span');lr.className='codec-label-right';
+  lr.textContent=modelTag?'FREQ 140.85 · '+modelTag.toUpperCase():'FREQ 140.85';
+  if(modelTag==='sonnet')lr.style.color='var(--cyan)';
   lbl.appendChild(ll);lbl.appendChild(lr);cw.appendChild(lbl);
 
   // Portrait column
@@ -1031,6 +1114,7 @@ function addDestiny(text,typewriter){
   cc.appendChild(ch);cc.appendChild(ctxt);cw.appendChild(cc);
   w.appendChild(cw);feed.appendChild(w);feed.scrollTop=feed.scrollHeight;
 
+  if(!typewriter){ctxt.textContent=text;ctxt.classList.add('glow-in');return Promise.resolve();}
   if(typewriter){
     playSound('codec-open');
     return new Promise(function(resolve){
@@ -1276,11 +1360,11 @@ async function runScan(addr){
     // DESTINY analysis
     inputEl.disabled=true;sending=true;showThink();
     var summary='TOKEN: '+pdata.name+' ('+pdata.sym+')\nPRICE: '+pdata.price+(chg!==null?' ('+chg+'% 24h)':'')+'\nLIQUIDITY: '+pdata.liq+'\n24H VOLUME: '+pdata.vol24+'\nMKT CAP: '+pdata.mcap+'\nAGE: '+pdata.age+'\nDEX: '+pdata.dex+' on '+pdata.chain+'\nBUYS/SELLS 24h: '+pdata.buys+'/'+pdata.sells;
-    var apiRes=await fetch(BACKEND+'/api/chat',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({visitorId:getVid(),message:'This is a token contract address (CA) on '+pdata.chain+' — not a wallet. Give me a 2-3 sentence risk assessment based on this on-chain data. Call out red flags directly.\n\n'+summary,history:getHistForAPI()})});
+    var apiRes=await fetch(BACKEND+'/api/chat',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({visitorId:getVid(),model:ACTIVE_MODEL,sessionToken:getSessionToken(),message:'This is a token contract address (CA) on '+pdata.chain+' — not a wallet. Give me a 2-3 sentence risk assessment based on this on-chain data. Call out red flags directly.\n\n'+summary,history:getHistForAPI()})});
     hideThink();avCore.className='speaking';scanLine();
     if(apiRes.ok){
       var d=await apiRes.json();var reply=d.response||'Scan data received. Analysis unavailable.';
-      incUsage();updateHUD();pushHist('assistant',reply);await addDestiny(reply,true);
+      incUsage();updateHUD();pushHist('assistant',reply);await addDestiny(reply,true,d.model);
     }else{await addDestiny('Scan complete. Analysis signal lost.',true);}
   }catch(e){
     hideThink();
@@ -1364,6 +1448,8 @@ async function runDebrief(){
   try{
     var res=await fetch(BACKEND+'/api/chat',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({
       visitorId:getVid(),
+      model:ACTIVE_MODEL,
+      sessionToken:getSessionToken(),
       message:'Give me a 2-3 line tactical debrief of what we covered. Be concise and direct.',
       history:getHistForAPI()
     })});
@@ -1372,7 +1458,7 @@ async function runDebrief(){
       var data=await res.json();
       var reply=data.response||'Mission data corrupted.';
       incUsage();updateHUD();pushHist('assistant',reply);
-      await addDestiny(reply,true);
+      await addDestiny(reply,true,data.model);
     } else {
       await addDestiny('Debrief signal lost.',true);
     }
@@ -1392,13 +1478,12 @@ async function sendMsg(){
   inputEl.disabled=true;sending=true;
   addHero(text);pushHist('user',text);showThink();
   try{
-    var res=await fetch(BACKEND+'/api/chat',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({visitorId:getVid(),message:text,history:getHistForAPI()})});
+    var res=await fetch(BACKEND+'/api/chat',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({visitorId:getVid(),model:ACTIVE_MODEL,sessionToken:getSessionToken(),message:text,history:getHistForAPI()})});
     hideThink();avCore.className='speaking';scanLine();
-    var reply;
-    if(res.status===429){reply='Signal exhausted. Return tomorrow, '+(CALLSIGN||'hero')+'.';incUsage();updateHUD();}
-    else if(res.ok){var data=await res.json();reply=data.response||'Signal unclear. Try again.';incUsage();updateHUD();pushHist('assistant',reply);}
-    else{reply='Signal interference. Stand by.';}
-    await addDestiny(reply,true);
+    var reply,modelUsed;
+    if(res.status===429){reply='Signal exhausted. Return tomorrow, '+(CALLSIGN||'hero')+'.';incUsage();updateHUD();await addDestiny(reply,true);}
+    else if(res.ok){var data=await res.json();reply=data.response||'Signal unclear. Try again.';modelUsed=data.model;incUsage();updateHUD();pushHist('assistant',reply);await addDestiny(reply,true,modelUsed);}
+    else{reply='Signal interference. Stand by.';await addDestiny(reply,true);}
   }catch(e){hideThink();await addDestiny('Connection dropped. Check your signal.',true);}
   avCore.className='';sending=false;
   if(getRemaining()>0){inputEl.disabled=false;inputEl.focus();}
@@ -1408,6 +1493,21 @@ async function sendMsg(){
 var scanHintEl=document.getElementById('scan-hint');
 var _pendingScanAddr=null;
 
+function toggleModel(){
+  ACTIVE_MODEL=(ACTIVE_MODEL==='haiku')?'sonnet':'haiku';
+  var btn=document.getElementById('model-toggle-btn');
+  if(ACTIVE_MODEL==='sonnet'){
+    btn.textContent='⬡ SONNET';
+    btn.style.borderColor='rgba(0,212,255,0.6)';
+    btn.style.color='var(--cyan)';
+    addCmd(['// MODEL SWITCHED → SONNET · UPGRADED INTELLIGENCE ACTIVE']);
+  } else {
+    btn.textContent='⬡ HAIKU';
+    btn.style.borderColor='';
+    btn.style.color='';
+    addCmd(['// MODEL SWITCHED → HAIKU · STANDARD MODE']);
+  }
+}
 function toggleMoreCmds(){
   document.getElementById('cmd-bar').classList.toggle('expanded');
 }
