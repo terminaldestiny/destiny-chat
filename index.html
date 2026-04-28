@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
   <title>DESTINY // CODEC 140.85</title>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -226,7 +226,7 @@
     #scan-hint-addr { opacity:0.55;font-size:9px;letter-spacing:1px; }
 
     /* ── MAIN UI ───────────────────────────────────── */
-    #ui { position:fixed;inset:0;z-index:10;display:flex;flex-direction:column;opacity:0;transition:opacity 0.8s; }
+    #ui { position:fixed;top:0;left:0;right:0;height:100vh;height:100dvh;z-index:10;display:flex;flex-direction:column;opacity:0;transition:opacity 0.8s; }
     #ui.on { opacity:1; }
 
     /* ── TOP BAR ───────────────────────────────────── */
@@ -333,6 +333,8 @@
       padding:18px 20px 14px;
       display:flex;flex-direction:column;gap:12px;
       scroll-behavior:smooth;
+      -webkit-overflow-scrolling:touch;
+      overscroll-behavior:contain;
     }
     #chat-feed::-webkit-scrollbar { width:3px; }
     #chat-feed::-webkit-scrollbar-track { background:transparent; }
@@ -932,7 +934,7 @@ function getUsage(){var today=new Date().toISOString().slice(0,10);try{var u=JSO
 function incUsage(){var u=getUsage();u.count++;localStorage.setItem('destiny_usage',JSON.stringify(u));}
 function getRemaining(){return Math.max(0,DAILY_LIMIT-getUsage().count);}
 function getHist(){try{return JSON.parse(localStorage.getItem('destiny_hist')||'[]');}catch(e){return[];}}
-function saveHist(h){if(h.length>24)h=h.slice(-24);localStorage.setItem('destiny_hist',JSON.stringify(h));}
+function saveHist(h){if(h.length>80)h=h.slice(-80);localStorage.setItem('destiny_hist',JSON.stringify(h));}
 function pushHist(role,content){var h=getHist();h.push({role:role,content:content});saveHist(h);}
 function getHistForAPI(){
   var h=getHist();
@@ -1461,6 +1463,17 @@ inputEl.addEventListener('paste',function(e){
 });
 inputEl.addEventListener('keydown',function(e){if(e.key==='Enter'){e.preventDefault();hideScanHint();sendMsg();}});
 document.addEventListener('keydown',function(e){if(e.key==='Escape'){closeHelp();hideScanHint();}});
+
+// ── iOS keyboard viewport fix ─────────────────────────────────────
+if(window.visualViewport){
+  var _ui=document.getElementById('ui');
+  function _vpFix(){
+    _ui.style.height=window.visualViewport.height+'px';
+    _ui.style.top=window.visualViewport.offsetTop+'px';
+    feed.scrollTop=feed.scrollHeight;
+  }
+  window.visualViewport.addEventListener('resize',_vpFix);
+}
 
 // ── Live UTC clock ────────────────────────────────────────────────
 (function(){
