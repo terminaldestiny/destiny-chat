@@ -195,6 +195,10 @@
       border-color:var(--cyan);color:var(--cyan);background:rgba(0,212,255,0.06);
       box-shadow:0 0 10px rgba(0,212,255,0.1);
     }
+    .cmd-chip-more { letter-spacing:4px;padding:5px 14px; }
+    #cmd-bar.expanded .cmd-chip-more { border-color:rgba(0,255,65,0.42);color:var(--green);background:rgba(0,255,65,0.05); }
+    .cmd-chip-extra { display:none; }
+    #cmd-bar.expanded .cmd-chip-extra { display:inline-flex;align-items:center; }
 
     /* Paste-to-scan hint bar */
     #scan-hint {
@@ -675,14 +679,15 @@
   <div id="limit-banner">DAILY TRANSMISSIONS EXHAUSTED — SIGNAL RESETS AT MIDNIGHT UTC</div>
 
   <div id="cmd-bar">
-    <button class="cmd-chip cmd-chip-scan" onclick="quickCmd('/scan')" title="Scan any token contract address">⬡ SCAN TOKEN</button>
-    <button class="cmd-chip" onclick="quickCmd('/status')">/status</button>
-    <button class="cmd-chip" onclick="quickCmd('/freq')">/freq</button>
-    <button class="cmd-chip" onclick="quickCmd('/debrief')">/debrief</button>
-    <button class="cmd-chip" onclick="quickCmd('/nvg')">/nvg</button>
-    <button class="cmd-chip" onclick="quickCmd('/who')">/who</button>
+    <button class="cmd-chip cmd-chip-scan" onclick="quickCmd('/scan')">⬡ SCAN TOKEN</button>
     <button class="cmd-chip" onclick="quickCmd('/clear')">/clear</button>
-    <button class="cmd-chip" onclick="quickCmd('/mute')">/mute</button>
+    <button class="cmd-chip cmd-chip-more" id="cmd-more-btn" onclick="toggleMoreCmds()">· · ·</button>
+    <button class="cmd-chip cmd-chip-extra" onclick="quickCmd('/status')">/status</button>
+    <button class="cmd-chip cmd-chip-extra" onclick="quickCmd('/freq')">/freq</button>
+    <button class="cmd-chip cmd-chip-extra" onclick="quickCmd('/debrief')">/debrief</button>
+    <button class="cmd-chip cmd-chip-extra" onclick="quickCmd('/nvg')">/nvg</button>
+    <button class="cmd-chip cmd-chip-extra" onclick="quickCmd('/who')">/who</button>
+    <button class="cmd-chip cmd-chip-extra" onclick="quickCmd('/mute')">/mute</button>
   </div>
 
   <div id="scan-hint" onclick="confirmScanHint()"></div>
@@ -1322,6 +1327,9 @@ async function sendMsg(){
 var scanHintEl=document.getElementById('scan-hint');
 var _pendingScanAddr=null;
 
+function toggleMoreCmds(){
+  document.getElementById('cmd-bar').classList.toggle('expanded');
+}
 function quickCmd(cmd){
   if(cmd==='/scan'){
     inputEl.value='/scan ';
