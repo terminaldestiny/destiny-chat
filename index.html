@@ -169,6 +169,45 @@
     .tscan-ftr { border-top:1px solid rgba(0,255,65,0.07);margin-top:12px;padding-top:8px;font-size:7px;letter-spacing:1.5px;color:rgba(0,255,65,0.22); }
     @media(max-width:600px){ .tscan-grid{ grid-template-columns:1fr; } }
 
+    /* Command strip */
+    #cmd-bar {
+      flex-shrink:0;display:flex;align-items:center;gap:6px;
+      padding:7px 18px;overflow-x:auto;scrollbar-width:none;
+      border-top:1px solid rgba(0,255,65,0.06);
+      background:rgba(3,12,21,0.6);
+    }
+    #cmd-bar::-webkit-scrollbar { display:none; }
+    .cmd-chip {
+      flex-shrink:0;background:transparent;
+      border:1px solid rgba(0,255,65,0.14);
+      color:rgba(0,255,65,0.42);
+      font-family:inherit;font-size:9px;letter-spacing:2px;
+      padding:5px 11px;cursor:pointer;transition:all 0.15s;white-space:nowrap;
+    }
+    .cmd-chip:hover,.cmd-chip:active {
+      border-color:rgba(0,255,65,0.42);color:var(--green);background:rgba(0,255,65,0.05);
+    }
+    .cmd-chip-scan {
+      border-color:rgba(0,212,255,0.28);color:rgba(0,212,255,0.6);
+      font-weight:bold;letter-spacing:2.5px;
+    }
+    .cmd-chip-scan:hover,.cmd-chip-scan:active {
+      border-color:var(--cyan);color:var(--cyan);background:rgba(0,212,255,0.06);
+      box-shadow:0 0 10px rgba(0,212,255,0.1);
+    }
+
+    /* Paste-to-scan hint bar */
+    #scan-hint {
+      display:none;flex-shrink:0;align-items:center;justify-content:space-between;
+      padding:7px 18px;background:rgba(0,212,255,0.04);
+      border-top:1px solid rgba(0,212,255,0.15);
+      font-size:10px;letter-spacing:2px;color:rgba(0,212,255,0.7);
+      cursor:pointer;transition:background 0.15s;
+    }
+    #scan-hint.on { display:flex; }
+    #scan-hint:hover { background:rgba(0,212,255,0.08); }
+    #scan-hint-addr { opacity:0.55;font-size:9px;letter-spacing:1px; }
+
     /* ── MAIN UI ───────────────────────────────────── */
     #ui { position:fixed;inset:0;z-index:10;display:flex;flex-direction:column;opacity:0;transition:opacity 0.8s; }
     #ui.on { opacity:1; }
@@ -634,6 +673,19 @@
 
   <div id="chat-feed"></div>
   <div id="limit-banner">DAILY TRANSMISSIONS EXHAUSTED — SIGNAL RESETS AT MIDNIGHT UTC</div>
+
+  <div id="cmd-bar">
+    <button class="cmd-chip cmd-chip-scan" onclick="quickCmd('/scan')" title="Scan any token contract address">⬡ SCAN TOKEN</button>
+    <button class="cmd-chip" onclick="quickCmd('/status')">/status</button>
+    <button class="cmd-chip" onclick="quickCmd('/freq')">/freq</button>
+    <button class="cmd-chip" onclick="quickCmd('/debrief')">/debrief</button>
+    <button class="cmd-chip" onclick="quickCmd('/nvg')">/nvg</button>
+    <button class="cmd-chip" onclick="quickCmd('/who')">/who</button>
+    <button class="cmd-chip" onclick="quickCmd('/clear')">/clear</button>
+    <button class="cmd-chip" onclick="quickCmd('/mute')">/mute</button>
+  </div>
+
+  <div id="scan-hint" onclick="confirmScanHint()"></div>
 
   <div id="input-area">
     <span id="input-pfx">&gt;&nbsp;HERO:&nbsp;</span>
@@ -1266,13 +1318,62 @@ async function sendMsg(){
   if(getRemaining()>0){inputEl.disabled=false;inputEl.focus();}
 }
 
+// ── Quick commands + paste detection ─────────────────────────────
+var scanHintEl=document.getElementById('scan-hint');
+var _pendingScanAddr=null;
+
+function quickCmd(cmd){
+  if(cmd==='/scan'){
+    inputEl.value='/scan ';
+    inputEl.focus();
+    eqEl.classList.add('on');
+  } else {
+    handleCommand(cmd);
+  }
+}
+
+function looksLikeCA(str){
+  // Ethereum (0x…, 40 hex chars) or Solana (base58, 32-44 chars)
+  return /^0x[0-9a-fA-F]{40}$/.test(str) || (/^[1-9A-HJ-NP-Za-km-z]{32,44}$/.test(str) && str.length>=32);
+}
+
+function showScanHint(addr){
+  _pendingScanAddr=addr;
+  scanHintEl.innerHTML='⬡ CONTRACT DETECTED — <span style="color:var(--cyan);margin:0 10px">TAP TO SCAN</span> <span id="scan-hint-addr">'+addr.slice(0,12)+'...'+addr.slice(-8)+'</span>';
+  scanHintEl.classList.add('on');
+}
+function hideScanHint(){
+  scanHintEl.classList.remove('on');
+  _pendingScanAddr=null;
+}
+function confirmScanHint(){
+  if(_pendingScanAddr){
+    var addr=_pendingScanAddr;
+    hideScanHint();
+    inputEl.value='';eqEl.classList.remove('on');
+    runScan(addr);
+  }
+}
+
 // ── Input events ──────────────────────────────────────────────────
 var inputArea=document.getElementById('input-area'),inputBox=document.getElementById('input-box');
 inputEl.addEventListener('focus',function(){inputArea.classList.add('hot');inputBox.classList.add('hot');});
 inputEl.addEventListener('blur',function(){inputArea.classList.remove('hot');inputBox.classList.remove('hot');});
-inputEl.addEventListener('input',function(){eqEl.classList.toggle('on',inputEl.value.length>0);});
-inputEl.addEventListener('keydown',function(e){if(e.key==='Enter'){e.preventDefault();sendMsg();}});
-document.addEventListener('keydown',function(e){if(e.key==='Escape')closeHelp();});
+inputEl.addEventListener('input',function(){
+  eqEl.classList.toggle('on',inputEl.value.length>0);
+  // Hide scan hint if user starts typing something else
+  if(_pendingScanAddr&&!inputEl.value.startsWith('/scan'))hideScanHint();
+});
+inputEl.addEventListener('paste',function(e){
+  setTimeout(function(){
+    var val=inputEl.value.trim();
+    if(looksLikeCA(val)){
+      showScanHint(val);
+    }
+  },20);
+});
+inputEl.addEventListener('keydown',function(e){if(e.key==='Enter'){e.preventDefault();hideScanHint();sendMsg();}});
+document.addEventListener('keydown',function(e){if(e.key==='Escape'){closeHelp();hideScanHint();}});
 
 // ── CA ────────────────────────────────────────────────────────────
 var toastT=null;
