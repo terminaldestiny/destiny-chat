@@ -330,7 +330,7 @@
     #help-btn { position:relative;width:30px;height:30px;cursor:pointer;flex-shrink:0; }
     #h-r1 { position:absolute;inset:-3px;border-radius:50%;border:1.5px solid rgba(0,255,65,0.32);border-right-color:transparent;border-bottom-color:transparent;animation:spin-cw 4s linear infinite; }
     #h-r2 { position:absolute;inset:-1px;border-radius:50%;border:1px solid rgba(255,42,0,0.28);border-left-color:transparent;border-top-color:transparent;animation:spin-ccw 6s linear infinite; }
-    #h-core { position:relative;z-index:1;width:28px;height:28px;border:1px solid rgba(0,255,65,0.28);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:bold;color:var(--green);transition:all 0.15s;user-select:none;margin:1px; }
+    #h-core { position:relative;z-index:1;width:28px;height:28px;border:1px solid rgba(0,255,65,0.28);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:15px;color:var(--green);transition:all 0.15s;user-select:none;margin:1px; }
     #help-btn:hover #h-core { background:var(--green);color:#000;box-shadow:0 0 16px var(--green); }
 
     /* ── CHAT FEED ─────────────────────────────────── */
@@ -375,7 +375,22 @@
       font-size:8px;letter-spacing:3px;color:rgba(0,255,65,0.5);
     }
     .codec-label-left { color:rgba(0,255,65,0.55);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:52%; }
-    .codec-label-right { color:rgba(255,42,0,0.5);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:52%; }
+    .codec-label-right { color:rgba(255,42,0,0.5);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:42%; }
+
+    /* Share card button in help overlay */
+    #share-card-btn {
+      width:100%;display:flex;flex-direction:column;gap:4px;align-items:center;
+      padding:16px 14px;margin-bottom:18px;
+      border:1px solid rgba(0,255,65,0.35);border-top:2px solid var(--green);
+      background:rgba(0,255,65,0.04);cursor:pointer;
+      transition:all 0.2s;user-select:none;
+      animation:share-pulse 3s ease-in-out infinite;
+    }
+    @keyframes share-pulse { 0%,100%{box-shadow:0 0 8px rgba(0,255,65,0.07)} 50%{box-shadow:0 0 22px rgba(0,255,65,0.18)} }
+    #share-card-btn:hover { background:rgba(0,255,65,0.1);border-color:var(--green);box-shadow:0 0 28px rgba(0,255,65,0.2); }
+    #share-card-btn:active { background:rgba(0,255,65,0.18); }
+    #share-card-lbl { font-size:12px;letter-spacing:2.5px;font-weight:bold;color:var(--green);text-shadow:0 0 8px rgba(0,255,65,0.5); }
+    #share-card-desc { font-size:9px;letter-spacing:1.5px;color:rgba(0,255,65,0.4); }
 
     /* Portrait column */
     .codec-portrait-col {
@@ -593,19 +608,62 @@
     @keyframes eq-alt { from{height:3px} to{height:20px} }
 
     #send-btn {
-      width:38px;height:38px;flex-shrink:0;
-      clip-path:polygon(50% 0%,100% 25%,100% 75%,50% 100%,0% 75%,0% 25%);
-      background:rgba(0,255,65,0.06);display:flex;align-items:center;justify-content:center;
-      color:var(--green);font-size:15px;cursor:pointer;user-select:none;position:relative;
-      animation:send-pulse 2.5s ease-in-out infinite;transition:all 0.2s;
+      flex-shrink:0;height:40px;padding:0 16px;
+      border:1px solid rgba(0,255,65,0.32);
+      background:rgba(0,255,65,0.05);
+      display:flex;align-items:center;justify-content:center;gap:8px;
+      color:var(--green);cursor:pointer;user-select:none;position:relative;overflow:hidden;
+      transition:all 0.18s;
+      animation:send-pulse 2.5s ease-in-out infinite;
     }
     #send-btn::before {
-      content:'';position:absolute;inset:0;
-      clip-path:polygon(50% 0%,100% 25%,100% 75%,50% 100%,0% 75%,0% 25%);
-      border:1px solid rgba(0,255,65,0.32);pointer-events:none;
+      content:'';position:absolute;top:0;left:-100%;width:60%;height:100%;
+      background:linear-gradient(90deg,transparent,rgba(0,255,65,0.07),transparent);
+      animation:send-sh 3s ease-in-out infinite;
     }
-    #send-btn:hover { background:rgba(0,255,65,0.16);filter:drop-shadow(0 0 10px var(--green)); }
-    @keyframes send-pulse { 0%,100%{filter:drop-shadow(0 0 4px rgba(0,255,65,0.18))} 50%{filter:drop-shadow(0 0 12px rgba(0,255,65,0.48))} }
+    @keyframes send-sh { 0%{left:-100%} 100%{left:200%} }
+    #send-btn:hover { background:rgba(0,255,65,0.14);border-color:var(--green);box-shadow:0 0 18px rgba(0,255,65,0.22); }
+    #send-btn:active { background:rgba(0,255,65,0.22); }
+    #send-icon { font-size:13px;line-height:1; }
+    #send-lbl { font-size:9px;letter-spacing:2.5px;font-weight:bold; }
+    @keyframes send-pulse { 0%,100%{box-shadow:0 0 6px rgba(0,255,65,0.1)} 50%{box-shadow:0 0 16px rgba(0,255,65,0.3)} }
+
+    /* ── IMAGE ATTACH (operative-only) ────────────── */
+    #attach-btn {
+      display:none;flex-shrink:0;height:40px;padding:0 11px;
+      border:1px solid rgba(255,170,0,0.28);color:rgba(255,170,0,0.65);
+      background:transparent;align-items:center;justify-content:center;
+      font-size:9px;letter-spacing:2px;cursor:pointer;
+      transition:all 0.15s;user-select:none;
+    }
+    #attach-btn.on { display:flex; }
+    #attach-btn:hover { border-color:var(--amber);color:var(--amber);background:rgba(255,170,0,0.07); }
+    #img-preview {
+      display:none;flex-shrink:0;align-items:center;gap:12px;
+      padding:7px 18px;background:rgba(255,170,0,0.04);
+      border-top:1px solid rgba(255,170,0,0.18);
+    }
+    #img-preview.on { display:flex; }
+    #img-thumb { width:44px;height:44px;object-fit:cover;border:1px solid rgba(255,170,0,0.3);filter:brightness(0.85);flex-shrink:0; }
+    #img-label { flex:1;font-size:9px;letter-spacing:1.5px;color:rgba(255,170,0,0.65); }
+    #img-clear { font-size:9px;letter-spacing:1.5px;color:rgba(255,42,0,0.5);cursor:pointer;padding:4px 8px;border:1px solid rgba(255,42,0,0.2);transition:all 0.15s;flex-shrink:0;user-select:none; }
+    #img-clear:hover { color:var(--red);border-color:var(--red); }
+    .hero-img { max-width:240px;max-height:160px;object-fit:contain;border:1px solid rgba(0,212,255,0.2);margin-bottom:7px;display:block;margin-left:auto;filter:brightness(0.9); }
+
+    /* Help nav buttons */
+    #help-nav { display:flex;gap:10px;margin-top:20px;border-top:1px solid rgba(0,255,65,0.1);padding-top:16px; }
+    .help-nav-btn {
+      flex:1;text-decoration:none;display:flex;flex-direction:column;gap:4px;
+      padding:13px 14px;border:1px solid rgba(0,212,255,0.28);
+      background:rgba(0,212,255,0.04);
+      transition:all 0.2s;
+    }
+    .help-nav-btn:hover {
+      border-color:var(--cyan);background:rgba(0,212,255,0.09);
+      box-shadow:0 0 18px rgba(0,212,255,0.12);
+    }
+    .help-nav-lbl { font-size:11px;letter-spacing:2.5px;font-weight:bold;color:var(--cyan); }
+    .help-nav-desc { font-size:9px;letter-spacing:1px;color:rgba(0,212,255,0.45); }
 
     /* CA */
     #ca-badge { position:fixed;bottom:72px;right:14px;font-size:9px;text-align:right;cursor:pointer;z-index:50;user-select:none;line-height:1.6; }
@@ -660,7 +718,8 @@
       #input-area { height:56px; padding:0 10px; }
       #chat-input { font-size:16px; } /* prevent iOS auto-zoom */
       #input-pfx { font-size:11px; letter-spacing:1px; }
-      #send-btn { width:42px; height:42px; }
+      #send-btn { height:42px; padding:0 12px; }
+      #send-lbl { display:none; }
 
       /* ── Cmd bar ── */
       #cmd-bar { padding:6px 10px; gap:6px; }
@@ -681,6 +740,23 @@
       #bg-edge { animation:none; }
       #bg-scanlines { display:none; }
       .codec-wave span { animation:none; }
+
+      /* ── Help overlay ── */
+      #share-card-btn { padding:12px 10px; }
+      #share-card-lbl { font-size:11px; letter-spacing:2px; }
+      #share-card-desc { font-size:8px; }
+      #help-nav { gap:8px; }
+      .help-nav-btn { padding:10px 10px; }
+      .help-nav-lbl { font-size:10px; letter-spacing:1.5px; }
+      .help-nav-desc { font-size:8px; letter-spacing:0.5px; }
+
+      /* ── Image attach ── */
+      #attach-btn { height:40px; padding:0 9px; font-size:8px; letter-spacing:1.5px; }
+      #img-preview { padding:6px 10px; gap:8px; }
+      #img-thumb { width:36px; height:36px; }
+      #img-label { font-size:8px; letter-spacing:0.8px; }
+      #img-clear { font-size:8px; padding:4px 6px; }
+      .hero-img { max-width:180px; max-height:120px; }
 
       /* ── CA / misc ── */
       #ca-badge { display:none; }
@@ -740,7 +816,7 @@
       <div id="help-btn" onclick="openHelp()">
         <div id="h-r1"></div>
         <div id="h-r2"></div>
-        <div id="h-core">?</div>
+        <div id="h-core">☰</div>
       </div>
     </div>
   </div>
@@ -758,14 +834,25 @@
 
   <div id="scan-hint" onclick="confirmScanHint()"></div>
 
+  <div id="img-preview">
+    <img id="img-thumb" src="" alt=""/>
+    <span id="img-label">IMAGE ATTACHED</span>
+    <div id="img-clear" onclick="clearPendingImage()">✕ REMOVE</div>
+  </div>
+
   <div id="input-area">
     <span id="input-pfx">&gt;&nbsp;HERO:&nbsp;</span>
     <div id="input-box">
       <input id="chat-input" type="text" placeholder="enter transmission..."
         autocomplete="off" spellcheck="false" maxlength="500"/>
     </div>
+    <input id="file-pick" type="file" accept="image/*" style="display:none">
+    <div id="attach-btn" onclick="document.getElementById('file-pick').click()">⬡ IMG</div>
     <div id="eq"><span></span><span></span><span></span><span></span><span></span></div>
-    <div id="send-btn" onclick="sendMsg()">&#9654;</div>
+    <div id="send-btn" onclick="sendMsg()">
+      <span id="send-icon">&#9654;</span>
+      <span id="send-lbl">SEND</span>
+    </div>
   </div>
 </div>
 
@@ -780,12 +867,26 @@
 <div id="help-ovl" onclick="handleOvl(event)">
   <div id="help-box">
     <h2>// WHAT DESTINY CAN HELP WITH</h2>
+    <div id="share-card-btn" onclick="closeHelp();shareOperativeCard();">
+      <span id="share-card-lbl">⬡ SHARE YOUR OPERATIVE CARD</span>
+      <span id="share-card-desc">Generate your terminal ID · share to X</span>
+    </div>
     <div class="ht"><div class="ht-n">→ AI &amp; Building</div><div class="ht-d">Claude Code, Cursor, v0, Bolt — tools first, always. Ask her what to use.</div></div>
     <div class="ht"><div class="ht-n">→ Crypto &amp; DeFi</div><div class="ht-d">Wallets, tokens, on-chain analysis, $DESTINY ecosystem, token safety</div></div>
     <div class="ht"><div class="ht-n">→ Coding &amp; Shipping</div><div class="ht-d">Debugging, stack choices, architecture, moving fast with AI</div></div>
     <div class="ht"><div class="ht-n">→ Web3 Projects</div><div class="ht-d">Smart contracts, NFTs, DApps, tokenomics, launch strategy</div></div>
     <div class="ht"><div class="ht-n">→ Unlock Sonnet 4.6</div><div class="ht-d">Hold 500,000+ $DESTINY · connect Phantom or Backpack · verify on-chain</div></div>
     <div class="ht"><div class="ht-n">→ Terminal Commands</div><div class="ht-d">/scan /status /freq /who /nvg /clear /debrief /mute · type /help in chat</div></div>
+    <div id="help-nav">
+      <a href="#" class="help-nav-btn">
+        <span class="help-nav-lbl">⬡ WORLD</span>
+        <span class="help-nav-desc">Enter the 3D terminal world</span>
+      </a>
+      <a href="#" class="help-nav-btn">
+        <span class="help-nav-lbl">⬡ DREAM OS</span>
+        <span class="help-nav-desc">Terminal operating system</span>
+      </a>
+    </div>
     <div id="help-close" onclick="closeHelp()">[ CLOSE TRANSMISSION ]</div>
   </div>
 </div>
@@ -812,17 +913,20 @@ function applyTierUI(tier,balance){
   var mBtn=document.getElementById('model-toggle-btn');
   var dBtn=document.getElementById('disconnect-btn');
   dBtn.style.display='inline-flex';
+  var aBtn=document.getElementById('attach-btn');
   if(tier==='operative'){
     badge.textContent='OPERATIVE';badge.style.display='inline-block';
     wBtn.textContent='⬡ VERIFIED';wBtn.classList.add('verified');
     mBtn.textContent='⬡ SONNET';
     mBtn.style.borderColor='rgba(0,212,255,0.6)';mBtn.style.color='var(--cyan)';
     ACTIVE_MODEL='sonnet';
+    aBtn.classList.add('on');
   } else {
     badge.style.display='none';
     wBtn.textContent='⬡ RECRUIT';wBtn.classList.remove('verified');
     mBtn.textContent='⬡ SONNET 🔒';mBtn.style.borderColor='';mBtn.style.color='';
     ACTIVE_MODEL='haiku';
+    aBtn.classList.remove('on');clearPendingImage();
   }
 }
 
@@ -921,6 +1025,176 @@ async function connectWallet(){
   }
 })();
 
+// ── Operative Card ────────────────────────────────────────────────
+function shareOperativeCard(){
+  addCmd(['// GENERATING OPERATIVE CARD...']);
+  var portrait=new Image();
+  portrait.onload=function(){_renderCard(portrait);};
+  portrait.onerror=function(){_renderCard(null);};
+  portrait.src='destiny.png';
+}
+
+function _renderCard(portrait){
+  var W=1080,H=1080;
+  var cvs=document.createElement('canvas');
+  cvs.width=W;cvs.height=H;
+  var ctx=cvs.getContext('2d');
+
+  var tier=getTier(),sess=getSession();
+  var bal=sess?sess.balance:0,wallet=sess?sess.wallet:'';
+  var isOp=tier==='operative';
+
+  // ── Background
+  ctx.fillStyle='#030c15';ctx.fillRect(0,0,W,H);
+
+  // ── Grid
+  ctx.strokeStyle='rgba(0,255,65,0.022)';ctx.lineWidth=1;
+  for(var gx=0;gx<W;gx+=48){ctx.beginPath();ctx.moveTo(gx,0);ctx.lineTo(gx,H);ctx.stroke();}
+  for(var gy=0;gy<H;gy+=48){ctx.beginPath();ctx.moveTo(0,gy);ctx.lineTo(W,gy);ctx.stroke();}
+
+  // ── Red energy streaks
+  [[-200,180,520,-20],[700,50,1180,260],[-50,820,580,640],[900,700,1200,900]].forEach(function(s){
+    var gr=ctx.createLinearGradient(s[0],s[1],s[2],s[3]);
+    gr.addColorStop(0,'transparent');gr.addColorStop(0.5,'rgba(255,42,0,0.16)');gr.addColorStop(1,'transparent');
+    ctx.strokeStyle=gr;ctx.lineWidth=1.5;
+    ctx.beginPath();ctx.moveTo(s[0],s[1]);ctx.lineTo(s[2],s[3]);ctx.stroke();
+  });
+
+  // ── Vignette
+  var vig=ctx.createRadialGradient(W/2,H*0.42,W*0.2,W/2,H*0.42,W*0.72);
+  vig.addColorStop(0,'transparent');vig.addColorStop(1,'rgba(3,12,21,0.78)');
+  ctx.fillStyle=vig;ctx.fillRect(0,0,W,H);
+
+  // ── Top bar
+  ctx.fillStyle='rgba(0,255,65,0.07)';ctx.fillRect(0,0,W,56);
+  ctx.strokeStyle='rgba(0,255,65,0.16)';ctx.lineWidth=1;
+  ctx.beginPath();ctx.moveTo(0,56);ctx.lineTo(W,56);ctx.stroke();
+  ctx.strokeStyle='rgba(255,42,0,0.5)';ctx.lineWidth=2;
+  ctx.beginPath();ctx.moveTo(0,1);ctx.lineTo(W,1);ctx.stroke();
+  ctx.font='11px "Courier New"';
+  ctx.fillStyle='rgba(0,255,65,0.55)';ctx.textAlign='left';
+  ctx.fillText('DESTINY  FIELD  TERMINAL  v2.1',26,35);
+  ctx.fillStyle='rgba(255,42,0,0.6)';ctx.textAlign='right';
+  ctx.fillText('CODEC  140.85',W-26,35);
+  ctx.textAlign='left';
+
+  // ── Portrait hex
+  var px=W/2,py=340,pr=210;
+  function hexPath(){
+    ctx.beginPath();
+    ctx.moveTo(px,py-pr);ctx.lineTo(px+pr,py-pr*0.5);
+    ctx.lineTo(px+pr,py+pr*0.5);ctx.lineTo(px,py+pr);
+    ctx.lineTo(px-pr,py+pr*0.5);ctx.lineTo(px-pr,py-pr*0.5);
+    ctx.closePath();
+  }
+
+  // Outer glow ring
+  ctx.save();hexPath();
+  ctx.strokeStyle='rgba(0,255,65,0.18)';ctx.lineWidth=3;
+  ctx.shadowColor='#00ff41';ctx.shadowBlur=28;ctx.stroke();
+  ctx.shadowBlur=0;ctx.restore();
+
+  // Second ring (red accent)
+  ctx.save();
+  ctx.beginPath();
+  ctx.moveTo(px,py-pr-14);ctx.lineTo(px+pr+14,py-(pr+14)*0.5);
+  ctx.lineTo(px+pr+14,py+(pr+14)*0.5);ctx.lineTo(px,py+pr+14);
+  ctx.lineTo(px-pr-14,py+(pr+14)*0.5);ctx.lineTo(px-pr-14,py-(pr+14)*0.5);
+  ctx.closePath();
+  ctx.strokeStyle='rgba(255,42,0,0.2)';ctx.lineWidth=1;ctx.stroke();
+  ctx.restore();
+
+  // Portrait image
+  if(portrait){
+    ctx.save();hexPath();ctx.clip();
+    var scale=Math.max(pr*2/portrait.naturalWidth,pr*2/portrait.naturalHeight)*2.2;
+    var dw=portrait.naturalWidth*scale,dh=portrait.naturalHeight*scale;
+    var dx=px-dw*0.5,dy=py-pr-dh*0.12;
+    ctx.filter='saturate(0.8) brightness(0.88)';
+    ctx.drawImage(portrait,dx,dy,dw,dh);
+    ctx.filter='none';
+    // Scanlines
+    for(var sl=py-pr;sl<py+pr;sl+=3){ctx.fillStyle='rgba(0,0,0,0.1)';ctx.fillRect(px-pr-2,sl,pr*2+4,1.5);}
+    ctx.restore();
+  }
+
+  // Portrait border
+  ctx.save();hexPath();
+  ctx.strokeStyle='rgba(0,255,65,0.5)';ctx.lineWidth=2;
+  ctx.shadowColor='#00ff41';ctx.shadowBlur=18;ctx.stroke();
+  ctx.shadowBlur=0;ctx.restore();
+
+  // ── Tier badge
+  ctx.textAlign='center';
+  ctx.font='12px "Courier New"';
+  var tierLabel=isOp?'⬡  OPERATIVE':'⬡  RECRUIT';
+  ctx.fillStyle=isOp?'rgba(0,212,255,0.9)':'rgba(0,255,65,0.6)';
+  if(isOp){ctx.shadowColor='rgba(0,212,255,0.6)';ctx.shadowBlur=10;}
+  ctx.fillText(tierLabel,W/2,610);
+  ctx.shadowBlur=0;
+
+  // ── Callsign (big, glowing)
+  var cs=CALLSIGN||'OPERATIVE';
+  var csSize=90;
+  ctx.font='bold '+csSize+'px "Courier New"';
+  while(ctx.measureText(cs).width>W-80&&csSize>32){csSize-=4;ctx.font='bold '+csSize+'px "Courier New"';}
+  ctx.fillStyle='#00ff41';
+  ctx.shadowColor='#00ff41';ctx.shadowBlur=30;ctx.fillText(cs,W/2,700);
+  ctx.shadowBlur=12;ctx.fillText(cs,W/2,700);
+  ctx.shadowBlur=0;
+
+  // ── Divider
+  ctx.strokeStyle='rgba(0,255,65,0.14)';ctx.lineWidth=1;
+  ctx.beginPath();ctx.moveTo(80,730);ctx.lineTo(W-80,730);ctx.stroke();
+  ctx.strokeStyle='rgba(255,42,0,0.12)';
+  ctx.beginPath();ctx.moveTo(80,732);ctx.lineTo(W-80,732);ctx.stroke();
+
+  // ── Stats
+  ctx.font='13px "Courier New"';
+  if(isOp&&bal>0){
+    ctx.fillStyle='rgba(0,212,255,0.75)';ctx.shadowColor='rgba(0,212,255,0.4)';ctx.shadowBlur=8;
+    ctx.fillText(bal.toLocaleString()+' $DESTINY HELD',W/2,778);ctx.shadowBlur=0;
+    ctx.font='10px "Courier New"';ctx.fillStyle='rgba(0,255,65,0.38)';
+    ctx.fillText('SONNET 4.6 UNLOCKED  ·  SIGNAL LOCK CONFIRMED',W/2,808);
+  } else {
+    ctx.fillStyle='rgba(0,255,65,0.45)';
+    ctx.fillText('HOLD 500,000+ $DESTINY TO UNLOCK SONNET',W/2,778);
+    ctx.font='10px "Courier New"';ctx.fillStyle='rgba(0,255,65,0.28)';
+    ctx.fillText('CONNECT WALLET  ·  VERIFY ON-CHAIN',W/2,806);
+  }
+  if(isOp&&wallet){
+    ctx.font='9px "Courier New"';ctx.fillStyle='rgba(0,255,65,0.18)';
+    ctx.fillText(wallet.slice(0,8)+'...'+wallet.slice(-4),W/2,836);
+  }
+
+  // ── Bottom bar
+  ctx.fillStyle='rgba(0,255,65,0.05)';ctx.fillRect(0,H-60,W,60);
+  ctx.strokeStyle='rgba(0,255,65,0.1)';ctx.lineWidth=1;
+  ctx.beginPath();ctx.moveTo(0,H-60);ctx.lineTo(W,H-60);ctx.stroke();
+  ctx.strokeStyle='rgba(255,42,0,0.35)';ctx.lineWidth=2;
+  ctx.beginPath();ctx.moveTo(0,H-1);ctx.lineTo(W,H-1);ctx.stroke();
+  ctx.font='11px "Courier New"';ctx.fillStyle='rgba(0,255,65,0.4)';
+  ctx.fillText('terminaldestiny.com',W/2,H-21);
+
+  // Outer border
+  ctx.strokeStyle='rgba(0,255,65,0.2)';ctx.lineWidth=1.5;ctx.strokeRect(1,1,W-2,H-2);
+
+  // ── Export
+  cvs.toBlob(function(blob){
+    var fname='destiny-operative-'+(cs.toLowerCase().replace(/\s+/g,'-'))+'.png';
+    var file=new File([blob],fname,{type:'image/png'});
+    if(navigator.canShare&&navigator.canShare({files:[file]})){
+      navigator.share({files:[file],title:'DESTINY // '+cs,text:'Signal locked. terminaldestiny.com'}).catch(function(){});
+    } else {
+      var url=URL.createObjectURL(blob);
+      var a=document.createElement('a');a.href=url;a.download=fname;
+      document.body.appendChild(a);a.click();a.remove();
+      setTimeout(function(){URL.revokeObjectURL(url);},1000);
+    }
+    addCmd(['// OPERATIVE CARD READY']);
+  },'image/png');
+}
+
 // ── Boot ──────────────────────────────────────────────────────────
 var bootEl=document.getElementById('boot'),uiEl=document.getElementById('ui'),inputEl=document.getElementById('chat-input');
 var BOOT=[
@@ -986,10 +1260,9 @@ function finishBoot(){
     var existingSession=getSession();
     if(existingSession)applyTierUI(existingSession.tier,existingSession.balance);
     setTimeout(function(){
-      var hadHistory=loadChatHistory();
-      if(!hadHistory){
-        addDestiny("You found me. Good. Ask me anything — AI, crypto, code, building. Let's make you dangerous.",true);
-      }
+      addDestiny("You found me. Good. Ask me anything — AI, crypto, code, building. Let's make you dangerous.",true).then(function(){
+        loadChatHistory();
+      });
     },900);
     setTimeout(function(){if(getRemaining()>0)inputEl.focus();},600);
   },500);
@@ -1071,7 +1344,7 @@ function addSys(text){
   w.appendChild(sw);feed.appendChild(w);feed.scrollTop=feed.scrollHeight;
 }
 
-function addHero(text){
+function addHero(text,imgUrl){
   var w=document.createElement('div');w.className='msg';
   var hw=document.createElement('div');hw.className='hero-wrap';
   var bar=document.createElement('div');bar.className='hero-bar';
@@ -1080,8 +1353,10 @@ function addHero(text){
   var ts_=document.createElement('span');ts_.className='hero-ts';ts_.textContent=ts();
   var name=document.createElement('span');name.className='hero-name';name.textContent=CALLSIGN||'HERO';
   head.appendChild(ts_);head.appendChild(name);
+  body.appendChild(head);
+  if(imgUrl){var thumb=document.createElement('img');thumb.className='hero-img';thumb.src=imgUrl;thumb.alt='';body.appendChild(thumb);}
   var txt=document.createElement('div');txt.className='hero-text';txt.textContent=text;
-  body.appendChild(head);body.appendChild(txt);
+  body.appendChild(txt);
   hw.appendChild(bar);hw.appendChild(body);w.appendChild(hw);
   feed.appendChild(w);feed.scrollTop=feed.scrollHeight;
 }
@@ -1481,22 +1756,74 @@ async function runDebrief(){
   if(getRemaining()>0){inputEl.disabled=false;inputEl.focus();}
 }
 
+// ── Image attach (operative-only) ────────────────────────────────
+var pendingImage=null;
+
+function attachImageBlob(blob){
+  var reader=new FileReader();
+  reader.onload=function(e){
+    var img=new Image();
+    img.onload=function(){
+      var MAX=1024,w=img.width,h=img.height;
+      if(w>MAX||h>MAX){if(w>h){h=Math.round(h*MAX/w);w=MAX;}else{w=Math.round(w*MAX/h);h=MAX;}}
+      var cvs=document.createElement('canvas');cvs.width=w;cvs.height=h;
+      cvs.getContext('2d').drawImage(img,0,0,w,h);
+      var dataUrl=cvs.toDataURL('image/jpeg',0.82);
+      pendingImage={base64:dataUrl.split(',')[1],dataUrl:dataUrl};
+      document.getElementById('img-thumb').src=dataUrl;
+      document.getElementById('img-label').textContent='⬡ IMAGE ATTACHED  ·  '+w+'×'+h+'  ·  READY TO TRANSMIT';
+      document.getElementById('img-preview').classList.add('on');
+      inputEl.focus();
+    };
+    img.src=e.target.result;
+  };
+  reader.readAsDataURL(blob);
+}
+
+function clearPendingImage(){
+  pendingImage=null;
+  document.getElementById('img-preview').classList.remove('on');
+  document.getElementById('img-thumb').src='';
+  document.getElementById('file-pick').value='';
+}
+
+document.getElementById('file-pick').addEventListener('change',function(e){
+  if(e.target.files&&e.target.files[0])attachImageBlob(e.target.files[0]);
+});
+
+document.addEventListener('paste',function(e){
+  if(getTier()!=='operative')return;
+  var items=(e.clipboardData||{}).items||[];
+  for(var i=0;i<items.length;i++){
+    if(items[i].kind==='file'&&items[i].type.indexOf('image')!==-1){
+      attachImageBlob(items[i].getAsFile());
+      e.preventDefault();break;
+    }
+  }
+});
+
 // ── Send ──────────────────────────────────────────────────────────
 async function sendMsg(){
   var text=inputEl.value.trim();
-  if(!text)return;
+  if(!text&&!pendingImage)return;
+  if(!text)text='Analyze this image.';
   inputEl.value='';eqEl.classList.remove('on');
   if(text.startsWith('/')){handleCommand(text);return;}
   if(sending||getRemaining()<=0)return;
   playSound('tx-send');
   inputEl.disabled=true;sending=true;
-  addHero(text);pushHist('user',text);showThink();
+  var imgDataUrl=pendingImage?pendingImage.dataUrl:null;
+  var imgBase64=pendingImage?pendingImage.base64:null;
+  clearPendingImage();
+  addHero(text,imgDataUrl);pushHist('user',text);showThink();
   // Detect expired session before sending
   var _sess=JSON.parse(localStorage.getItem('destiny_session')||'null');
   if(_sess&&_sess.expires<=Date.now()){disconnectWallet();addCmd(['// SESSION EXPIRED · RECONNECT WALLET TO RESTORE SONNET ACCESS']);}
 
   try{
-    var res=await fetch(BACKEND+'/api/chat',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({visitorId:getVid(),model:ACTIVE_MODEL,sessionToken:getSessionToken(),message:text,history:getHistForAPI()})});
+    var reqBody={visitorId:getVid(),model:ACTIVE_MODEL,sessionToken:getSessionToken(),message:text,history:getHistForAPI()};
+    if(imgBase64)reqBody.image=imgBase64;
+    var res=await fetch(BACKEND+'/api/chat',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(reqBody)});
     hideThink();avCore.className='speaking';scanLine();
     var reply,modelUsed;
     if(res.status===429){reply='Signal exhausted. Return tomorrow, '+(CALLSIGN||'hero')+'.';incUsage();updateHUD();await addDestiny(reply,true);}
@@ -1536,6 +1863,8 @@ function disconnectWallet(){
   wBtn.textContent='⬡ CONNECT';wBtn.classList.remove('verified');wBtn.disabled=false;
   mBtn.textContent='⬡ SONNET 🔒';mBtn.style.borderColor='';mBtn.style.color='';
   dBtn.style.display='none';
+  document.getElementById('attach-btn').classList.remove('on');
+  clearPendingImage();
   addCmd(['// WALLET DISCONNECTED · SESSION CLEARED']);
 }
 function quickCmd(cmd){

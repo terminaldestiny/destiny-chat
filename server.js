@@ -24,7 +24,7 @@ app.use(cors({
     }
   }
 }));
-app.use(express.json({ limit: '50kb' }));
+app.use(express.json({ limit: '6mb' }));
 
 var client = new Anthropic.default({ apiKey: process.env.ANTHROPIC_API_KEY });
 
@@ -232,6 +232,15 @@ app.post('/api/chat', function(req, res) {
 
   var remaining = getChatRemaining(limitKey, dailyLimit);
 
+  // Vision image — operative-only, max ~4MB base64
+  var imageSource = null;
+  if (body.image && tier === 'operative') {
+    var b64 = (body.image || '').toString();
+    if (b64.length > 0 && b64.length <= 5500000) {
+      imageSource = { type: 'base64', media_type: 'image/jpeg', data: b64 };
+    }
+  }
+
   var messages = rawHistory
     .filter(function(m) {
       return m && (m.role === 'user' || m.role === 'assistant') && typeof m.content === 'string';
@@ -239,8 +248,15 @@ app.post('/api/chat', function(req, res) {
     .map(function(m) { return { role: m.role, content: m.content.slice(0, 2000) }; })
     .slice(-20);
 
-  if (!messages.length || messages[messages.length - 1].role !== 'user') {
-    messages.push({ role: 'user', content: message });
+  // Build the current user turn — vision content block if image attached
+  var currentContent = imageSource
+    ? [{ type: 'image', source: imageSource }, { type: 'text', text: message || 'Analyze this image.' }]
+    : message;
+
+  if (messages.length && messages[messages.length - 1].role === 'user') {
+    if (imageSource) messages[messages.length - 1] = { role: 'user', content: currentContent };
+  } else {
+    messages.push({ role: 'user', content: currentContent });
   }
 
   var ALLOWED_MODELS = { sonnet: 'claude-sonnet-4-6', haiku: 'claude-haiku-4-5-20251001' };
