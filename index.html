@@ -1654,7 +1654,7 @@ async function runScan(addr){
     var summary='TOKEN: '+pdata.name+' ('+pdata.sym+')\nPRICE: '+pdata.price+(chg!==null?' ('+chg+'% 24h)':'')+'\nLIQUIDITY: '+pdata.liq+'\n24H VOLUME: '+pdata.vol24+'\nMKT CAP: '+pdata.mcap+'\nAGE: '+pdata.age+'\nDEX: '+pdata.dex+' on '+pdata.chain+'\nBUYS/SELLS 24h: '+pdata.buys+'/'+pdata.sells;
     var isSelf=(addr.trim()===CA);
     var scanPrompt=isSelf
-      ?'This is $DESTINY — my own token, the access token for the DreamOS/terminaldestiny.com ecosystem. Read the on-chain data honestly and acknowledge where the metrics are thin, but give the real context: this is an early-stage utility token for a small dedicated community, not a typical meme launch. Explain what these numbers actually mean at this stage — what\'s expected, what a holder should actually watch, and what the token is for. Honest, grounded, not defensive, not a roast.\n\n'+summary
+      ?'Someone just scanned $DESTINY — the token that powers this ecosystem. Give a 2-sentence read on the data: what the numbers show right now, and what this token actually is. Keep it tight, honest, no hype, no roast.\n\n'+summary
       :'This is a token contract address (CA) on '+pdata.chain+' — not a wallet. Give me a 2-3 sentence risk assessment based on this on-chain data. Call out red flags directly.\n\n'+summary;
     var apiRes=await fetch(BACKEND+'/api/chat',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({visitorId:getVid(),model:ACTIVE_MODEL,sessionToken:getSessionToken(),message:scanPrompt,history:getHistForAPI()})});
     hideThink();avCore.className='speaking';scanLine();
