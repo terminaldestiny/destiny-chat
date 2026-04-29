@@ -936,13 +936,16 @@ function applyTierUI(tier,balance){
   }
 }
 
+var _connecting=false;
 async function connectWallet(){
+  if(_connecting)return;
+  _connecting=true;
   var wBtn=document.getElementById('wallet-btn');
   var provider=window.phantom?.solana||window.backpack?.solana||(window.solana?.isPhantom||window.solana?.isBackpack?window.solana:null);
   if(!provider){
     addCmd(['// NO WALLET DETECTED · OPEN THIS SITE INSIDE PHANTOM OR BACKPACK BROWSER']);
     addCmd(['// PHANTOM: TAP BROWSER TAB → NAVIGATE TO THIS URL']);
-    return;
+    _connecting=false;return;
   }
   wBtn.textContent='⬡ CONNECTING...';wBtn.disabled=true;
   try{
@@ -964,7 +967,7 @@ async function connectWallet(){
 
     if(result.error){
       addCmd(['// VERIFICATION FAILED · '+result.error.toUpperCase()]);
-      wBtn.textContent='⬡ CONNECT';wBtn.disabled=false;return;
+      wBtn.textContent='⬡ CONNECT';wBtn.disabled=false;_connecting=false;return;
     }
 
     saveSession({sessionToken:result.sessionToken,tier:result.tier,balance:result.balance,wallet:wallet,expires:Date.now()+3600000});
@@ -979,7 +982,7 @@ async function connectWallet(){
     addCmd(['// CONNECTION ERROR · '+(e.message||'UNKNOWN').toUpperCase()]);
     wBtn.textContent='⬡ CONNECT';wBtn.disabled=false;
   }
-  wBtn.disabled=false;
+  wBtn.disabled=false;_connecting=false;
 }
 
 // ── Matrix rain ───────────────────────────────────────────────────
@@ -1535,7 +1538,7 @@ var _lastCmd={text:null,el:null,ts:0};
 function addCmd(lines){
   var key=lines[0];
   var now=Date.now();
-  if(_lastCmd.text===key&&_lastCmd.el&&now-_lastCmd.ts<1500){
+  if(_lastCmd.text===key&&_lastCmd.el&&now-_lastCmd.ts<3000){
     _lastCmd.el.classList.remove('cmd-flash');
     void _lastCmd.el.offsetWidth;
     _lastCmd.el.classList.add('cmd-flash');
