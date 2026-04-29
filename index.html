@@ -306,6 +306,8 @@
     #id-sub { display:flex;align-items:center;gap:7px;font-size:9px;letter-spacing:2px;color:rgba(0,255,65,0.42); }
     #id-dot { width:6px;height:6px;background:var(--green);border-radius:50%;animation:dot-blink 2.2s ease-in-out infinite; }
     #id-freq { color:rgba(255,42,0,0.65);letter-spacing:1.5px; }
+    #voice-ind { color:rgba(0,212,255,0.75);letter-spacing:1.5px;animation:voice-pulse 1.8s ease-in-out infinite; }
+    @keyframes voice-pulse { 0%,100%{opacity:0.6} 50%{opacity:1} }
 
     /* HUD right */
     .tb-right { display:flex;align-items:center;gap:18px; }
@@ -815,6 +817,7 @@
           <div id="id-dot"></div>
           <span>FIELD OPERATIVE</span>
           <span id="tier-badge"></span>
+          <span id="voice-ind" style="display:none">◉ VOICE</span>
           <span id="id-clock"></span>
         </div>
       </div>
@@ -1409,7 +1412,7 @@ function addDestiny(text,typewriter,modelTag){
   cc.appendChild(ch);cc.appendChild(ctxt);cw.appendChild(cc);
   w.appendChild(cw);feed.appendChild(w);feed.scrollTop=feed.scrollHeight;
 
-  if(!typewriter){ctxt.textContent=text;ctxt.classList.add('glow-in');return Promise.resolve();}
+  if(!typewriter){ctxt.textContent=text;ctxt.classList.add('glow-in');speakDestiny(text);return Promise.resolve();}
   if(typewriter){
     playSound('codec-open');
     return new Promise(function(resolve){
@@ -1425,6 +1428,7 @@ function addDestiny(text,typewriter,modelTag){
           ctxt.classList.remove('tcur');
           ctxt.classList.add('glow-in','glitching');
           ctxt.style.animationDelay=GDELAYS[Math.floor(Math.random()*GDELAYS.length)];
+          speakDestiny(text);
           resolve();
         }
       },speed);
@@ -1473,6 +1477,37 @@ function scanLine(){
 
 // ── Sound engine ─────────────────────────────────────────────────
 var _actx=null,_muted=false;
+
+// ── Voice (Web Speech API) ────────────────────────────────────────────────
+var _voiceOn=false,_destinyVoice=null,_synth=window.speechSynthesis;
+function _loadVoice(){
+  var voices=_synth.getVoices();
+  if(!voices.length)return;
+  var preferred=['Samantha','Karen','Moira','Fiona','Tessa','Victoria','Allison','Ava','Zira','Susan'];
+  for(var i=0;i<preferred.length;i++){
+    var match=voices.find(function(v){return v.name.indexOf(preferred[i])!==-1;});
+    if(match){_destinyVoice=match;return;}
+  }
+  _destinyVoice=voices.find(function(v){return v.lang.startsWith('en')&&v.name.toLowerCase().indexOf('female')!==-1;})
+              ||voices.find(function(v){return v.lang.startsWith('en-US');})
+              ||voices[0]||null;
+}
+if(_synth){if(_synth.getVoices().length)_loadVoice();else _synth.onvoiceschanged=_loadVoice;}
+function speakDestiny(text){
+  if(!_voiceOn||!_synth||_muted)return;
+  _synth.cancel();
+  var utt=new SpeechSynthesisUtterance(text);
+  if(_destinyVoice)utt.voice=_destinyVoice;
+  utt.rate=0.93;utt.pitch=0.88;utt.volume=0.95;
+  _synth.speak(utt);
+}
+function toggleVoice(){
+  _voiceOn=!_voiceOn;
+  if(!_voiceOn&&_synth)_synth.cancel();
+  var ind=document.getElementById('voice-ind');
+  if(ind)ind.style.display=_voiceOn?'':'none';
+  addCmd([_voiceOn?'// VOICE ONLINE · DESTINY SPEAKING':'// VOICE OFFLINE · SILENT MODE']);
+}
 function _ctx(){
   if(!_actx)_actx=new(window.AudioContext||window.webkitAudioContext)();
   if(_actx.state==='suspended')_actx.resume();
@@ -1737,6 +1772,7 @@ function handleCommand(raw){
         '/clear      wipe feed and memory',
         '/debrief    summarize this mission',
         '/mute       toggle sound on/off',
+        '/voice      toggle DESTINY voice (text-to-speech)',
         '/help       this list',
         '──────────────────────────────',
         '// UNLOCK SONNET 4.6',
@@ -1746,9 +1782,12 @@ function handleCommand(raw){
       ]);break;
     case '/mute':
       _muted=!_muted;
+      if(_muted&&_synth)_synth.cancel();
       addCmd([_muted?'// AUDIO MUTED · SILENT RUNNING':'// AUDIO ONLINE · CODEC FREQUENCIES ACTIVE']);
       if(!_muted)setTimeout(function(){playSound('cmd-blip');},20);
       break;
+    case '/voice':
+      toggleVoice();break;
     case '/debrief':
       runDebrief();break;
     default:
