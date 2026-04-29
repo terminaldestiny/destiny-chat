@@ -141,6 +141,8 @@
     }
     .cmd-bar { width:2px;flex-shrink:0;margin-top:3px;min-height:14px;border-radius:1px;background:rgba(0,255,65,0.35);box-shadow:0 0 5px rgba(0,255,65,0.3); }
     .cmd-text { font-size:11px;letter-spacing:1.5px;color:rgba(0,255,65,0.55);line-height:1.6; }
+    @keyframes cmd-flash-anim { 0%{color:rgba(0,255,65,1);text-shadow:0 0 8px rgba(0,255,65,0.7);} 100%{color:rgba(0,255,65,0.55);text-shadow:none;} }
+    .cmd-flash .cmd-text { animation:cmd-flash-anim 0.5s ease forwards; }
 
     /* Token scan panel */
     .tscan-wrap {
@@ -1529,7 +1531,16 @@ function playSound(type){
 // ── Terminal commands ─────────────────────────────────────────────
 var sending=false,eqEl=document.getElementById('eq');
 
+var _lastCmd={text:null,el:null,ts:0};
 function addCmd(lines){
+  var key=lines[0];
+  var now=Date.now();
+  if(_lastCmd.text===key&&_lastCmd.el&&now-_lastCmd.ts<1500){
+    _lastCmd.el.classList.remove('cmd-flash');
+    void _lastCmd.el.offsetWidth;
+    _lastCmd.el.classList.add('cmd-flash');
+    return;
+  }
   var w=document.createElement('div');w.className='msg';
   var cw=document.createElement('div');cw.className='cmd-wrap';
   var bar=document.createElement('div');bar.className='cmd-bar';
@@ -1541,6 +1552,7 @@ function addCmd(lines){
   cw.appendChild(bar);cw.appendChild(txt);w.appendChild(cw);
   feed.appendChild(w);feed.scrollTop=feed.scrollHeight;
   playSound('cmd-blip');
+  _lastCmd={text:key,el:cw,ts:now};
 }
 
 var STATUS_POOL=[
