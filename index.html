@@ -73,53 +73,56 @@
 
     /* ── BOOT ──────────────────────────────────────── */
     #boot {
-      position:fixed;inset:0;background:#000;z-index:9500;
-      display:flex;flex-direction:column;justify-content:center;
-      padding:40px clamp(24px,8vw,90px);
+      position:fixed;inset:0;background:#000508;z-index:9500;overflow:hidden;
+      display:flex;flex-direction:column;align-items:center;justify-content:center;
+      border-top:2px solid var(--red);
       transition:opacity 1s ease;
     }
     #boot.out { opacity:0;pointer-events:none; }
-    .bl { font-size:12px;letter-spacing:2px;margin-bottom:7px;opacity:0;animation:bl-in 0.12s ease forwards; }
+
+    /* Corner brackets */
+    .bcor { position:absolute;width:16px;height:16px;border-color:rgba(0,255,65,0.22);border-style:solid; }
+    .bcor-tl { top:14px;left:14px;border-width:1px 0 0 1px; }
+    .bcor-tr { top:14px;right:14px;border-width:1px 1px 0 0; }
+    .bcor-bl { bottom:14px;left:14px;border-width:0 0 1px 1px; }
+    .bcor-br { bottom:14px;right:14px;border-width:0 1px 1px 0; }
+
+    /* Wordmark */
+    #boot-logo { text-align:center;margin-bottom:36px; }
+    #boot-logo-name { display:block;font-size:clamp(42px,9vw,80px);font-weight:900;letter-spacing:14px;color:var(--green);text-shadow:0 0 24px var(--green),0 0 70px rgba(0,255,65,0.22);line-height:1; }
+    #boot-logo-sub { display:block;font-size:9px;letter-spacing:4.5px;color:rgba(0,255,65,0.32);margin-top:10px; }
+    #boot-logo-div { width:50px;height:2px;background:linear-gradient(90deg,transparent,var(--red),transparent);margin:12px auto 0; }
+
+    /* Boot lines */
+    #boot-lines { width:min(460px,88vw); }
+    .bl { font-size:11px;letter-spacing:2px;margin-bottom:6px;opacity:0;animation:bl-in 0.12s ease forwards; }
     .bl-dim { color:rgba(0,255,65,0.32); }
     .bl-red { color:var(--red);text-shadow:0 0 10px var(--rg); }
     .bl-acc { color:var(--cyan); }
     .bl-win { color:var(--green);font-weight:bold;text-shadow:0 0 14px var(--green),0 0 30px var(--gg); }
-    @keyframes bl-in { from{opacity:0;transform:translateX(-12px)} to{opacity:1;transform:none} }
-    .boot-bar-wrap {
-      width:260px;height:3px;background:rgba(0,255,65,0.08);
-      border:1px solid rgba(0,255,65,0.18);overflow:hidden;
-      margin:4px 0 10px;opacity:0;animation:bl-in 0.12s ease forwards;
-    }
-    .boot-bar-fill {
-      height:100%;width:0;
-      background:linear-gradient(90deg,var(--red),var(--amber),var(--green));
-      box-shadow:0 0 8px var(--green);
-      animation:bfill 1.6s ease forwards;animation-delay:0.4s;
-    }
-    @keyframes bfill { to{ width:100%; } }
+    @keyframes bl-in { from{opacity:0;transform:translateX(-8px)} to{opacity:1;transform:none} }
 
-    /* Boot callsign input */
-    .boot-prompt {
-      display:flex;align-items:center;gap:10px;flex-wrap:wrap;
-      font-size:12px;letter-spacing:2px;color:var(--cyan);
-      margin-top:16px;margin-bottom:4px;opacity:0;animation:bl-in 0.18s ease forwards;
-    }
-    .boot-prompt span { opacity:0.65; }
+    /* Progress bar */
+    .boot-bar-wrap { width:100%;height:2px;background:rgba(0,255,65,0.07);margin:6px 0 14px;opacity:0;animation:bl-in 0.12s ease forwards;overflow:hidden; }
+    .boot-bar-fill { height:100%;width:0;background:linear-gradient(90deg,var(--red),var(--amber),var(--green));box-shadow:0 0 8px var(--green);animation:bfill 1.5s ease forwards;animation-delay:0.3s; }
+    @keyframes bfill { to{width:100%;} }
+
+    /* Callsign prompt */
+    .boot-prompt { width:min(460px,88vw);margin-top:22px;opacity:0;animation:bl-in 0.25s ease forwards; }
+    .boot-prompt-lbl { font-size:9px;letter-spacing:3.5px;color:rgba(0,212,255,0.42);margin-bottom:10px; }
+    .boot-prompt-row { display:flex;align-items:stretch;border:1px solid rgba(0,212,255,0.35);background:rgba(0,212,255,0.02); }
     #boot-callsign-input {
-      background:transparent;border:none;border-bottom:1px solid rgba(0,212,255,0.5);
-      outline:none;color:var(--cyan);font-family:inherit;
-      font-size:12px;letter-spacing:3px;caret-color:var(--green);
-      width:180px;text-transform:uppercase;
+      flex:1;background:transparent;border:none;outline:none;
+      color:var(--cyan);font-family:inherit;font-size:14px;letter-spacing:3px;
+      caret-color:var(--green);padding:13px 16px;text-transform:uppercase;
     }
+    #boot-callsign-input::placeholder { color:rgba(0,212,255,0.22);letter-spacing:2px; }
     #boot-confirm-btn {
-      background:transparent;border:1px solid rgba(0,212,255,0.45);
-      color:var(--cyan);font-family:inherit;font-size:10px;letter-spacing:2.5px;
-      padding:5px 14px;cursor:pointer;transition:all 0.15s;
+      background:transparent;border:none;border-left:1px solid rgba(0,212,255,0.28);
+      color:rgba(0,212,255,0.6);font-family:inherit;font-size:16px;
+      padding:0 20px;cursor:pointer;transition:all 0.15s;
     }
-    #boot-confirm-btn:hover,#boot-confirm-btn:active {
-      background:rgba(0,212,255,0.12);border-color:var(--cyan);
-      box-shadow:0 0 12px rgba(0,212,255,0.2);
-    }
+    #boot-confirm-btn:hover { background:rgba(0,212,255,0.1);color:var(--cyan); }
 
     /* NVG mode */
     body.nvg #ui {
@@ -1210,27 +1213,43 @@ function _renderCard(portrait){
 
 // ── Boot ──────────────────────────────────────────────────────────
 var bootEl=document.getElementById('boot'),uiEl=document.getElementById('ui'),inputEl=document.getElementById('chat-input');
+var bootLinesEl=null;
+
 var BOOT=[
-  {t:'DESTINY FIELD TERMINAL v2.1',c:''},
-  {t:'NEURAL MESH LOADING...',c:'dim'},
+  {t:'INITIALIZING NEURAL MESH...',c:'dim'},
   {t:'BAR',c:'bar'},
   {t:'CODEC FREQ 140.85 · SECURING CHANNEL',c:'acc'},
   {t:'LOCATING OPERATIVE...',c:'dim'},
   {t:'SIGNAL LOCK CONFIRMED',c:'acc'},
   {t:'THREAT ENVIRONMENT: ACTIVE',c:'red'},
   {t:'RESPONSE MATRIX: PRIMED',c:'dim'},
-  {t:'────────────────────────────────────────',c:'dim'},
 ];
+
+function initBoot(){
+  ['tl','tr','bl','br'].forEach(function(p){
+    var c=document.createElement('div');c.className='bcor bcor-'+p;bootEl.appendChild(c);
+  });
+  var logo=document.createElement('div');logo.id='boot-logo';
+  var nm=document.createElement('span');nm.id='boot-logo-name';nm.textContent='DESTINY';
+  var sub=document.createElement('span');sub.id='boot-logo-sub';sub.textContent='FIELD INTELLIGENCE TERMINAL';
+  var div=document.createElement('div');div.id='boot-logo-div';
+  logo.appendChild(nm);logo.appendChild(sub);logo.appendChild(div);
+  bootEl.appendChild(logo);
+  bootLinesEl=document.createElement('div');bootLinesEl.id='boot-lines';
+  bootEl.appendChild(bootLinesEl);
+}
 
 function showCallsignPrompt(resume){
   var bp=document.createElement('div');bp.className='boot-prompt';
-  var lbl=document.createElement('span');lbl.textContent='IDENTIFY OPERATIVE ▸';
+  var lbl=document.createElement('div');lbl.className='boot-prompt-lbl';lbl.textContent='WHO ARE YOU, OPERATIVE?';
+  var row=document.createElement('div');row.className='boot-prompt-row';
   var inp=document.createElement('input');
-  inp.id='boot-callsign-input';inp.type='text';inp.placeholder='ENTER CALLSIGN';
+  inp.id='boot-callsign-input';inp.type='text';inp.placeholder='YOUR NAME';
   inp.maxLength=20;inp.autocomplete='off';inp.spellcheck=false;
   var btn=document.createElement('button');
-  btn.id='boot-confirm-btn';btn.type='button';btn.textContent='CONFIRM';
-  bp.appendChild(lbl);bp.appendChild(inp);bp.appendChild(btn);
+  btn.id='boot-confirm-btn';btn.type='button';btn.textContent='→';
+  row.appendChild(inp);row.appendChild(btn);
+  bp.appendChild(lbl);bp.appendChild(row);
   bootEl.appendChild(bp);
   setTimeout(function(){inp.focus();},80);
   function confirm(){
@@ -1240,9 +1259,9 @@ function showCallsignPrompt(resume){
     localStorage.setItem('destiny_callsign',CALLSIGN);
     bp.remove();
     var cf=document.createElement('div');cf.className='bl bl-acc';
-    cf.textContent='OPERATIVE '+CALLSIGN+' · CONFIRMED';
-    bootEl.appendChild(cf);
-    setTimeout(resume,350);
+    cf.textContent='CALLSIGN '+CALLSIGN+' · LOCKED IN';
+    bootLinesEl.appendChild(cf);
+    setTimeout(resume,400);
   }
   btn.addEventListener('click',confirm);
   inp.addEventListener('keydown',function(e){if(e.key==='Enter'){e.preventDefault();confirm();}});
@@ -1264,7 +1283,7 @@ function loadChatHistory(){
 function finishBoot(){
   var last=document.createElement('div');last.className='bl bl-win';
   last.textContent='> CHANNEL OPEN. MAKE IT COUNT, '+(CALLSIGN||'HERO')+'.';
-  bootEl.appendChild(last);
+  bootLinesEl.appendChild(last);
   setTimeout(function(){
     bootEl.classList.add('out');uiEl.classList.add('on');
     setTimeout(function(){bootEl.style.display='none';},1000);
@@ -1282,6 +1301,7 @@ function finishBoot(){
 }
 
 function runBoot(){
+  initBoot();
   var i=0;
   (function next(){
     if(i>=BOOT.length){
@@ -1291,11 +1311,11 @@ function runBoot(){
     var b=BOOT[i++];
     if(b.c==='bar'){
       var w=document.createElement('div');w.className='boot-bar-wrap';
-      var f=document.createElement('div');f.className='boot-bar-fill';w.appendChild(f);bootEl.appendChild(w);
+      var f=document.createElement('div');f.className='boot-bar-fill';w.appendChild(f);bootLinesEl.appendChild(w);
     } else {
-      var el=document.createElement('div');el.className='bl'+(b.c?' bl-'+b.c:'');el.textContent=b.t;bootEl.appendChild(el);
+      var el=document.createElement('div');el.className='bl'+(b.c?' bl-'+b.c:'');el.textContent=b.t;bootLinesEl.appendChild(el);
     }
-    setTimeout(next,135+Math.random()*75);
+    setTimeout(next,130+Math.random()*70);
   })();
 }
 setTimeout(runBoot,200);
