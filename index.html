@@ -327,11 +327,20 @@
     #hud-fill.empty { background:var(--red);box-shadow:0 0 10px var(--red); }
     #hud-cnt { font-size:9px;letter-spacing:1px;color:rgba(0,255,65,0.42); }
 
-    #help-btn { position:relative;width:30px;height:30px;cursor:pointer;flex-shrink:0; }
-    #h-r1 { position:absolute;inset:-3px;border-radius:50%;border:1.5px solid rgba(0,255,65,0.32);border-right-color:transparent;border-bottom-color:transparent;animation:spin-cw 4s linear infinite; }
-    #h-r2 { position:absolute;inset:-1px;border-radius:50%;border:1px solid rgba(255,42,0,0.28);border-left-color:transparent;border-top-color:transparent;animation:spin-ccw 6s linear infinite; }
-    #h-core { position:relative;z-index:1;width:28px;height:28px;border:1px solid rgba(0,255,65,0.28);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:15px;color:var(--green);transition:all 0.15s;user-select:none;margin:1px; }
-    #help-btn:hover #h-core { background:var(--green);color:#000;box-shadow:0 0 16px var(--green); }
+    #help-btn { position:relative;cursor:pointer;flex-shrink:0;user-select:none; }
+    #h-core {
+      display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;
+      padding:5px 10px;border:1px solid rgba(0,255,65,0.45);
+      color:var(--green);transition:all 0.15s;
+      font-size:14px;letter-spacing:0;
+      animation:menu-pulse 3s ease-in-out infinite;
+    }
+    #h-core-lbl { font-size:7px;letter-spacing:2.5px;color:rgba(0,255,65,0.6); }
+    @keyframes menu-pulse {
+      0%,100%{ border-color:rgba(0,255,65,0.38);box-shadow:0 0 6px rgba(0,255,65,0.06); }
+      50%    { border-color:rgba(0,255,65,0.7); box-shadow:0 0 14px rgba(0,255,65,0.18); }
+    }
+    #help-btn:hover #h-core { background:rgba(0,255,65,0.1);border-color:var(--green);box-shadow:0 0 20px rgba(0,255,65,0.3);animation:none; }
 
     /* ── CHAT FEED ─────────────────────────────────── */
     #chat-feed {
@@ -376,11 +385,12 @@
     }
     .codec-label-left { color:rgba(0,255,65,0.55);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:52%; }
     .codec-label-right { color:rgba(255,42,0,0.5);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:42%; }
+    .codec-model-tag { color:rgba(255,90,60,0.85); }
 
     /* Share card button in help overlay */
     #share-card-btn {
       width:100%;display:flex;flex-direction:column;gap:4px;align-items:center;
-      padding:16px 14px;margin-bottom:18px;
+      padding:16px 14px;margin-top:18px;margin-bottom:0;
       border:1px solid rgba(0,255,65,0.35);border-top:2px solid var(--green);
       background:rgba(0,255,65,0.04);cursor:pointer;
       transition:all 0.2s;user-select:none;
@@ -649,7 +659,7 @@
     .hero-img { max-width:240px;max-height:160px;object-fit:contain;border:1px solid rgba(0,212,255,0.2);margin-bottom:7px;display:block;margin-left:auto;filter:brightness(0.9); }
 
     /* Help nav buttons */
-    #help-nav { display:flex;gap:10px;margin-top:20px;border-top:1px solid rgba(0,255,65,0.1);padding-top:16px; }
+    #help-nav { display:flex;gap:10px;margin-bottom:20px;border-bottom:1px solid rgba(0,255,65,0.1);padding-bottom:16px; }
     .help-nav-btn {
       flex:1;text-decoration:none;display:flex;flex-direction:column;gap:4px;
       padding:13px 14px;border:1px solid rgba(0,212,255,0.28);
@@ -681,7 +691,7 @@
     #help-ovl { display:none;position:fixed;inset:0;background:rgba(3,12,21,0.94);z-index:9000;align-items:center;justify-content:center; }
     #help-ovl.on { display:flex; }
     #help-box { border:1px solid rgba(0,255,65,0.28);border-top:2px solid var(--red);background:rgba(4,14,24,0.99);padding:30px 32px;max-width:460px;width:90%;box-shadow:0 0 80px rgba(0,255,65,0.08),0 0 40px rgba(255,42,0,0.04); }
-    #help-box h2 { font-size:11px;letter-spacing:3px;margin-bottom:22px;text-shadow:0 0 8px var(--green);border-bottom:1px solid rgba(0,255,65,0.1);padding-bottom:12px; }
+    #help-box h2 { font-size:11px;letter-spacing:3px;margin-top:0;margin-bottom:16px;text-shadow:0 0 8px var(--green); }
     .ht { margin-bottom:14px; }
     .ht-n { color:var(--cyan);font-size:11px;letter-spacing:1.5px;margin-bottom:3px; }
     .ht-d { color:rgba(0,255,65,0.42);font-size:11px;padding-left:10px; }
@@ -702,8 +712,7 @@
       #hud-lbl { display:none; }
       #hud-track { width:55px; }
       #hud-cnt { font-size:8px; }
-      #help-btn { width:36px; height:36px; }
-      #h-core { width:34px; height:34px; font-size:14px; }
+      #h-core { font-size:13px; padding:4px 8px; }
 
       /* ── Chat feed ── */
       #chat-feed { padding:10px 10px 8px; }
@@ -711,6 +720,7 @@
       .codec-portrait-col,.think-portrait-col { display:none; }
       .codec-wrap,.think-wrap { padding:8px 10px 10px; }
       .hero-wrap { max-width:100%; }
+      .codec-freq-tag { display:none; }
 
       /* ── Input ── */
       #input-area { height:56px; padding:0 10px; gap:6px; }
@@ -813,9 +823,7 @@
         <div id="hud-cnt">20 / 20</div>
       </div>
       <div id="help-btn" onclick="openHelp()">
-        <div id="h-r1"></div>
-        <div id="h-r2"></div>
-        <div id="h-core">☰</div>
+        <div id="h-core">☰<span id="h-core-lbl">MENU</span></div>
       </div>
     </div>
   </div>
@@ -865,17 +873,6 @@
 
 <div id="help-ovl" onclick="handleOvl(event)">
   <div id="help-box">
-    <h2>// WHAT DESTINY CAN HELP WITH</h2>
-    <div id="share-card-btn" onclick="closeHelp();shareOperativeCard();">
-      <span id="share-card-lbl">⬡ SHARE YOUR OPERATIVE CARD</span>
-      <span id="share-card-desc">Generate your terminal ID · share to X</span>
-    </div>
-    <div class="ht"><div class="ht-n">→ AI &amp; Building</div><div class="ht-d">Claude Code, Cursor, v0, Bolt — tools first, always. Ask her what to use.</div></div>
-    <div class="ht"><div class="ht-n">→ Crypto &amp; DeFi</div><div class="ht-d">Wallets, tokens, on-chain analysis, $DESTINY ecosystem, token safety</div></div>
-    <div class="ht"><div class="ht-n">→ Coding &amp; Shipping</div><div class="ht-d">Debugging, stack choices, architecture, moving fast with AI</div></div>
-    <div class="ht"><div class="ht-n">→ Web3 Projects</div><div class="ht-d">Smart contracts, NFTs, DApps, tokenomics, launch strategy</div></div>
-    <div class="ht"><div class="ht-n">→ Unlock Sonnet 4.6</div><div class="ht-d">Hold 500,000+ $DESTINY · connect Phantom or Backpack · verify on-chain</div></div>
-    <div class="ht"><div class="ht-n">→ Terminal Commands</div><div class="ht-d">/scan /status /freq /who /nvg /clear /debrief /mute · type /help in chat</div></div>
     <div id="help-nav">
       <a href="#" class="help-nav-btn">
         <span class="help-nav-lbl">⬡ WORLD</span>
@@ -885,6 +882,16 @@
         <span class="help-nav-lbl">⬡ DREAM OS</span>
         <span class="help-nav-desc">Terminal operating system</span>
       </a>
+    </div>
+    <h2>// WHAT DESTINY CAN HELP WITH</h2>
+    <div class="ht"><div class="ht-n">→ AI &amp; Building</div><div class="ht-d">Claude Code, Cursor, v0, Bolt — tools first, always. Ask her what to use.</div></div>
+    <div class="ht"><div class="ht-n">→ Crypto &amp; DeFi</div><div class="ht-d">Wallets, tokens, on-chain analysis, $DESTINY ecosystem, token safety</div></div>
+    <div class="ht"><div class="ht-n">→ Coding &amp; Shipping</div><div class="ht-d">Debugging, stack choices, architecture, moving fast with AI</div></div>
+    <div class="ht"><div class="ht-n">→ Web3 Projects</div><div class="ht-d">Smart contracts, NFTs, DApps, tokenomics, launch strategy</div></div>
+    <div class="ht"><div class="ht-n">→ Unlock Sonnet 4.6</div><div class="ht-d">Hold 500,000+ $DESTINY · connect Phantom or Backpack · verify on-chain</div></div>
+    <div id="share-card-btn" onclick="closeHelp();shareOperativeCard();">
+      <span id="share-card-lbl">⬡ SHARE YOUR HERO CARD</span>
+      <span id="share-card-desc">Generate your terminal ID · share to X</span>
     </div>
     <div id="help-close" onclick="closeHelp()">[ CLOSE TRANSMISSION ]</div>
   </div>
@@ -1366,8 +1373,13 @@ function addDestiny(text,typewriter,modelTag){
   var ll=document.createElement('span');ll.className='codec-label-left';ll.textContent='CODEC TRANSMISSION';
   var lr=document.createElement('span');lr.className='codec-label-right';
   var MODEL_DISPLAY={sonnet:'SONNET 4.6',haiku:'HAIKU 4.5'};
-  lr.textContent=modelTag?'FREQ 140.85 · '+(MODEL_DISPLAY[modelTag]||modelTag.toUpperCase()):'FREQ 140.85';
-  if(modelTag==='sonnet')lr.style.color='var(--cyan)';
+  var freqSpan=document.createElement('span');freqSpan.className='codec-freq-tag';freqSpan.textContent='FREQ 140.85';
+  if(modelTag){
+    var sep=document.createElement('span');sep.className='codec-freq-tag';sep.textContent=' · ';
+    var modSpan=document.createElement('span');modSpan.className='codec-model-tag';modSpan.textContent=MODEL_DISPLAY[modelTag]||modelTag.toUpperCase();
+    if(modelTag==='sonnet')modSpan.style.color='var(--cyan)';
+    lr.appendChild(freqSpan);lr.appendChild(sep);lr.appendChild(modSpan);
+  }else{lr.appendChild(freqSpan);}
   lbl.appendChild(ll);lbl.appendChild(lr);cw.appendChild(lbl);
 
   // Portrait column
@@ -1640,7 +1652,11 @@ async function runScan(addr){
     // DESTINY analysis
     inputEl.disabled=true;sending=true;showThink();
     var summary='TOKEN: '+pdata.name+' ('+pdata.sym+')\nPRICE: '+pdata.price+(chg!==null?' ('+chg+'% 24h)':'')+'\nLIQUIDITY: '+pdata.liq+'\n24H VOLUME: '+pdata.vol24+'\nMKT CAP: '+pdata.mcap+'\nAGE: '+pdata.age+'\nDEX: '+pdata.dex+' on '+pdata.chain+'\nBUYS/SELLS 24h: '+pdata.buys+'/'+pdata.sells;
-    var apiRes=await fetch(BACKEND+'/api/chat',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({visitorId:getVid(),model:ACTIVE_MODEL,sessionToken:getSessionToken(),message:'This is a token contract address (CA) on '+pdata.chain+' — not a wallet. Give me a 2-3 sentence risk assessment based on this on-chain data. Call out red flags directly.\n\n'+summary,history:getHistForAPI()})});
+    var isSelf=(addr.trim()===CA);
+    var scanPrompt=isSelf
+      ?'This is $DESTINY — my own token, the access token for the DreamOS/terminaldestiny.com ecosystem. Read the on-chain data honestly and acknowledge where the metrics are thin, but give the real context: this is an early-stage utility token for a small dedicated community, not a typical meme launch. Explain what these numbers actually mean at this stage — what\'s expected, what a holder should actually watch, and what the token is for. Honest, grounded, not defensive, not a roast.\n\n'+summary
+      :'This is a token contract address (CA) on '+pdata.chain+' — not a wallet. Give me a 2-3 sentence risk assessment based on this on-chain data. Call out red flags directly.\n\n'+summary;
+    var apiRes=await fetch(BACKEND+'/api/chat',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({visitorId:getVid(),model:ACTIVE_MODEL,sessionToken:getSessionToken(),message:scanPrompt,history:getHistForAPI()})});
     hideThink();avCore.className='speaking';scanLine();
     if(apiRes.ok){
       var d=await apiRes.json();var reply=d.response||'Scan data received. Analysis unavailable.';
