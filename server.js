@@ -8,6 +8,7 @@ var bs58 = require('bs58');
 var { createClient } = require('@supabase/supabase-js');
 
 var app = express();
+app.set('trust proxy', 1);
 
 var ALLOWED_ORIGINS = [
   'https://terminaldestiny.github.io',
@@ -18,7 +19,7 @@ var ALLOWED_ORIGINS = [
 ];
 app.use(cors({
   origin: function(origin, callback) {
-    if (!origin || ALLOWED_ORIGINS.indexOf(origin) !== -1) {
+    if (origin && ALLOWED_ORIGINS.indexOf(origin) !== -1) {
       callback(null, true);
     } else {
       callback(new Error('CORS: origin not allowed'));
@@ -79,7 +80,16 @@ setInterval(function() {
   pendingNonces.forEach(function(exp, k)  { if (exp < now) pendingNonces.delete(k); });
   verifiedSessions.forEach(function(s, k) { if (s.expires < now) verifiedSessions.delete(k); });
   challengeLog.forEach(function(ts, k)    { if (!ts.length || ts[ts.length-1] < now - 60000) challengeLog.delete(k); });
+  var today = getTodayUTC();
+  Object.keys(chatLog).forEach(function(k) { if (chatLog[k].date !== today) delete chatLog[k]; });
 }, 600000);
+
+function guardMapSize(map, limit) {
+  if (map.size > limit) {
+    var iter = map.keys();
+    for (var i = 0; i < Math.floor(limit / 4); i++) map.delete(iter.next().value);
+  }
+}
 
 function checkChallengeLimit(ip) {
   var now = Date.now(), ago = now - 60000;
@@ -109,7 +119,8 @@ async function getSolanaTokenBalance(walletAddress) {
 
 // ── /api/challenge ────────────────────────────────────────────────────────
 app.get('/api/challenge', function(req, res) {
-  var ip = req.headers['x-forwarded-for'] || req.socket.remoteAddress || 'unknown';
+  var ip = req.ip || 'unknown';
+  guardMapSize(pendingNonces, 5000);
   if (!checkChallengeLimit(ip)) {
     return res.status(429).json({ error: 'rate_limited' });
   }
@@ -290,12 +301,7 @@ app.post('/api/chat', async function(req, res) {
   var messages = [];
   if (tier === 'operative' && walletAddress) {
     var saved = await loadHistory(walletAddress);
-    if (saved !== null) {
-      messages = saved.slice(-40);
-    } else {
-      // First visit — seed Supabase from client localStorage
-      messages = cleanClient;
-    }
+    messages = saved ? saved.slice(-40) : [];
   } else {
     messages = cleanClient.slice(-20);
   }
