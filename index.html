@@ -195,6 +195,14 @@
       background:rgba(3,12,21,0.6);
     }
     #cmd-bar::-webkit-scrollbar { display:none; }
+    #cmd-scroll-hint {
+      display:none;position:sticky;right:0;flex-shrink:0;
+      align-items:center;justify-content:flex-end;
+      padding-left:18px;padding-right:8px;
+      background:linear-gradient(90deg,transparent,rgba(3,12,21,0.97) 55%);
+      color:rgba(0,255,65,0.5);font-size:18px;pointer-events:none;
+      transition:opacity 0.2s;
+    }
     .cmd-chip {
       flex-shrink:0;background:transparent;
       border:1px solid rgba(0,255,65,0.14);
@@ -839,6 +847,7 @@
       /* ── Cmd bar ── */
       #cmd-bar { padding:6px 10px; gap:6px; }
       .cmd-chip { padding:8px 12px; font-size:9px; min-height:34px; }
+      #cmd-scroll-hint { display:flex; }
 
       /* ── Email bar ── */
       #email-bar { padding:6px 10px; gap:8px; }
@@ -956,6 +965,7 @@
     <button class="cmd-chip cmd-chip-disconnect" id="disconnect-btn" onclick="disconnectWallet()" style="display:none">⬡ DISCONNECT</button>
     <button class="cmd-chip cmd-chip-dream" onclick="quickCmd('/dream')">⬡ DREAM</button>
     <button class="cmd-chip" onclick="quickCmd('/clear')">CLEAR CHAT</button>
+    <div id="cmd-scroll-hint">›</div>
   </div>
 
   <div id="email-bar">
@@ -2452,6 +2462,17 @@ function copyCA(){
   if(navigator.clipboard)navigator.clipboard.writeText(CA).then(done).catch(function(){fbCopy();done();});else{fbCopy();done();}
 }
 function fbCopy(){var ta=document.createElement('textarea');ta.value=CA;ta.style.cssText='position:fixed;top:-9999px';document.body.appendChild(ta);ta.select();try{document.execCommand('copy');}catch(e){}document.body.removeChild(ta);}
+
+// ── Cmd bar scroll hint ───────────────────────────────────────────
+(function(){
+  var bar=document.getElementById('cmd-bar');
+  var hint=document.getElementById('cmd-scroll-hint');
+  if(!bar||!hint)return;
+  bar.addEventListener('scroll',function(){
+    var atEnd=bar.scrollLeft+bar.clientWidth>=bar.scrollWidth-8;
+    hint.style.opacity=atEnd?'0':'1';
+  });
+})();
 
 // ── Help ──────────────────────────────────────────────────────────
 function openHelp(){document.getElementById('help-ovl').classList.add('on');document.getElementById('help-backdrop').classList.add('on');}
