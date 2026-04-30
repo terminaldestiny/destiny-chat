@@ -11,6 +11,8 @@ var app = express();
 app.set('trust proxy', 1);
 
 var ALLOWED_ORIGINS = [
+  'https://terminaldestiny.com',
+  'https://www.terminaldestiny.com',
   'https://terminaldestiny.github.io',
   'http://localhost:3000',
   'http://localhost:5500',
