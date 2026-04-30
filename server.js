@@ -412,7 +412,8 @@ app.post('/api/chat', async function(req, res) {
     : message;
 
   if (messages.length && messages[messages.length - 1].role === 'user') {
-    if (imageSource) messages[messages.length - 1] = { role: 'user', content: currentContent };
+    // Replace the orphaned user turn (prior failed send) with the current message
+    messages[messages.length - 1] = { role: 'user', content: currentContent };
   } else {
     messages.push({ role: 'user', content: currentContent });
   }

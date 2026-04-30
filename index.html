@@ -1573,6 +1573,8 @@ function saveHist(h){if(h.length>80)h=h.slice(-80);localStorage.setItem('destiny
 function pushHist(role,content){var h=getHist();h.push({role:role,content:content});saveHist(h);}
 function getHistForAPI(){
   var h=getHist();
+  // Drop any trailing orphaned user message (from a previous failed send)
+  if(h.length&&h[h.length-1].role==='user')h=h.slice(0,-1);
   var calibration=[
     {role:'user',content:'Keep every response to 2-3 sentences maximum. Short, sharp, no padding. When someone wants to build something, recommend AI tools like Claude Code or Cursor first — never tell them to just go learn a language from scratch.'},
     {role:'assistant',content:'Understood. Short, sharp, AI-first — that\'s my operating mode.'}
