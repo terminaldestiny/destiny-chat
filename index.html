@@ -666,19 +666,19 @@
     .hero-img { max-width:240px;max-height:160px;object-fit:contain;border:1px solid rgba(0,212,255,0.2);margin-bottom:7px;display:block;margin-left:auto;filter:brightness(0.9); }
 
     /* Help nav buttons */
-    #help-nav { display:flex;gap:10px;margin-bottom:20px;border-bottom:1px solid rgba(0,255,65,0.1);padding-bottom:16px; }
+    #help-nav { display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:20px;border-bottom:1px solid rgba(0,255,65,0.1);padding-bottom:16px; }
     .help-nav-btn {
-      flex:1;text-decoration:none;display:flex;flex-direction:column;gap:4px;
-      padding:13px 14px;border:1px solid rgba(0,212,255,0.28);
-      background:rgba(0,212,255,0.04);
-      transition:all 0.2s;
+      text-decoration:none;display:flex;flex-direction:column;gap:4px;
+      padding:12px 12px;border:1px solid rgba(0,212,255,0.28);
+      background:rgba(0,212,255,0.04);transition:all 0.2s;
     }
-    .help-nav-btn:hover {
-      border-color:var(--cyan);background:rgba(0,212,255,0.09);
-      box-shadow:0 0 18px rgba(0,212,255,0.12);
-    }
-    .help-nav-lbl { font-size:11px;letter-spacing:2.5px;font-weight:bold;color:var(--cyan); }
-    .help-nav-desc { font-size:9px;letter-spacing:1px;color:rgba(0,212,255,0.45); }
+    .help-nav-btn:hover { border-color:var(--cyan);background:rgba(0,212,255,0.09);box-shadow:0 0 18px rgba(0,212,255,0.12); }
+    .help-nav-lbl { font-size:10px;letter-spacing:2px;font-weight:bold;color:var(--cyan); }
+    .help-nav-desc { font-size:8px;letter-spacing:0.8px;color:rgba(0,212,255,0.45); }
+    .help-nav-btn-buy { border-color:rgba(255,170,0,0.3);background:rgba(255,170,0,0.03); }
+    .help-nav-btn-buy .help-nav-lbl { color:var(--amber); }
+    .help-nav-btn-buy .help-nav-desc { color:rgba(255,170,0,0.45); }
+    .help-nav-btn-buy:hover { border-color:var(--amber);background:rgba(255,170,0,0.08);box-shadow:0 0 18px rgba(255,170,0,0.1); }
 
     /* CA */
     #ca-badge { position:fixed;bottom:72px;right:14px;font-size:9px;text-align:right;cursor:pointer;z-index:50;user-select:none;line-height:1.6; }
@@ -694,15 +694,26 @@
     #limit-banner { display:none;flex-shrink:0;background:rgba(255,42,0,0.05);border-top:1px solid rgba(255,42,0,0.2);padding:7px 20px;font-size:10px;color:rgba(255,80,80,0.78);letter-spacing:1.5px;text-align:center; }
     #limit-banner.on { display:block; }
 
-    /* Help modal */
-    #help-ovl { display:none;position:fixed;inset:0;background:rgba(3,12,21,0.94);z-index:9000;align-items:center;justify-content:center; }
-    #help-ovl.on { display:flex; }
-    #help-box { border:1px solid rgba(0,255,65,0.28);border-top:2px solid var(--red);background:rgba(4,14,24,0.99);padding:30px 32px;max-width:460px;width:90%;box-shadow:0 0 80px rgba(0,255,65,0.08),0 0 40px rgba(255,42,0,0.04); }
-    #help-box h2 { font-size:11px;letter-spacing:3px;margin-top:0;margin-bottom:16px;text-shadow:0 0 8px var(--green); }
-    .ht { margin-bottom:14px; }
+    /* Help panel */
+    #help-backdrop { display:none;position:fixed;inset:0;z-index:8999;background:rgba(0,0,0,0.35); }
+    #help-backdrop.on { display:block; }
+    #help-ovl {
+      position:fixed;top:0;right:0;bottom:0;
+      width:min(320px,92vw);
+      background:rgba(4,14,24,0.99);
+      border-left:1px solid rgba(0,255,65,0.22);
+      border-top:2px solid var(--red);
+      z-index:9000;padding:20px 22px 30px;
+      overflow-y:auto;display:none;flex-direction:column;
+      box-shadow:-12px 0 50px rgba(0,0,0,0.55);
+    }
+    #help-ovl.on { display:flex;animation:panel-slide-in 0.22s ease forwards; }
+    @keyframes panel-slide-in { from{transform:translateX(100%)} to{transform:translateX(0)} }
+    #help-ovl h2 { font-size:11px;letter-spacing:3px;margin-top:0;margin-bottom:16px;text-shadow:0 0 8px var(--green); }
+    .ht { margin-bottom:13px; }
     .ht-n { color:var(--cyan);font-size:11px;letter-spacing:1.5px;margin-bottom:3px; }
-    .ht-d { color:rgba(0,255,65,0.42);font-size:11px;padding-left:10px; }
-    #help-header { display:flex;justify-content:flex-end;margin-bottom:12px; }
+    .ht-d { color:rgba(0,255,65,0.42);font-size:10px;padding-left:10px;line-height:1.5; }
+    #help-header { display:flex;justify-content:flex-end;margin-bottom:16px; }
     #help-close { color:rgba(0,255,65,0.5);font-size:16px;cursor:pointer;transition:color 0.15s,text-shadow 0.15s;user-select:none;line-height:1; }
     #help-close:hover { color:var(--green);text-shadow:0 0 10px var(--green); }
 
@@ -777,7 +788,7 @@
 
       /* ── CA / misc ── */
       #ca-badge { display:none; }
-      #help-box { padding:22px 20px; }
+      #help-ovl { padding:16px 16px 24px; }
     }
   </style>
 </head>
@@ -881,29 +892,36 @@
 </div>
 <div id="toast">COPIED</div>
 
-<div id="help-ovl" onclick="handleOvl(event)">
-  <div id="help-box">
-    <div id="help-header"><div id="help-close" onclick="closeHelp()">✕</div></div>
-    <div id="help-nav">
-      <a href="#" class="help-nav-btn">
-        <span class="help-nav-lbl">⬡ WORLD</span>
-        <span class="help-nav-desc">Enter the 3D terminal world</span>
-      </a>
-      <a href="#" class="help-nav-btn">
-        <span class="help-nav-lbl">⬡ DREAM OS</span>
-        <span class="help-nav-desc">Terminal operating system</span>
-      </a>
-    </div>
-    <h2>// WHAT DESTINY CAN HELP WITH</h2>
-    <div class="ht"><div class="ht-n">→ AI &amp; Building</div><div class="ht-d">Claude Code, Cursor, v0, Bolt — tools first, always. Ask her what to use.</div></div>
-    <div class="ht"><div class="ht-n">→ Crypto &amp; DeFi</div><div class="ht-d">Wallets, tokens, on-chain analysis, $DESTINY ecosystem, token safety</div></div>
-    <div class="ht"><div class="ht-n">→ Coding &amp; Shipping</div><div class="ht-d">Debugging, stack choices, architecture, moving fast with AI</div></div>
-    <div class="ht"><div class="ht-n">→ Web3 Projects</div><div class="ht-d">Smart contracts, NFTs, DApps, tokenomics, launch strategy</div></div>
-    <div class="ht"><div class="ht-n">→ Unlock Sonnet 4.6</div><div class="ht-d">Hold 500,000+ $DESTINY · connect Phantom or Backpack · verify on-chain</div></div>
-    <div id="share-card-btn" onclick="closeHelp();shareOperativeCard();">
-      <span id="share-card-lbl">⬡ SHARE YOUR HERO CARD</span>
-      <span id="share-card-desc">Generate your terminal ID · share to X</span>
-    </div>
+<div id="help-backdrop" onclick="closeHelp()"></div>
+<div id="help-ovl">
+  <div id="help-header"><div id="help-close" onclick="closeHelp()">✕</div></div>
+  <div id="help-nav">
+    <a href="#" class="help-nav-btn">
+      <span class="help-nav-lbl">⬡ WORLD</span>
+      <span class="help-nav-desc">3D terminal world</span>
+    </a>
+    <a href="#" class="help-nav-btn">
+      <span class="help-nav-lbl">⬡ DREAM OS</span>
+      <span class="help-nav-desc">Terminal operating system</span>
+    </a>
+    <a href="https://terminaldestiny.com" target="_blank" rel="noopener" class="help-nav-btn">
+      <span class="help-nav-lbl">⬡ HYPERSCAPE</span>
+      <span class="help-nav-desc">AI-native MMORPG</span>
+    </a>
+    <a href="https://jup.ag/swap/SOL-3AwkJnZL7xrf8ffUwEsSkKndQkPSj2vfR3CqvyFpk8UP" target="_blank" rel="noopener" class="help-nav-btn help-nav-btn-buy">
+      <span class="help-nav-lbl">⬡ BUY $DESTINY</span>
+      <span class="help-nav-desc">Trade on Jupiter</span>
+    </a>
+  </div>
+  <h2>// WHAT DESTINY CAN HELP WITH</h2>
+  <div class="ht"><div class="ht-n">→ AI &amp; Building</div><div class="ht-d">Claude Code, Cursor, v0, Bolt — tools first, always. Ask her what to use.</div></div>
+  <div class="ht"><div class="ht-n">→ Crypto &amp; DeFi</div><div class="ht-d">Wallets, tokens, on-chain analysis, $DESTINY ecosystem, token safety</div></div>
+  <div class="ht"><div class="ht-n">→ Coding &amp; Shipping</div><div class="ht-d">Debugging, stack choices, architecture, moving fast with AI</div></div>
+  <div class="ht"><div class="ht-n">→ Web3 Projects</div><div class="ht-d">Smart contracts, NFTs, DApps, tokenomics, launch strategy</div></div>
+  <div class="ht"><div class="ht-n">→ Unlock Sonnet 4.6</div><div class="ht-d">Hold 500,000+ $DESTINY · connect Phantom or Backpack · verify on-chain</div></div>
+  <div id="share-card-btn" onclick="closeHelp();shareOperativeCard();">
+    <span id="share-card-lbl">⬡ SHARE YOUR HERO CARD</span>
+    <span id="share-card-desc">Generate your terminal ID · share to X</span>
   </div>
 </div>
 
@@ -2057,9 +2075,8 @@ function copyCA(){
 function fbCopy(){var ta=document.createElement('textarea');ta.value=CA;ta.style.cssText='position:fixed;top:-9999px';document.body.appendChild(ta);ta.select();try{document.execCommand('copy');}catch(e){}document.body.removeChild(ta);}
 
 // ── Help ──────────────────────────────────────────────────────────
-function openHelp(){document.getElementById('help-ovl').classList.add('on');}
-function closeHelp(){document.getElementById('help-ovl').classList.remove('on');}
-function handleOvl(e){if(e.target.id==='help-ovl')closeHelp();}
+function openHelp(){document.getElementById('help-ovl').classList.add('on');document.getElementById('help-backdrop').classList.add('on');}
+function closeHelp(){document.getElementById('help-ovl').classList.remove('on');document.getElementById('help-backdrop').classList.remove('on');}
 </script>
 </body>
 </html>
