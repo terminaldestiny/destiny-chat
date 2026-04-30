@@ -978,13 +978,13 @@
   <div id="limit-banner">DAILY TRANSMISSIONS EXHAUSTED — SIGNAL RESETS AT MIDNIGHT UTC</div>
 
   <div id="cmd-bar">
-    <button class="cmd-chip cmd-chip-scan" onclick="quickCmd('/scan')">⬡ SCAN TOKEN</button>
-    <button class="cmd-chip cmd-chip-wallet" id="wallet-btn" onclick="connectWallet()">⬡ CONNECT</button>
+    <button class="cmd-chip cmd-chip-wallet" id="wallet-btn" onclick="connectWallet()">◈ CONNECT</button>
+    <button class="cmd-chip cmd-chip-disconnect" id="disconnect-btn" onclick="disconnectWallet()" style="display:none">◈ DISCONNECT</button>
     <button class="cmd-chip cmd-chip-email" id="email-btn" onclick="openEmailBar(getSession()?'link':'login')">✉ EMAIL</button>
+    <button class="cmd-chip cmd-chip-scan" onclick="quickCmd('/scan')">⬡ SCAN TOKEN</button>
     <button class="cmd-chip" id="model-toggle-btn" onclick="toggleModel()">⬡ SONNET 🔒</button>
-    <button class="cmd-chip" id="voice-btn" onclick="toggleVoice()">◉ VOICE</button>
-    <button class="cmd-chip cmd-chip-disconnect" id="disconnect-btn" onclick="disconnectWallet()" style="display:none">⬡ DISCONNECT</button>
     <button class="cmd-chip cmd-chip-dream" onclick="quickCmd('/dream')">⬡ DREAM</button>
+    <button class="cmd-chip" id="voice-btn" onclick="toggleVoice()">◉ VOICE</button>
     <button class="cmd-chip" onclick="quickCmd('/clear')">CLEAR CHAT</button>
     <div id="cmd-scroll-hint">›</div>
   </div>
