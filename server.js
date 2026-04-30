@@ -66,20 +66,111 @@ async function saveHistory(wallet, messages) {
   }
 }
 
+// ── User store (email ↔ wallet linking) ───────────────────────────────────
+async function getUserByEmail(email) {
+  if (!supabase) return null;
+  try {
+    var { data, error } = await supabase.from('users').select('*').eq('email', email).single();
+    if (error && error.code !== 'PGRST116') throw error;
+    return data || null;
+  } catch (e) { console.error('getUserByEmail:', e.message); return null; }
+}
+
+async function upsertUser(wallet, email, tier, balance) {
+  if (!supabase) return;
+  try {
+    await supabase.from('users').upsert(
+      { wallet, email, tier, balance, last_balance_check: new Date().toISOString() },
+      { onConflict: 'wallet' }
+    );
+  } catch (e) { console.error('upsertUser:', e.message); }
+}
+
+// ── Magic token store ────────────────────────────────────────────────────
+async function createMagicToken(email) {
+  if (!supabase) throw new Error('no_supabase');
+  var token = crypto.randomUUID();
+  var expires_at = new Date(Date.now() + 900000).toISOString(); // 15 min
+  var { error } = await supabase.from('magic_tokens').insert({ email, token, expires_at });
+  if (error) throw error;
+  return token;
+}
+
+async function consumeMagicToken(token) {
+  if (!supabase) return null;
+  try {
+    var { data, error } = await supabase
+      .from('magic_tokens')
+      .select('*')
+      .eq('token', token)
+      .eq('used', false)
+      .gt('expires_at', new Date().toISOString())
+      .single();
+    if (error || !data) return null;
+    await supabase.from('magic_tokens').update({ used: true }).eq('id', data.id);
+    return data.email;
+  } catch (e) { console.error('consumeMagicToken:', e.message); return null; }
+}
+
+// ── Magic send rate limit (max 3 emails/hour per address) ────────────────
+function checkMagicSendLimit(email) {
+  var now = Date.now();
+  var ts = (magicSendLog.get(email) || []).filter(function(t) { return t > now - 3600000; });
+  if (ts.length >= 3) return false;
+  ts.push(now);
+  magicSendLog.set(email, ts);
+  return true;
+}
+
+// ── Email sending via Resend ─────────────────────────────────────────────
+async function sendMagicLinkEmail(to, token) {
+  if (!process.env.RESEND_API_KEY) throw new Error('no_resend_key');
+  var link = SITE_URL.replace(/\/?$/, '/') + '?token=' + token;
+  var res = await fetch('https://api.resend.com/emails', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + process.env.RESEND_API_KEY },
+    body: JSON.stringify({
+      from: process.env.EMAIL_FROM || 'DESTINY <onboarding@resend.dev>',
+      to: [to],
+      subject: 'DESTINY // ACCESS LINK',
+      text: [
+        '// DESTINY FIELD TERMINAL',
+        '// ACCESS LINK REQUESTED',
+        '',
+        'Click below to access DESTINY with your hero tier restored:',
+        '',
+        link,
+        '',
+        'Expires in 15 minutes. Do not share this link.',
+        '',
+        '// terminaldestiny.com  ·  CODEC 140.85'
+      ].join('\n')
+    })
+  });
+  if (!res.ok) {
+    var body = await res.text();
+    throw new Error('resend: ' + body.slice(0, 120));
+  }
+}
+
 // ── Holder verification ───────────────────────────────────────────────────
 var DESTINY_MINT = '3AwkJnZL7xrf8ffUwEsSkKndQkPSj2vfR3CqvyFpk8UP';
 var MIN_TOKENS   = 500000;
 var SOLANA_RPC   = 'https://api.mainnet-beta.solana.com';
+var SITE_URL     = process.env.SITE_URL || 'https://terminaldestiny.github.io/destiny-chat/';
+var SESSION_TTL  = 7 * 24 * 60 * 60 * 1000; // 7 days
 
 var pendingNonces    = new Map();
 var verifiedSessions = new Map();
 var challengeLog     = new Map();
+var magicSendLog     = new Map(); // email -> timestamp[]
 
 setInterval(function() {
   var now = Date.now();
   pendingNonces.forEach(function(exp, k)  { if (exp < now) pendingNonces.delete(k); });
   verifiedSessions.forEach(function(s, k) { if (s.expires < now) verifiedSessions.delete(k); });
   challengeLog.forEach(function(ts, k)    { if (!ts.length || ts[ts.length-1] < now - 60000) challengeLog.delete(k); });
+  magicSendLog.forEach(function(ts, k)    { if (!ts.length || ts[ts.length-1] < now - 3600000) magicSendLog.delete(k); });
   var today = getTodayUTC();
   Object.keys(chatLog).forEach(function(k) { if (chatLog[k].date !== today) delete chatLog[k]; });
 }, 600000);
@@ -163,7 +254,7 @@ app.post('/api/verify', async function(req, res) {
     var sessionToken = crypto.randomUUID();
     verifiedSessions.set(sessionToken, {
       wallet: wallet, tier: tier, balance: balance,
-      expires: Date.now() + 3600000
+      expires: Date.now() + SESSION_TTL
     });
     res.json({ tier: tier, balance: balance, sessionToken: sessionToken, minTokens: MIN_TOKENS });
   } catch (e) {
@@ -350,6 +441,103 @@ app.post('/api/chat', async function(req, res) {
   } catch (err) {
     console.error('Chat API error:', err.message || err);
     res.status(500).json({ error: 'api_error', response: 'Static on the line. Try again.' });
+  }
+});
+
+// ── /api/auth/link-email — attach email to an active wallet session ───────
+app.post('/api/auth/link-email', async function(req, res) {
+  var body         = req.body || {};
+  var sessionToken = (body.sessionToken || '').toString().trim().slice(0, 64);
+  var email        = (body.email || '').toString().trim().toLowerCase().slice(0, 254);
+
+  if (!sessionToken || !email || !email.includes('@') || !email.includes('.')) {
+    return res.status(400).json({ error: 'missing_fields' });
+  }
+  if (!supabase) return res.status(503).json({ error: 'no_supabase' });
+
+  var session = verifiedSessions.get(sessionToken);
+  if (!session || session.expires < Date.now()) {
+    return res.status(401).json({ error: 'invalid_session' });
+  }
+
+  try {
+    // Prevent one email from being linked to two different wallets
+    var existing = await getUserByEmail(email);
+    if (existing && existing.wallet !== session.wallet) {
+      return res.status(409).json({ error: 'email_taken' });
+    }
+
+    if (!checkMagicSendLimit(email)) {
+      return res.status(429).json({ error: 'rate_limited' });
+    }
+
+    await upsertUser(session.wallet, email, session.tier, session.balance);
+    var token = await createMagicToken(email);
+    await sendMagicLinkEmail(email, token);
+    res.json({ ok: true });
+  } catch (e) {
+    console.error('link-email error:', e.message);
+    res.status(500).json({ error: e.message || 'server_error' });
+  }
+});
+
+// ── /api/auth/magic-send — request a magic link for already-linked email ──
+app.post('/api/auth/magic-send', async function(req, res) {
+  var body  = req.body || {};
+  var email = (body.email || '').toString().trim().toLowerCase().slice(0, 254);
+
+  if (!email || !email.includes('@') || !email.includes('.')) {
+    return res.status(400).json({ error: 'invalid_email' });
+  }
+  if (!supabase) return res.status(503).json({ error: 'no_supabase' });
+  if (!checkMagicSendLimit(email)) {
+    return res.status(429).json({ error: 'rate_limited' });
+  }
+
+  try {
+    var user = await getUserByEmail(email);
+    if (user) {
+      var token = await createMagicToken(email);
+      await sendMagicLinkEmail(email, token);
+    }
+    // Always return ok — don't reveal whether email exists
+    res.json({ ok: true });
+  } catch (e) {
+    console.error('magic-send error:', e.message);
+    res.status(500).json({ error: 'server_error' });
+  }
+});
+
+// ── /api/auth/magic-verify — verify token, re-check balance, issue session ─
+app.post('/api/auth/magic-verify', async function(req, res) {
+  var body  = req.body || {};
+  var token = (body.token || '').toString().trim().slice(0, 64);
+
+  if (!token) return res.status(400).json({ error: 'missing_token' });
+  if (!supabase) return res.status(503).json({ error: 'no_supabase' });
+
+  try {
+    var email = await consumeMagicToken(token);
+    if (!email) return res.status(401).json({ error: 'invalid_or_expired' });
+
+    var user = await getUserByEmail(email);
+    if (!user) return res.status(404).json({ error: 'user_not_found' });
+
+    // Always re-check on-chain balance — catches anyone who sold
+    var balance  = await getSolanaTokenBalance(user.wallet);
+    var tier     = balance >= MIN_TOKENS ? 'operative' : 'recruit';
+    await upsertUser(user.wallet, email, tier, balance);
+
+    var sessionToken = crypto.randomUUID();
+    verifiedSessions.set(sessionToken, {
+      wallet: user.wallet, tier: tier, balance: balance,
+      expires: Date.now() + SESSION_TTL
+    });
+
+    res.json({ tier, balance, sessionToken, wallet: user.wallet, email, minTokens: MIN_TOKENS });
+  } catch (e) {
+    console.error('magic-verify error:', e.message);
+    res.status(500).json({ error: 'server_error' });
   }
 });
 

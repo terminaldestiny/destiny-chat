@@ -213,6 +213,8 @@
       border-color:var(--cyan);color:var(--cyan);background:rgba(0,212,255,0.06);
       box-shadow:0 0 10px rgba(0,212,255,0.1);
     }
+    .cmd-chip-email { border-color:rgba(0,212,255,0.28);color:rgba(0,212,255,0.55); }
+    .cmd-chip-email:hover,.cmd-chip-email:active { border-color:var(--cyan);color:var(--cyan);background:rgba(0,212,255,0.06);box-shadow:0 0 10px rgba(0,212,255,0.1); }
     .cmd-chip-dream { border-color:rgba(180,80,255,0.28);color:rgba(180,80,255,0.55);letter-spacing:2.5px; }
     .cmd-chip-dream:hover,.cmd-chip-dream:active { border-color:rgba(180,80,255,0.6);color:rgba(200,120,255,0.9);background:rgba(180,80,255,0.06);box-shadow:0 0 10px rgba(180,80,255,0.12); }
     .cmd-chip-disconnect { border-color:rgba(255,42,0,0.3);color:rgba(255,42,0,0.6); }
@@ -237,6 +239,28 @@
     #scan-hint.on { display:flex; }
     #scan-hint:hover { background:rgba(0,212,255,0.08); }
     #scan-hint-addr { opacity:0.55;font-size:9px;letter-spacing:1px; }
+
+    /* Email bar */
+    #email-bar {
+      display:none;flex-shrink:0;align-items:center;gap:10px;
+      padding:7px 18px;background:rgba(0,212,255,0.03);
+      border-top:1px solid rgba(0,212,255,0.18);
+    }
+    #email-bar.on { display:flex; }
+    #email-bar-pfx { font-size:8px;letter-spacing:2.5px;color:rgba(0,212,255,0.5);white-space:nowrap;flex-shrink:0; }
+    #email-input {
+      flex:1;background:transparent;border:none;border-bottom:1px solid rgba(0,212,255,0.28);outline:none;
+      color:var(--cyan);font-family:inherit;font-size:13px;padding:4px 8px;caret-color:var(--green);
+    }
+    #email-input::placeholder { color:rgba(0,212,255,0.2); }
+    #email-bar-send {
+      flex-shrink:0;padding:5px 14px;border:1px solid rgba(0,212,255,0.38);
+      color:rgba(0,212,255,0.8);font-family:inherit;font-size:9px;letter-spacing:1.5px;
+      cursor:pointer;transition:all 0.15s;user-select:none;
+    }
+    #email-bar-send:hover { background:rgba(0,212,255,0.1);border-color:var(--cyan);color:var(--cyan); }
+    #email-bar-cancel { color:rgba(255,42,0,0.4);font-size:13px;cursor:pointer;padding:4px 6px;transition:color 0.15s;user-select:none;flex-shrink:0; }
+    #email-bar-cancel:hover { color:var(--red); }
 
     /* Mission bar */
     #mission-bar {
@@ -769,6 +793,11 @@
       #cmd-bar { padding:6px 10px; gap:6px; }
       .cmd-chip { padding:8px 12px; font-size:9px; min-height:34px; }
 
+      /* ── Email bar ── */
+      #email-bar { padding:6px 10px; gap:8px; }
+      #email-input { font-size:14px; }
+      #email-bar-send { font-size:8px; padding:5px 10px; letter-spacing:1px; }
+
       /* ── Mission bar ── */
       #mission-bar { padding:5px 10px; gap:8px; }
       #mission-bar-text { font-size:9px; letter-spacing:1px; }
@@ -874,11 +903,19 @@
   <div id="cmd-bar">
     <button class="cmd-chip cmd-chip-scan" onclick="quickCmd('/scan')">⬡ SCAN TOKEN</button>
     <button class="cmd-chip cmd-chip-wallet" id="wallet-btn" onclick="connectWallet()">⬡ CONNECT</button>
+    <button class="cmd-chip cmd-chip-email" id="email-btn" onclick="openEmailBar(getSession()?'link':'login')">✉ EMAIL</button>
     <button class="cmd-chip" id="model-toggle-btn" onclick="toggleModel()">⬡ SONNET 🔒</button>
     <button class="cmd-chip" id="voice-btn" onclick="toggleVoice()">◉ VOICE</button>
     <button class="cmd-chip cmd-chip-disconnect" id="disconnect-btn" onclick="disconnectWallet()" style="display:none">⬡ DISCONNECT</button>
     <button class="cmd-chip cmd-chip-dream" onclick="quickCmd('/dream')">⬡ DREAM</button>
     <button class="cmd-chip" onclick="quickCmd('/clear')">CLEAR CHAT</button>
+  </div>
+
+  <div id="email-bar">
+    <span id="email-bar-pfx">✉ EMAIL LOGIN</span>
+    <input id="email-input" type="email" placeholder="your@email.com" autocomplete="email" maxlength="254" spellcheck="false"/>
+    <div id="email-bar-send" onclick="submitEmail()">→ SEND LINK</div>
+    <div id="email-bar-cancel" onclick="closeEmailBar()">✕</div>
   </div>
 
   <div id="mission-bar">
@@ -956,6 +993,19 @@ var CALLSIGN=localStorage.getItem('destiny_callsign')||null;
 var ACTIVE_MODEL='haiku';
 var _mission=null;
 
+// ── Magic link token — read from URL on page load ────────────────────────
+var _pendingMagicToken=(function(){
+  try{
+    var params=new URLSearchParams(window.location.search);
+    var t=params.get('token');
+    if(t){
+      var clean=window.location.pathname+window.location.search.replace(/[?&]token=[^&]+/,'').replace(/^\?$/,'').replace(/^&/,'?');
+      window.history.replaceState({},'',clean||window.location.pathname);
+    }
+    return t||null;
+  }catch(e){return null;}
+})();
+
 // ── Session / tier ────────────────────────────────────────────────
 function getSession(){
   try{var s=JSON.parse(localStorage.getItem('destiny_session')||'null');return(s&&s.expires>Date.now())?s:null;}catch(e){return null;}
@@ -1030,6 +1080,11 @@ async function connectWallet(){
       addCmd(['// OPERATIVE CONFIRMED · '+result.balance.toLocaleString()+' DESTINY HELD · SONNET UNLOCKED']);
     } else {
       addCmd(['// RECRUIT STATUS · '+result.balance.toLocaleString()+' DESTINY HELD · NEED '+result.minTokens.toLocaleString()+' TO UNLOCK SONNET']);
+    }
+    if(!localStorage.getItem('destiny_email')){
+      setTimeout(function(){
+        addCmd(['// TIP · LINK YOUR EMAIL FOR PASSWORDLESS ACCESS','// Click ✉ EMAIL in the bar below — no wallet needed next time']);
+      },1200);
     }
   }catch(e){
     addCmd(['// CONNECTION ERROR · '+(e.message||'UNKNOWN').toUpperCase()]);
@@ -1338,8 +1393,10 @@ function finishBoot(){
     var existingSession=getSession();
     if(existingSession)applyTierUI(existingSession.tier,existingSession.balance);
     setTimeout(function(){
+      var mt=_pendingMagicToken;_pendingMagicToken=null;
       addDestiny("You found me. Good. Ask me anything — AI, crypto, code, building. Let's make you dangerous.",true).then(function(){
         loadChatHistory();
+        if(mt)verifyMagicToken(mt);
       });
     },900);
     setTimeout(function(){if(getRemaining()>0)inputEl.focus();},600);
@@ -1606,6 +1663,80 @@ function clearMission(){
   if(saved){_mission=saved;document.getElementById('mission-bar-text').textContent=_mission;document.getElementById('mission-bar').classList.add('on');}
 })();
 
+// ── Email / magic link auth ───────────────────────────────────────
+var _emailBarMode='login';
+function openEmailBar(mode){
+  _emailBarMode=mode||'login';
+  var pfx=document.getElementById('email-bar-pfx');
+  if(pfx)pfx.textContent=mode==='link'?'✉ LINK EMAIL':'✉ EMAIL LOGIN';
+  document.getElementById('email-bar').classList.add('on');
+  setTimeout(function(){document.getElementById('email-input').focus();},60);
+}
+function closeEmailBar(){
+  document.getElementById('email-bar').classList.remove('on');
+  document.getElementById('email-input').value='';
+}
+function submitEmail(){
+  var email=document.getElementById('email-input').value.trim().toLowerCase();
+  if(!email||!email.includes('@')||!email.includes('.')){
+    addCmd(['// INVALID EMAIL FORMAT']);return;
+  }
+  closeEmailBar();
+  if(_emailBarMode==='link'){linkEmail(email);}else{sendMagicLink(email);}
+}
+document.getElementById('email-input').addEventListener('keydown',function(e){
+  if(e.key==='Enter'){e.preventDefault();submitEmail();}
+  if(e.key==='Escape'){closeEmailBar();}
+});
+
+async function linkEmail(email){
+  var st=getSessionToken();
+  if(!st){addCmd(['// CONNECT WALLET FIRST · THEN LINK YOUR EMAIL']);return;}
+  addCmd(['// LINKING EMAIL · '+email+'...']);
+  try{
+    var res=await fetch(BACKEND+'/api/auth/link-email',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({sessionToken:st,email:email})});
+    var data=await res.json();
+    if(res.ok){
+      localStorage.setItem('destiny_email',email);
+      addCmd(['// EMAIL LINKED · MAGIC LINK SENT TO '+email,'// CHECK YOUR INBOX · USE IT NEXT TIME — NO WALLET NEEDED']);
+    }else if(data.error==='email_taken'){
+      addCmd(['// EMAIL ALREADY LINKED TO A DIFFERENT WALLET']);
+    }else if(data.error==='rate_limited'){
+      addCmd(['// TOO MANY REQUESTS · WAIT AND TRY AGAIN']);
+    }else{
+      addCmd(['// LINK FAILED · '+(data.error||'SERVER ERROR').toUpperCase()]);
+    }
+  }catch(e){addCmd(['// LINK FAILED · '+(e.message||'CONNECTION ERROR').toUpperCase()]);}
+}
+
+async function sendMagicLink(email){
+  addCmd(['// SENDING ACCESS LINK TO: '+email+'...']);
+  try{
+    await fetch(BACKEND+'/api/auth/magic-send',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email:email})});
+    addCmd(['// ACCESS LINK SENT · CHECK YOUR INBOX','// EXPIRES IN 15 MINUTES · CLICK IT TO RESTORE YOUR SESSION']);
+  }catch(e){addCmd(['// SEND FAILED · '+(e.message||'CONNECTION ERROR').toUpperCase()]);}
+}
+
+async function verifyMagicToken(token){
+  addCmd(['// VERIFYING ACCESS LINK...']);
+  try{
+    var res=await fetch(BACKEND+'/api/auth/magic-verify',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({token:token})});
+    var data=await res.json();
+    if(res.ok&&!data.error){
+      saveSession({sessionToken:data.sessionToken,tier:data.tier,balance:data.balance,wallet:data.wallet,expires:Date.now()+604800000});
+      applyTierUI(data.tier,data.balance);
+      if(data.email)localStorage.setItem('destiny_email',data.email);
+      if(data.tier==='operative'){
+        addCmd(['// ACCESS GRANTED · HERO STATUS CONFIRMED','// '+data.balance.toLocaleString()+' $DESTINY HELD · SONNET UNLOCKED']);
+      }else{
+        addCmd(['// ACCESS GRANTED · RECRUIT STATUS','// NEED 500,000 $DESTINY TO UNLOCK SONNET']);
+      }
+    }else{
+      addCmd(['// ACCESS LINK INVALID OR EXPIRED','// Click ✉ EMAIL to request a new one']);
+    }
+  }catch(e){addCmd(['// VERIFICATION FAILED · '+(e.message||'CONNECTION ERROR').toUpperCase()]);}
+}
+
 function _ctx(){
   if(!_actx)_actx=new(window.AudioContext||window.webkitAudioContext)();
   if(_actx.state==='suspended')_actx.resume();
@@ -1865,6 +1996,7 @@ function handleCommand(raw){
       addCmd([
         '// AVAILABLE COMMANDS',
         '/scan [ca]       token intel — price, liquidity, risk',
+        '/email [address] link email or request magic login link',
         '/mission [goal]  lock a goal · session stays focused on it',
         '/profile         your hero profile — tier, model, mission',
         '/intel           random AI or crypto intel tip',
@@ -1906,6 +2038,15 @@ function handleCommand(raw){
       break;
     case '/debrief':
       runDebrief();break;
+    case '/email':
+      (function(){
+        var arg=raw.trim().slice(7).trim();
+        if(arg){
+          if(getSession()){linkEmail(arg);}else{sendMagicLink(arg);}
+        }else{
+          openEmailBar(getSession()?'link':'login');
+        }
+      })();break;
     case '/mission':
       setMission(raw.trim().slice(8).trim());break;
     case '/profile':
