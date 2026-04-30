@@ -236,6 +236,20 @@
     #scan-hint:hover { background:rgba(0,212,255,0.08); }
     #scan-hint-addr { opacity:0.55;font-size:9px;letter-spacing:1px; }
 
+    /* Mission bar */
+    #mission-bar {
+      display:none;flex-shrink:0;align-items:center;gap:10px;
+      padding:6px 18px;background:rgba(255,170,0,0.04);
+      border-top:1px solid rgba(255,170,0,0.22);
+      animation:mission-pulse 3s ease-in-out infinite;
+    }
+    #mission-bar.on { display:flex; }
+    @keyframes mission-pulse { 0%,100%{border-top-color:rgba(255,170,0,0.18)} 50%{border-top-color:rgba(255,170,0,0.4)} }
+    #mission-bar-pfx { font-size:8px;letter-spacing:2.5px;color:rgba(255,170,0,0.5);white-space:nowrap;flex-shrink:0; }
+    #mission-bar-text { flex:1;font-size:10px;letter-spacing:1.5px;color:rgba(255,170,0,0.9);overflow:hidden;text-overflow:ellipsis;white-space:nowrap; }
+    #mission-bar-clear { cursor:pointer;color:rgba(255,42,0,0.45);padding:2px 8px;border:1px solid rgba(255,42,0,0.18);font-size:8px;letter-spacing:1px;flex-shrink:0;transition:all 0.15s;user-select:none; }
+    #mission-bar-clear:hover { color:var(--red);border-color:var(--red); }
+
     /* ── MAIN UI ───────────────────────────────────── */
     #ui { position:fixed;top:0;left:0;right:0;height:100vh;height:100dvh;z-index:10;display:flex;flex-direction:column;opacity:0;transition:opacity 0.8s; }
     #ui.on { opacity:1; }
@@ -753,6 +767,10 @@
       #cmd-bar { padding:6px 10px; gap:6px; }
       .cmd-chip { padding:8px 12px; font-size:9px; min-height:34px; }
 
+      /* ── Mission bar ── */
+      #mission-bar { padding:5px 10px; gap:8px; }
+      #mission-bar-text { font-size:9px; letter-spacing:1px; }
+
       /* ── Scan hint ── */
       #scan-hint { padding:6px 10px; font-size:9px; letter-spacing:1.5px; }
 
@@ -860,6 +878,12 @@
     <button class="cmd-chip" onclick="quickCmd('/clear')">CLEAR CHAT</button>
   </div>
 
+  <div id="mission-bar">
+    <span id="mission-bar-pfx">⬡ MISSION</span>
+    <span id="mission-bar-text"></span>
+    <div id="mission-bar-clear" onclick="clearMission()">✕ ABORT</div>
+  </div>
+
   <div id="scan-hint" onclick="confirmScanHint()"></div>
 
   <div id="img-preview">
@@ -927,6 +951,7 @@ var CA='3AwkJnZL7xrf8ffUwEsSkKndQkPSj2vfR3CqvyFpk8UP';
 var DAILY_LIMIT=20;
 var CALLSIGN=localStorage.getItem('destiny_callsign')||null;
 var ACTIVE_MODEL='haiku';
+var _mission=null;
 
 // ── Session / tier ────────────────────────────────────────────────
 function getSession(){
@@ -1356,6 +1381,12 @@ function getHistForAPI(){
   if(CALLSIGN&&(h.length===0||h[0].content!=='My callsign is '+CALLSIGN+'.')){
     base=calibration.concat([{role:'user',content:'My callsign is '+CALLSIGN+'.'},{role:'assistant',content:'Copy that, '+CALLSIGN+'. Frequency locked.'}]);
   }
+  if(_mission){
+    base=base.concat([
+      {role:'user',content:'My active mission is: '+_mission+'. Keep all your responses focused on helping me achieve this.'},
+      {role:'assistant',content:'Mission locked: '+_mission+'. I\'m focused on that — ask me anything related to it.'}
+    ]);
+  }
   return base.concat(h);
 }
 
@@ -1549,6 +1580,29 @@ function toggleVoice(){
   if(vBtn){vBtn.style.color=_voiceOn?'var(--cyan)':'';vBtn.style.borderColor=_voiceOn?'var(--cyan)':'';}
   addCmd([_voiceOn?'// VOICE ONLINE · DESTINY SPEAKING':'// VOICE OFFLINE · SILENT MODE']);
 }
+// ── Mission ───────────────────────────────────────────────────────
+function setMission(goal){
+  if(!goal){addCmd(['// USAGE: /mission [your goal]','// Sets the focus for this entire session.','// /mission clear  ·  to abort active mission']);return;}
+  if(goal.toLowerCase()==='clear'||goal.toLowerCase()==='abort'){clearMission();return;}
+  _mission=goal;
+  localStorage.setItem('destiny_mission',_mission);
+  var txt=document.getElementById('mission-bar-text');
+  if(txt)txt.textContent=_mission;
+  document.getElementById('mission-bar').classList.add('on');
+  addCmd(['// MISSION LOCKED','// OBJECTIVE: '+_mission.toUpperCase(),'// DESTINY IS NOW FOCUSED ON THIS GOAL']);
+}
+function clearMission(){
+  _mission=null;
+  localStorage.removeItem('destiny_mission');
+  document.getElementById('mission-bar').classList.remove('on');
+  addCmd(['// MISSION ABORTED · OPEN CHANNEL RESTORED']);
+}
+// Restore mission from storage on load
+(function(){
+  var saved=localStorage.getItem('destiny_mission');
+  if(saved){_mission=saved;document.getElementById('mission-bar-text').textContent=_mission;document.getElementById('mission-bar').classList.add('on');}
+})();
+
 function _ctx(){
   if(!_actx)_actx=new(window.AudioContext||window.webkitAudioContext)();
   if(_actx.state==='suspended')_actx.resume();
@@ -1807,22 +1861,31 @@ function handleCommand(raw){
     case '/help':
       addCmd([
         '// AVAILABLE COMMANDS',
-        '/scan [ca]  token intel — price, liquidity, risk',
-        '/status     field status report',
-        '/freq       scan known frequencies',
-        '/who        operative identification',
-        '/nvg        toggle night vision',
-        '/clear      wipe feed and memory',
-        '/debrief    summarize this mission',
-        '/mute       toggle sound on/off',
-        '/voice      toggle DESTINY voice (text-to-speech)',
-        '/dream      coming soon',
-        '/help       this list',
+        '/scan [ca]       token intel — price, liquidity, risk',
+        '/mission [goal]  lock a goal · session stays focused on it',
+        '/profile         your hero profile — tier, model, mission',
+        '/intel           random AI or crypto intel tip',
+        '/upgrade         see how to unlock hero tier',
+        '/debrief         summarize this session',
+        '/archive         session stats — messages, words exchanged',
+        '/trace           trace route to DESTINY core',
+        '/ping            ping server · check latency',
+        '/signal          signal diagnostics',
+        '/encrypt [text]  encode a message (for fun)',
+        '/bounty          active bounties — coming soon',
+        '/status          field status report',
+        '/freq            scan known frequencies',
+        '/who             operative ID',
+        '/nvg             toggle night vision',
+        '/voice           toggle DESTINY voice (text-to-speech)',
+        '/mute            toggle all sound',
+        '/dream           coming soon',
+        '/clear           wipe feed and memory',
         '──────────────────────────────',
-        '// UNLOCK SONNET 4.6',
+        '// UNLOCK HERO TIER',
         'hold 500,000+ $DESTINY · connect wallet · verify on-chain',
         'CA: 3AwkJnZL7xrf8ffUwEsSkKndQkPSj2vfR3CqvyFpk8UP',
-        'operatives get sonnet + 100 msg/day · recruits get haiku + 20/day'
+        'heroes get sonnet 4.6 + 100 msg/day · recruits get haiku + 20/day'
       ]);break;
     case '/mute':
       _muted=!_muted;
@@ -1840,6 +1903,107 @@ function handleCommand(raw){
       break;
     case '/debrief':
       runDebrief();break;
+    case '/mission':
+      setMission(raw.trim().slice(8).trim());break;
+    case '/profile':
+      (function(){
+        var sess=getSession(),tier=getTier(),rem=getRemaining();
+        var wallet=sess?sess.wallet:'UNLINKED';
+        var bal=sess?sess.balance.toLocaleString():'—';
+        var missionLine=_mission?_mission.slice(0,50)+(_mission.length>50?'...':''):'NONE SET';
+        addCmd([
+          '// HERO PROFILE',
+          'CALLSIGN  :  '+(CALLSIGN||'UNSET'),
+          'TIER      :  '+tier.toUpperCase(),
+          'MODEL     :  '+(tier==='operative'?'SONNET 4.6':'HAIKU 4.5'),
+          'MSGS LEFT :  '+rem+' / '+(tier==='operative'?'100':'20')+' TODAY',
+          'WALLET    :  '+(sess?wallet.slice(0,8)+'...'+wallet.slice(-4):'UNLINKED'),
+          'HOLDING   :  '+(sess?bal+' $DESTINY':'—'),
+          'MISSION   :  '+missionLine
+        ]);
+      })();break;
+    case '/ping':
+      (function(){
+        addCmd(['// PINGING SERVER...']);
+        var t0=Date.now();
+        fetch(BACKEND+'/health').then(function(r){
+          var ms=Date.now()-t0;
+          addCmd(['// PING RESULT','LATENCY   :  '+ms+'ms','STATUS    :  '+(r.ok?'ONLINE · ALL SYSTEMS GO':'DEGRADED'),'FREQ      :  140.85 · CODEC SECURED']);
+        }).catch(function(){addCmd(['// PING FAILED · SERVER UNREACHABLE']);});
+      })();break;
+    case '/signal':
+      (function(){
+        var bars=Math.floor(Math.random()*3)+3;
+        var bar_str=['░','░','░','░','░'].map(function(_,i){return i<bars?'█':'░';}).join('');
+        var quality=['MARGINAL','FAIR','GOOD','STRONG','OPTIMAL'][bars-1]||'UNKNOWN';
+        addCmd([
+          '// SIGNAL DIAGNOSTICS',
+          'STRENGTH  :  '+bar_str+'  '+quality,
+          'CODEC     :  140.85 · ENCRYPTED',
+          'UPLINK    :  '+Math.floor(Math.random()*40+60)+'%',
+          'NOISE     :  '+Math.floor(Math.random()*8)+'dB',
+          'LOCK      :  CONFIRMED'
+        ]);
+      })();break;
+    case '/trace':
+      (function(){
+        var hops=['LOCAL NODE','EDGE RELAY 07','BACKBONE SV3','CRYPTO MESH ALPHA','DESTINY CORE'];
+        var lines=['// TRACING ROUTE TO DESTINY CORE...'];
+        var delay=0;
+        hops.forEach(function(hop,i){
+          delay+=80+Math.random()*60|0;
+          setTimeout(function(){
+            addCmd(['// HOP '+(i+1)+' · '+hop+'  ·  '+(Math.floor(Math.random()*40+8))+'ms'+(i===hops.length-1?'  ·  LOCKED':'')]);
+          },delay);
+        });
+      })();break;
+    case '/intel':
+      (function(){
+        var pool=[
+          ['// INTEL BRIEF','Claude 3.5+ uses extended thinking — give it complex prompts and let it reason.','Set max_thinking_tokens high for hard problems.'],
+          ['// INTEL BRIEF','DeFi liquidity under $100K is thin enough to move price on a single trade.','Check buys/sells ratio — heavy sells with rising price = distribution.'],
+          ['// INTEL BRIEF','Claude Code can build full-stack apps from a single prompt in your terminal.','npm install -g @anthropic-ai/claude-code  →  then run: claude'],
+          ['// INTEL BRIEF','On Solana, token accounts are separate from wallet accounts.','A token with 0 holders on-chain is effectively dead regardless of price.'],
+          ['// INTEL BRIEF','v0.dev from Vercel generates full React UI from text prompts.','Paste a screenshot of any UI and it reverse-engineers the components.'],
+          ['// INTEL BRIEF','Phantom wallet signs messages without broadcasting to chain.','This is how DESTINY verifies you hold $DESTINY without spending gas.'],
+          ['// INTEL BRIEF','MCP (Model Context Protocol) lets Claude plug into any tool or data source.','Build custom MCP servers to give Claude access to your internal APIs.'],
+          ['// INTEL BRIEF','Bolt.new deploys full-stack apps to production in minutes, zero config.','Describe what you want to build — it handles infra, routing, and DB.'],
+        ];
+        var tip=pool[Math.floor(Math.random()*pool.length)];
+        addCmd(tip);
+      })();break;
+    case '/encrypt':
+      (function(){
+        var msg=raw.trim().slice(8).trim()||'DESTINY';
+        var enc=msg.toUpperCase().split('').map(function(c){return c===' '?' ':String.fromCharCode(((c.charCodeAt(0)-65+13)%26)+65);}).join('');
+        addCmd(['// CODEC ENCRYPTION  ·  ROT-13','INPUT     :  '+msg.toUpperCase(),'OUTPUT    :  '+enc,'CIPHER    :  CAESAR-13 · NOT REAL CRYPTO · JUST FOR FUN']);
+      })();break;
+    case '/upgrade':
+      (function(){
+        var tier=getTier();
+        if(tier==='operative'){
+          addCmd(['// UPGRADE STATUS','TIER      :  HERO · FULLY UNLOCKED','MODEL     :  SONNET 4.6 · ACTIVE','LIMIT     :  100 MESSAGES / DAY','MEMORY    :  PERSISTENT ACROSS DEVICES  ·  COMING SOON','NEXT TIER :  APEX (5M+ $DESTINY)  ·  COMING SOON']);
+        } else {
+          addCmd(['// UPGRADE PATH  ·  RECRUIT → HERO','CURRENT   :  HAIKU 4.5  ·  20 MSG/DAY','UNLOCK    :  HOLD 500,000+ $DESTINY','BENEFIT   :  SONNET 4.6 · 100 MSG/DAY · HERO CARD','HOW       :  BUY ON JUPITER → CONNECT WALLET → VERIFY','CA        :  3AwkJnZL7xrf8ffUwEsSkKndQkPSj2vfR3CqvyFpk8UP']);
+        }
+      })();break;
+    case '/bounty':
+      addCmd(['// ACTIVE BOUNTIES','[1]  RECRUIT 5 HEROES · REWARD: COMING SOON','[2]  FIRST /scan ON NEW LISTING · REWARD: COMING SOON','[3]  BUILD WITH $DESTINY API · REWARD: COMING SOON','// BOUNTY SYSTEM · LAUNCHING SOON · STAY TUNED']);break;
+    case '/archive':
+      (function(){
+        var hist=getHist();
+        var userMsgs=hist.filter(function(m){return m.role==='user';}).length;
+        var aiMsgs=hist.filter(function(m){return m.role==='assistant';}).length;
+        var wc=hist.reduce(function(acc,m){return acc+(m.content?m.content.split(/\s+/).length:0);},0);
+        addCmd([
+          '// SESSION ARCHIVE',
+          'YOUR MSGS :  '+userMsgs,
+          'AI MSGS   :  '+aiMsgs,
+          'WORDS EX  :  ~'+wc.toLocaleString(),
+          'MISSION   :  '+(_mission?_mission.slice(0,40):'NONE'),
+          'STORED    :  LOCAL  ·  HEROES GET CLOUD SYNC SOON'
+        ]);
+      })();break;
     default:
       addCmd(['// UNKNOWN COMMAND: '+raw,'type /help for available commands']);
   }
