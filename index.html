@@ -992,6 +992,7 @@ var DAILY_LIMIT=20;
 var CALLSIGN=localStorage.getItem('destiny_callsign')||null;
 var ACTIVE_MODEL='haiku';
 var _mission=null;
+var _awaitingCallsign=false;
 
 // ── Magic link token — read from URL on page load ────────────────────────
 var _pendingMagicToken=(function(){
@@ -1340,33 +1341,6 @@ function initBoot(){
   bootEl.appendChild(bootLinesEl);
 }
 
-function showCallsignPrompt(resume){
-  var bp=document.createElement('div');bp.className='boot-prompt';
-  var lbl=document.createElement('div');lbl.className='boot-prompt-lbl';lbl.textContent='WHO ARE YOU, OPERATIVE?';
-  var row=document.createElement('div');row.className='boot-prompt-row';
-  var inp=document.createElement('input');
-  inp.id='boot-callsign-input';inp.type='text';inp.placeholder='YOUR NAME';
-  inp.maxLength=20;inp.autocomplete='off';inp.spellcheck=false;
-  var btn=document.createElement('button');
-  btn.id='boot-confirm-btn';btn.type='button';btn.textContent='→';
-  row.appendChild(inp);row.appendChild(btn);
-  bp.appendChild(lbl);bp.appendChild(row);
-  bootEl.appendChild(bp);
-  setTimeout(function(){inp.focus();},80);
-  function confirm(){
-    var name=inp.value.trim().toUpperCase().replace(/[^A-Z0-9 _\-]/g,'').slice(0,16);
-    if(!name)name='OPERATIVE';
-    CALLSIGN=name;
-    localStorage.setItem('destiny_callsign',CALLSIGN);
-    bp.remove();
-    var cf=document.createElement('div');cf.className='bl bl-acc';
-    cf.textContent='CALLSIGN '+CALLSIGN+' · LOCKED IN';
-    bootLinesEl.appendChild(cf);
-    setTimeout(resume,400);
-  }
-  btn.addEventListener('click',confirm);
-  inp.addEventListener('keydown',function(e){if(e.key==='Enter'){e.preventDefault();confirm();}});
-}
 
 function loadChatHistory(){
   var h=getHist().filter(function(m){return m.role==='user'||m.role==='assistant';});
@@ -1383,7 +1357,7 @@ function loadChatHistory(){
 
 function finishBoot(){
   var last=document.createElement('div');last.className='bl bl-win';
-  last.textContent='> CHANNEL OPEN. MAKE IT COUNT, '+(CALLSIGN||'HERO')+'.';
+  last.textContent=CALLSIGN?'> CHANNEL OPEN. WELCOME BACK, '+CALLSIGN+'.':'> CHANNEL OPEN.';
   bootLinesEl.appendChild(last);
   setTimeout(function(){
     bootEl.classList.add('out');uiEl.classList.add('on');
@@ -1394,12 +1368,21 @@ function finishBoot(){
     if(existingSession)applyTierUI(existingSession.tier,existingSession.balance);
     setTimeout(function(){
       var mt=_pendingMagicToken;_pendingMagicToken=null;
-      addDestiny("You found me. Good. Ask me anything — AI, crypto, code, building. Let's make you dangerous.",true).then(function(){
-        loadChatHistory();
-        if(mt)verifyMagicToken(mt);
-      });
+      if(!CALLSIGN){
+        _awaitingCallsign=true;
+        inputEl.placeholder='enter your callsign...';
+        addDestiny("Signal locked. I'm DESTINY. What do I call you?",true).then(function(){
+          if(mt)verifyMagicToken(mt);
+          if(getRemaining()>0)inputEl.focus();
+        });
+      } else {
+        addDestiny("You found me. Good. Ask me anything — AI, crypto, code, building. Let's make you dangerous.",true).then(function(){
+          loadChatHistory();
+          if(mt)verifyMagicToken(mt);
+        });
+        setTimeout(function(){if(getRemaining()>0)inputEl.focus();},200);
+      }
     },900);
-    setTimeout(function(){if(getRemaining()>0)inputEl.focus();},600);
   },500);
 }
 
@@ -1407,10 +1390,7 @@ function runBoot(){
   initBoot();
   var i=0;
   (function next(){
-    if(i>=BOOT.length){
-      if(!CALLSIGN){showCallsignPrompt(finishBoot);}else{finishBoot();}
-      return;
-    }
+    if(i>=BOOT.length){finishBoot();return;}
     var b=BOOT[i++];
     if(b.c==='bar'){
       var w=document.createElement('div');w.className='boot-bar-wrap';
@@ -2228,11 +2208,28 @@ document.addEventListener('paste',function(e){
 });
 
 // ── Send ──────────────────────────────────────────────────────────
+async function captureCallsign(raw){
+  var name=raw.trim().toUpperCase().replace(/[^A-Z0-9 _\-]/g,'').slice(0,16)||'HERO';
+  CALLSIGN=name;
+  localStorage.setItem('destiny_callsign',CALLSIGN);
+  _awaitingCallsign=false;
+  document.getElementById('input-pfx').textContent='> '+CALLSIGN+':';
+  inputEl.placeholder='enter transmission...';
+  addHero(raw.trim());
+  await addDestiny('Copy that, '+CALLSIGN+'. Frequency locked. What do you need?',true);
+  loadChatHistory();
+}
+
 async function sendMsg(){
   var text=inputEl.value.trim();
   if(!text&&!pendingImage)return;
-  if(!text)text='Analyze this image.';
   inputEl.value='';eqEl.classList.remove('on');
+  if(_awaitingCallsign){
+    if(text.startsWith('/')){handleCommand(text);return;}
+    if(!text)return;
+    captureCallsign(text);return;
+  }
+  if(!text)text='Analyze this image.';
   if(text.startsWith('/')){handleCommand(text);return;}
   if(sending||getRemaining()<=0)return;
   playSound('tx-send');
