@@ -5,6 +5,7 @@ var Anthropic = require('@anthropic-ai/sdk');
 var crypto = require('crypto');
 var nacl = require('tweetnacl');
 var bs58 = require('bs58');
+var { createClient } = require('@supabase/supabase-js');
 
 var app = express();
 
@@ -27,6 +28,42 @@ app.use(cors({
 app.use(express.json({ limit: '6mb' }));
 
 var client = new Anthropic.default({ apiKey: process.env.ANTHROPIC_API_KEY });
+
+// ── Supabase ──────────────────────────────────────────────────────────────
+var supabase = null;
+if (process.env.SUPABASE_URL && process.env.SUPABASE_SERVICE_KEY) {
+  supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_SERVICE_KEY);
+  console.log('Supabase: connected');
+} else {
+  console.log('Supabase: not configured — heroes using client history');
+}
+
+async function loadHistory(wallet) {
+  if (!supabase) return null;
+  try {
+    var { data, error } = await supabase
+      .from('conversations')
+      .select('messages')
+      .eq('wallet', wallet)
+      .single();
+    if (error && error.code !== 'PGRST116') throw error;
+    return data ? data.messages : null;
+  } catch (e) {
+    console.error('Supabase load error:', e.message);
+    return null;
+  }
+}
+
+async function saveHistory(wallet, messages) {
+  if (!supabase) return;
+  try {
+    await supabase
+      .from('conversations')
+      .upsert({ wallet, messages, updated_at: new Date().toISOString() }, { onConflict: 'wallet' });
+  } catch (e) {
+    console.error('Supabase save error:', e.message);
+  }
+}
 
 // ── Holder verification ───────────────────────────────────────────────────
 var DESTINY_MINT = '3AwkJnZL7xrf8ffUwEsSkKndQkPSj2vfR3CqvyFpk8UP';
@@ -201,7 +238,7 @@ RESPONSE FORMAT:
 This is a terminal UI — keep it tight. 2-4 sentences max for most replies. Bullet points when listing options. No walls of text. If a topic needs depth, give the most important piece first and offer to go deeper.`;
 
 // ── /api/chat ─────────────────────────────────────────────────────────────
-app.post('/api/chat', function(req, res) {
+app.post('/api/chat', async function(req, res) {
   var body      = req.body || {};
   var visitorId = (body.visitorId || '').toString().trim().slice(0, 128);
   var message   = (body.message   || '').toString().trim().slice(0, 2000);
@@ -244,12 +281,24 @@ app.post('/api/chat', function(req, res) {
     }
   }
 
-  var messages = rawHistory
-    .filter(function(m) {
-      return m && (m.role === 'user' || m.role === 'assistant') && typeof m.content === 'string';
-    })
+  // ── History: Supabase for heroes, client-provided for recruits ────────────
+  var cleanClient = rawHistory
+    .filter(function(m) { return m && (m.role === 'user' || m.role === 'assistant') && typeof m.content === 'string'; })
     .map(function(m) { return { role: m.role, content: m.content.slice(0, 2000) }; })
-    .slice(-20);
+    .slice(-40);
+
+  var messages = [];
+  if (tier === 'operative' && walletAddress) {
+    var saved = await loadHistory(walletAddress);
+    if (saved !== null) {
+      messages = saved.slice(-40);
+    } else {
+      // First visit — seed Supabase from client localStorage
+      messages = cleanClient;
+    }
+  } else {
+    messages = cleanClient.slice(-20);
+  }
 
   // Build the current user turn — vision content block if image attached
   var currentContent = imageSource
@@ -266,18 +315,29 @@ app.post('/api/chat', function(req, res) {
   var modelKey = (tier === 'operative') ? 'sonnet' : 'haiku';
   var modelId  = ALLOWED_MODELS[modelKey];
 
-  client.messages.create({
-    model: modelId,
-    max_tokens: 300,
-    system: DESTINY_CHAT_PROMPT,
-    messages: messages
-  }).then(function(msg) {
+  try {
+    var msg = await client.messages.create({
+      model: modelId,
+      max_tokens: 300,
+      system: DESTINY_CHAT_PROMPT,
+      messages: messages
+    });
     var text = (msg.content && msg.content[0] && msg.content[0].text) ? msg.content[0].text.trim() : 'Signal unclear.';
+
+    // Save updated history to Supabase for heroes (store text only, no image blobs)
+    if (tier === 'operative' && walletAddress) {
+      var textMessages = messages.map(function(m) {
+        return { role: m.role, content: typeof m.content === 'string' ? m.content : message };
+      });
+      textMessages.push({ role: 'assistant', content: text });
+      await saveHistory(walletAddress, textMessages.slice(-40));
+    }
+
     res.json({ response: text, remaining: remaining, model: modelKey });
-  }).catch(function(err) {
+  } catch (err) {
     console.error('Chat API error:', err.message || err);
     res.status(500).json({ error: 'api_error', response: 'Static on the line. Try again.' });
-  });
+  }
 });
 
 // ── Health ────────────────────────────────────────────────────────────────
