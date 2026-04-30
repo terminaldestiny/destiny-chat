@@ -829,7 +829,7 @@
         <div id="id-name">DESTINY</div>
         <div id="id-sub">
           <div id="id-dot"></div>
-          <span>FIELD OPERATIVE</span>
+          <span>HERO OPERATIVE</span>
           <span id="tier-badge"></span>
           <span id="voice-ind" style="display:none">◉ VOICE</span>
           <span id="id-clock"></span>
@@ -958,6 +958,10 @@ function applyTierUI(tier,balance){
 }
 
 var _connecting=false;
+function _doneConnecting(wBtn){
+  wBtn.disabled=true;
+  setTimeout(function(){wBtn.disabled=false;_connecting=false;},3000);
+}
 async function connectWallet(){
   if(_connecting)return;
   _connecting=true;
@@ -988,7 +992,7 @@ async function connectWallet(){
 
     if(result.error){
       addCmd(['// VERIFICATION FAILED · '+result.error.toUpperCase()]);
-      wBtn.textContent='⬡ CONNECT';wBtn.disabled=false;_connecting=false;return;
+      wBtn.textContent='⬡ CONNECT';_doneConnecting(wBtn);return;
     }
 
     saveSession({sessionToken:result.sessionToken,tier:result.tier,balance:result.balance,wallet:wallet,expires:Date.now()+3600000});
@@ -1001,9 +1005,9 @@ async function connectWallet(){
     }
   }catch(e){
     addCmd(['// CONNECTION ERROR · '+(e.message||'UNKNOWN').toUpperCase()]);
-    wBtn.textContent='⬡ CONNECT';wBtn.disabled=false;
+    wBtn.textContent='⬡ CONNECT';
   }
-  wBtn.disabled=false;_connecting=false;
+  _doneConnecting(wBtn);
 }
 
 // ── Matrix rain ───────────────────────────────────────────────────
