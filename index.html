@@ -1816,6 +1816,7 @@ function handleCommand(raw){
         '/debrief    summarize this mission',
         '/mute       toggle sound on/off',
         '/voice      toggle DESTINY voice (text-to-speech)',
+        '/dream      coming soon',
         '/help       this list',
         '──────────────────────────────',
         '// UNLOCK SONNET 4.6',
@@ -1831,6 +1832,12 @@ function handleCommand(raw){
       break;
     case '/voice':
       toggleVoice();break;
+    case '/dream':
+      var dreamInput=raw.trim().slice(6).trim();
+      addCmd(dreamInput
+        ?['// DREAM PROTOCOL · SIGNAL RECEIVED','// "'+dreamInput+'"','// GENERATION OFFLINE · COMING SOON']
+        :['// DREAM PROTOCOL · COMING SOON','// /dream [describe what you want to see']);
+      break;
     case '/debrief':
       runDebrief();break;
     default:
