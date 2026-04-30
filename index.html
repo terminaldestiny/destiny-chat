@@ -198,10 +198,28 @@
     #cmd-scroll-hint {
       display:none;position:sticky;right:0;flex-shrink:0;
       align-items:center;justify-content:flex-end;
-      padding-left:18px;padding-right:8px;
-      background:linear-gradient(90deg,transparent,rgba(3,12,21,0.97) 55%);
-      color:rgba(0,255,65,0.5);font-size:18px;pointer-events:none;
-      transition:opacity 0.2s;
+      padding-left:26px;padding-right:10px;
+      background:linear-gradient(90deg,transparent,rgba(3,12,21,0.98) 52%);
+      font-size:22px;pointer-events:none;
+      transition:opacity 0.25s;
+      animation:scroll-hint-pulse 1.6s ease-in-out infinite;
+    }
+    @keyframes scroll-hint-pulse {
+      0%,100% {
+        color:rgba(0,255,65,0.22);
+        text-shadow:none;
+        transform:translateX(0);
+      }
+      45% {
+        color:rgba(0,255,65,1);
+        text-shadow:0 0 8px rgba(0,255,65,1),0 0 20px rgba(0,255,65,0.7),0 0 44px rgba(0,255,65,0.3),0 0 80px rgba(0,255,65,0.12);
+        transform:translateX(3px);
+      }
+      70% {
+        color:rgba(0,255,65,0.7);
+        text-shadow:0 0 6px rgba(0,255,65,0.6),0 0 16px rgba(0,255,65,0.3);
+        transform:translateX(1px);
+      }
     }
     .cmd-chip {
       flex-shrink:0;background:transparent;
