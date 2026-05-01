@@ -728,6 +728,7 @@
     #img-clear { font-size:9px;letter-spacing:1.5px;color:rgba(255,42,0,0.5);cursor:pointer;padding:4px 8px;border:1px solid rgba(255,42,0,0.2);transition:all 0.15s;flex-shrink:0;user-select:none; }
     #img-clear:hover { color:var(--red);border-color:var(--red); }
     .hero-img { max-width:240px;max-height:160px;object-fit:contain;border:1px solid rgba(0,212,255,0.2);margin-bottom:7px;display:block;margin-left:auto;filter:brightness(0.9); }
+    .hero-img-placeholder { font-size:9px;letter-spacing:1px;color:rgba(0,212,255,0.3);border:1px dashed rgba(0,212,255,0.18);padding:6px 10px;margin-bottom:7px;display:inline-block; }
 
     /* Help nav buttons */
     #help-nav { display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:20px;border-bottom:1px solid rgba(0,255,65,0.1);padding-bottom:16px; }
@@ -1658,8 +1659,18 @@ function addHero(text,imgUrl){
   var name=document.createElement('span');name.className='hero-name';name.textContent=CALLSIGN||'HERO';
   head.appendChild(ts_);head.appendChild(name);
   body.appendChild(head);
+  // Live image blob — show the real thumbnail
   if(imgUrl){var thumb=document.createElement('img');thumb.className='hero-img';thumb.src=imgUrl;thumb.alt='';body.appendChild(thumb);}
-  var txt=document.createElement('div');txt.className='hero-text';txt.textContent=text;
+  // Stored history marker — image is gone, show a placeholder
+  var imgMarker='\u{1F4CE} [image attached]\n';
+  var displayText=text;
+  if(!imgUrl&&text.startsWith(imgMarker)){
+    displayText=text.slice(imgMarker.length);
+    var ph=document.createElement('div');ph.className='hero-img-placeholder';
+    ph.textContent='📎 image · not available after refresh';
+    body.appendChild(ph);
+  }
+  var txt=document.createElement('div');txt.className='hero-text';txt.textContent=displayText;
   body.appendChild(txt);
   hw.appendChild(bar);hw.appendChild(body);w.appendChild(hw);
   feed.appendChild(w);feed.scrollTop=feed.scrollHeight;
@@ -2420,7 +2431,7 @@ async function sendMsg(){
   var imgDataUrl=pendingImage?pendingImage.dataUrl:null;
   var imgBase64=pendingImage?pendingImage.base64:null;
   clearPendingImage();
-  addHero(text,imgDataUrl);pushHist('user',text);showThink();
+  addHero(text,imgDataUrl);pushHist('user',imgBase64?'\u{1F4CE} [image attached]\n'+text:text);showThink();
   // Detect expired session before sending
   var _sess=JSON.parse(localStorage.getItem('destiny_session')||'null');
   if(_sess&&_sess.expires<=Date.now()){disconnectWallet();addCmd(['// SESSION EXPIRED · RECONNECT WALLET TO RESTORE SONNET ACCESS']);}
