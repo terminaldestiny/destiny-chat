@@ -127,7 +127,7 @@ function checkMagicSendLimit(email) {
 // ── Email sending via Resend ─────────────────────────────────────────────
 async function sendMagicLinkEmail(to, token) {
   if (!process.env.RESEND_API_KEY) throw new Error('no_resend_key');
-  var link = SITE_URL.replace(/\/?$/, '/') + '?token=' + token;
+  var link = SITE_URL.replace(/\/?$/, '/') + '#token=' + token;
   var res = await fetch('https://api.resend.com/emails', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + process.env.RESEND_API_KEY },
@@ -386,9 +386,26 @@ app.post('/api/chat', async function(req, res) {
   // Vision image — operative-only, max ~4MB base64
   var imageSource = null;
   if (body.image && tier === 'operative') {
-    var b64 = (body.image || '').toString();
+    var b64 = (body.image || '').toString().replace(/\s/g, '');
     if (b64.length > 0 && b64.length <= 5500000) {
-      imageSource = { type: 'base64', media_type: 'image/jpeg', data: b64 };
+      // Validate magic bytes — decode first 12 bytes to confirm real image type
+      var MAGIC = {
+        'image/jpeg': ['ffd8ff'],
+        'image/png':  ['89504e47'],
+        'image/gif':  ['47494638'],
+        'image/webp': ['52494646'],
+      };
+      var raw = Buffer.from(b64.slice(0, 16), 'base64');
+      var hex = raw.toString('hex');
+      var detectedType = null;
+      for (var mt in MAGIC) {
+        if (MAGIC[mt].some(function(sig) { return hex.startsWith(sig); })) {
+          detectedType = mt; break;
+        }
+      }
+      if (detectedType) {
+        imageSource = { type: 'base64', media_type: detectedType, data: b64 };
+      }
     }
   }
 

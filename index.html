@@ -1150,19 +1150,17 @@
 var BACKEND='https://dream-production-0bfd.up.railway.app';
 var CA='3AwkJnZL7xrf8ffUwEsSkKndQkPSj2vfR3CqvyFpk8UP';
 var DAILY_LIMIT=20;
-var CALLSIGN=localStorage.getItem('destiny_callsign')||null;
+var CALLSIGN=(function(){var v=localStorage.getItem('destiny_callsign')||'';return v.replace(/[^A-Z0-9 _\-]/g,'').slice(0,16)||null;})();
 var ACTIVE_MODEL='haiku';
 var _mission=null;
 
 // ── Magic link token — read from URL on page load ────────────────────────
 var _pendingMagicToken=(function(){
   try{
-    var params=new URLSearchParams(window.location.search);
-    var t=params.get('token');
-    if(t){
-      var clean=window.location.pathname+window.location.search.replace(/[?&]token=[^&]+/,'').replace(/^\?$/,'').replace(/^&/,'?');
-      window.history.replaceState({},'',clean||window.location.pathname);
-    }
+    var hash=window.location.hash||'';
+    var m=hash.match(/[#&]token=([^&]+)/);
+    var t=m?decodeURIComponent(m[1]):null;
+    if(t)window.history.replaceState({},'',window.location.pathname+window.location.search);
     return t||null;
   }catch(e){return null;}
 })();
@@ -1237,7 +1235,7 @@ async function connectWallet(){
       wBtn.textContent='⬡ CONNECT';_doneConnecting(wBtn);return;
     }
 
-    saveSession({sessionToken:result.sessionToken,tier:result.tier,balance:result.balance,wallet:wallet,expires:Date.now()+3600000});
+    saveSession({sessionToken:result.sessionToken,tier:result.tier,balance:result.balance,wallet:wallet,expires:Date.now()+604800000});
     applyTierUI(result.tier,result.balance);
 
     if(result.tier==='operative'){
