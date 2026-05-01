@@ -2488,6 +2488,8 @@ function disconnectWallet(){
   mBtn.textContent='⬡ SONNET 🔒';mBtn.style.borderColor='';mBtn.style.color='';
   dBtn.style.display='none';
   document.getElementById('attach-btn').classList.remove('on');
+  DAILY_LIMIT=20;
+  updateHUD();
   addCmd(['// WALLET DISCONNECTED · SESSION CLEARED']);
 }
 function quickCmd(cmd){
