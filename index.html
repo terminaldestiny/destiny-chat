@@ -1213,6 +1213,7 @@ function applyTierUI(tier,balance){
     aBtn.classList.remove('on');
     DAILY_LIMIT=20;
   }
+  if(fillEl) updateHUD();
 }
 
 // Apply session state immediately — UI is opacity:0 at this point so no flash
