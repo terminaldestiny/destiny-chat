@@ -2418,6 +2418,11 @@ async function sendMsg(){
     else if(res.ok){
       var data=await res.json();
       reply=data.response||'Signal unclear. Try again.';modelUsed=data.model;
+      // Detect server session drop: we sent as operative but server responded as haiku
+      if(modelUsed==='haiku'&&ACTIVE_MODEL==='sonnet'){
+        addCmd(['// SESSION EXPIRED · SERVER RESTARTED · RECONNECT WALLET TO RESTORE HERO ACCESS']);
+        disconnectWallet();
+      }
       incUsage();updateHUD();pushHist('assistant',reply);await addDestiny(reply,true,modelUsed);
       var rem=typeof data.remaining==='number'?data.remaining:null;
       if(rem!==null&&rem<=10&&rem>0)addCmd(['// '+rem+' TRANSMISSION'+(rem===1?'':'S')+' REMAINING TODAY']);
