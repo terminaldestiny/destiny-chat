@@ -1205,11 +1205,13 @@ function applyTierUI(tier,balance){
     mBtn.style.borderColor='rgba(0,212,255,0.6)';mBtn.style.color='var(--cyan)';
     ACTIVE_MODEL='sonnet';
     aBtn.classList.add('on');
+    DAILY_LIMIT=30;
   } else {
     badge.style.display='none';
     mBtn.textContent='⬡ SONNET 🔒';mBtn.style.borderColor='';mBtn.style.color='';
     ACTIVE_MODEL='haiku';
     aBtn.classList.remove('on');
+    DAILY_LIMIT=20;
   }
 }
 
@@ -2211,7 +2213,7 @@ function handleCommand(raw){
         '// UNLOCK HERO TIER',
         'hold 500,000+ $DESTINY · connect wallet · verify on-chain',
         'CA: 3AwkJnZL7xrf8ffUwEsSkKndQkPSj2vfR3CqvyFpk8UP',
-        'heroes get sonnet 4.6 + 100 msg/day · recruits get haiku + 20/day'
+        'heroes get sonnet 4.6 + 30 msg/day · recruits get haiku + 20/day'
       ]);break;
     case '/mute':
       _muted=!_muted;
@@ -2251,7 +2253,7 @@ function handleCommand(raw){
           'CALLSIGN  :  '+(CALLSIGN||'UNSET'),
           'TIER      :  '+tier.toUpperCase(),
           'MODEL     :  '+(tier==='operative'?'SONNET 4.6':'HAIKU 4.5'),
-          'MSGS LEFT :  '+rem+' / '+(tier==='operative'?'100':'20')+' TODAY',
+          'MSGS LEFT :  '+rem+' / '+(tier==='operative'?'30':'20')+' TODAY',
           'WALLET    :  '+(sess?wallet.slice(0,8)+'...'+wallet.slice(-4):'UNLINKED'),
           'HOLDING   :  '+(sess?bal+' $DESTINY':'—'),
           'MISSION   :  '+missionLine
@@ -2317,9 +2319,9 @@ function handleCommand(raw){
       (function(){
         var tier=getTier();
         if(tier==='operative'){
-          addCmd(['// UPGRADE STATUS','TIER      :  HERO · FULLY UNLOCKED','MODEL     :  SONNET 4.6 · ACTIVE','LIMIT     :  100 MESSAGES / DAY','MEMORY    :  PERSISTENT ACROSS DEVICES  ·  COMING SOON','NEXT TIER :  APEX (5M+ $DESTINY)  ·  COMING SOON']);
+          addCmd(['// UPGRADE STATUS','TIER      :  HERO · FULLY UNLOCKED','MODEL     :  SONNET 4.6 · ACTIVE','LIMIT     :  30 MESSAGES / DAY','MEMORY    :  PERSISTENT ACROSS DEVICES  ·  COMING SOON','NEXT TIER :  APEX (5M+ $DESTINY)  ·  COMING SOON']);
         } else {
-          addCmd(['// UPGRADE PATH  ·  RECRUIT → HERO','CURRENT   :  HAIKU 4.5  ·  20 MSG/DAY','UNLOCK    :  HOLD 500,000+ $DESTINY','BENEFIT   :  SONNET 4.6 · 100 MSG/DAY · HERO CARD','HOW       :  BUY ON JUPITER → CONNECT WALLET → VERIFY','CA        :  3AwkJnZL7xrf8ffUwEsSkKndQkPSj2vfR3CqvyFpk8UP']);
+          addCmd(['// UPGRADE PATH  ·  RECRUIT → HERO','CURRENT   :  HAIKU 4.5  ·  20 MSG/DAY','UNLOCK    :  HOLD 500,000+ $DESTINY','BENEFIT   :  SONNET 4.6 · 30 MSG/DAY · HERO CARD','HOW       :  BUY ON JUPITER → CONNECT WALLET → VERIFY','CA        :  3AwkJnZL7xrf8ffUwEsSkKndQkPSj2vfR3CqvyFpk8UP']);
         }
       })();break;
     case '/bounty':
