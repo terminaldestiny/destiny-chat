@@ -1624,6 +1624,7 @@ function updateHUD(){
   cntEl.textContent=rem+' / '+DAILY_LIMIT;
   fillEl.className=rem===0?'empty':rem<=5?'warn':'';
   if(rem===0){bannerEl.classList.add('on');inputEl.disabled=true;inputEl.placeholder='daily limit reached';}
+  else{bannerEl.classList.remove('on');inputEl.disabled=false;inputEl.placeholder='TRANSMIT MESSAGE...';}
   // ! alert when hitting 5 remaining
   if(rem===5)alertFlash();
 }
