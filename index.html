@@ -1212,6 +1212,9 @@ function applyTierUI(tier,balance){
   }
 }
 
+// Apply session state immediately — UI is opacity:0 at this point so no flash
+(function(){var s=getSession();if(s)applyTierUI(s.tier,s.balance);})();
+
 var _connecting=false;
 function _doneConnecting(wBtn){
   wBtn.disabled=true;
@@ -1539,8 +1542,7 @@ function finishBoot(){
     setTimeout(function(){bootEl.style.display='none';},1000);
     document.getElementById('input-pfx').textContent='> '+(CALLSIGN||'HERO')+':';
     playSound('boot-up');
-    var existingSession=getSession();
-    if(existingSession)applyTierUI(existingSession.tier,existingSession.balance);
+    // session state already applied at script load time (before boot)
     setTimeout(function(){
       var mt=_pendingMagicToken;_pendingMagicToken=null;
       if(!CALLSIGN){
