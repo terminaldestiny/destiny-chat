@@ -767,6 +767,13 @@
     #limit-banner { display:none;flex-shrink:0;background:rgba(255,42,0,0.05);border-top:1px solid rgba(255,42,0,0.2);padding:7px 20px;font-size:10px;color:rgba(255,80,80,0.78);letter-spacing:1.5px;text-align:center; }
     #limit-banner.on { display:block; }
 
+    #starters { display:none;flex-wrap:wrap;gap:7px;padding:8px 14px 6px;flex-shrink:0;transition:opacity 0.35s; }
+    #starters.hiding { opacity:0;pointer-events:none; }
+    .starter-btn { flex:1 1 calc(50% - 4px);background:none;border:1px solid rgba(0,255,65,0.18);border-radius:20px;color:rgba(0,255,65,0.38);font-family:inherit;font-size:9.5px;letter-spacing:1.5px;padding:7px 12px;cursor:pointer;text-align:center;transition:border-color 0.2s,color 0.2s,box-shadow 0.2s;white-space:nowrap;overflow:hidden;text-overflow:ellipsis; }
+    .starter-btn:hover { border-color:rgba(0,255,65,0.55);color:rgba(0,255,65,0.85);box-shadow:0 0 10px rgba(0,255,65,0.12); }
+    .starter-btn:active { border-color:rgba(0,255,65,0.7);color:rgba(0,255,65,1); }
+    @media(max-width:600px){ .starter-btn { font-size:9px;padding:6px 10px; } }
+
     /* ── Callsign modal ───────────────────────────────── */
     #callsign-modal {
       position:fixed;inset:0;z-index:9100;
@@ -1086,6 +1093,13 @@
     <img id="img-thumb" src="" alt=""/>
     <span id="img-label">IMAGE ATTACHED</span>
     <div id="img-clear" onclick="clearPendingImage()">✕ REMOVE</div>
+  </div>
+
+  <div id="starters">
+    <button class="starter-btn" onclick="sendStarter('What can you do?')">WHAT CAN YOU DO?</button>
+    <button class="starter-btn" onclick="sendStarter('I want to build something')">I WANT TO BUILD SOMETHING</button>
+    <button class="starter-btn" onclick="sendStarter('What is $DESTINY?')">WHAT IS $DESTINY?</button>
+    <button class="starter-btn" onclick="sendStarter('Scan a token for me')">SCAN A TOKEN</button>
   </div>
 
   <div id="input-area">
@@ -1553,6 +1567,7 @@ function finishBoot(){
         showCallsignModal(function(){
           addDestiny('Copy that, '+CALLSIGN+'. Frequency locked. Ask me anything — AI, crypto, code, building.',true).then(function(){
             if(mt)verifyMagicToken(mt);
+            showStarters();
             if(getRemaining()>0)inputEl.focus();
           });
         });
@@ -1563,6 +1578,7 @@ function finishBoot(){
         addDestiny(wbMsg,true).then(function(){
           loadChatHistory();
           if(mt)verifyMagicToken(mt);
+          showStarters();
         });
         setTimeout(function(){if(getRemaining()>0)inputEl.focus();},200);
       }
@@ -1629,6 +1645,26 @@ function updateHUD(){
   if(rem===5)alertFlash();
 }
 updateHUD();
+
+// ── Conversation starters ─────────────────────────────────────────
+var _startersEl=document.getElementById('starters');
+var _startersHidden=false;
+function showStarters(){
+  if(_startersHidden||getHist().length>0)return;
+  _startersEl.style.display='flex';
+}
+function hideStarters(){
+  if(_startersHidden)return;
+  _startersHidden=true;
+  _startersEl.classList.add('hiding');
+  setTimeout(function(){_startersEl.style.display='none';},380);
+}
+function sendStarter(text){
+  hideStarters();
+  inputEl.value=text;
+  sendMsg();
+}
+inputEl.addEventListener('input',function(){if(this.value.length>0)hideStarters();});
 
 function alertFlash(){
   var f=document.createElement('div');f.className='alert-flash';document.body.appendChild(f);
