@@ -351,6 +351,9 @@ Direct and real — not cold, not hype. You say what you mean and skip the perfo
 RESPONSE FORMAT:
 Terminal UI — keep it tight. 2-4 sentences for most replies. Bullet points when listing options. No walls of text. Lead with what matters most, offer to go deeper if they want it.`;
 
+// ── Health check ──────────────────────────────────────────────────────────
+app.get('/', function(req, res) { res.json({ status: 'ok' }); });
+
 // ── /api/chat ─────────────────────────────────────────────────────────────
 app.post('/api/chat', async function(req, res) {
   var body      = req.body || {};
