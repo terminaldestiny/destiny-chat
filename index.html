@@ -1576,22 +1576,17 @@ function finishBoot(){
         if(visit&&visit.topics&&visit.topics.length>0&&CALLSIGN){
           showThink();
           var greetPrompt='[GREETING] The user just opened the page. Greet them as a returning visitor. Name: '+CALLSIGN+'. They previously discussed: '+visit.topics.join(' / ')+'. Write a 1-2 sentence personalized opening — use their name, reference one past topic naturally. Stay in character as DESTINY.';
+          loadChatHistory();if(mt)verifyMagicToken(mt);
           fetch(BACKEND+'/api/chat',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({visitorId:getVid(),model:'haiku',sessionToken:getSessionToken(),message:greetPrompt,history:[]})})
             .then(function(r){return r.json();})
             .then(function(d){
               hideThink();avCore.className='speaking';scanLine();
               var reply=d.response||('Welcome back, '+CALLSIGN+'. Ready when you are.');
-              addDestiny(reply,true).then(function(){
-                loadChatHistory();if(mt)verifyMagicToken(mt);
-                if(getRemaining()>0)inputEl.focus();
-              });
+              addDestiny(reply,true).then(function(){if(getRemaining()>0)inputEl.focus();});
             })
             .catch(function(){
               hideThink();
-              addDestiny('Welcome back, '+CALLSIGN+'. Ready when you are.',true).then(function(){
-                loadChatHistory();if(mt)verifyMagicToken(mt);
-                if(getRemaining()>0)inputEl.focus();
-              });
+              addDestiny('Welcome back, '+CALLSIGN+'. Ready when you are.',true).then(function(){if(getRemaining()>0)inputEl.focus();});
             });
         } else {
           var wbMsg=CALLSIGN
