@@ -1592,10 +1592,11 @@ function finishBoot(){
           var wbMsg=CALLSIGN
             ?'Welcome back, '+CALLSIGN+'. Ready when you are — AI, crypto, code, building. Let\'s get to work.'
             :"You found me. Good. Ask me anything — AI, crypto, code, building. Let's make you dangerous.";
+          loadChatHistory();if(mt)verifyMagicToken(mt);
           addDestiny(wbMsg,true).then(function(){
-            loadChatHistory();if(mt)verifyMagicToken(mt);showStarters();
+            showStarters();
+            if(getRemaining()>0)inputEl.focus();
           });
-          setTimeout(function(){if(getRemaining()>0)inputEl.focus();},200);
         }
       }
     },900);
