@@ -1572,15 +1572,36 @@ function finishBoot(){
           });
         });
       } else {
-        var wbMsg=CALLSIGN
-          ? 'Welcome back, '+CALLSIGN+'. Ready when you are — AI, crypto, code, building. Let\'s get to work.'
-          : "You found me. Good. Ask me anything — AI, crypto, code, building. Let's make you dangerous.";
-        addDestiny(wbMsg,true).then(function(){
-          loadChatHistory();
-          if(mt)verifyMagicToken(mt);
-          showStarters();
-        });
-        setTimeout(function(){if(getRemaining()>0)inputEl.focus();},200);
+        var visit=getVisitSummary();
+        if(visit&&visit.topics&&visit.topics.length>0&&CALLSIGN){
+          showThink();
+          var greetPrompt='[GREETING] The user just opened the page. Greet them as a returning visitor. Name: '+CALLSIGN+'. They previously discussed: '+visit.topics.join(' / ')+'. Write a 1-2 sentence personalized opening — use their name, reference one past topic naturally. Stay in character as DESTINY.';
+          fetch(BACKEND+'/api/chat',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({visitorId:getVid(),model:'haiku',sessionToken:getSessionToken(),message:greetPrompt,history:[]})})
+            .then(function(r){return r.json();})
+            .then(function(d){
+              hideThink();avCore.className='speaking';scanLine();
+              var reply=d.response||('Welcome back, '+CALLSIGN+'. Ready when you are.');
+              addDestiny(reply,true).then(function(){
+                loadChatHistory();if(mt)verifyMagicToken(mt);
+                if(getRemaining()>0)inputEl.focus();
+              });
+            })
+            .catch(function(){
+              hideThink();
+              addDestiny('Welcome back, '+CALLSIGN+'. Ready when you are.',true).then(function(){
+                loadChatHistory();if(mt)verifyMagicToken(mt);
+                if(getRemaining()>0)inputEl.focus();
+              });
+            });
+        } else {
+          var wbMsg=CALLSIGN
+            ?'Welcome back, '+CALLSIGN+'. Ready when you are — AI, crypto, code, building. Let\'s get to work.'
+            :"You found me. Good. Ask me anything — AI, crypto, code, building. Let's make you dangerous.";
+          addDestiny(wbMsg,true).then(function(){
+            loadChatHistory();if(mt)verifyMagicToken(mt);showStarters();
+          });
+          setTimeout(function(){if(getRemaining()>0)inputEl.focus();},200);
+        }
       }
     },900);
   },500);
@@ -1611,6 +1632,17 @@ function getRemaining(){return Math.max(0,DAILY_LIMIT-getUsage().count);}
 function getHist(){try{return JSON.parse(localStorage.getItem('destiny_hist')||'[]');}catch(e){return[];}}
 function saveHist(h){if(h.length>80)h=h.slice(-80);localStorage.setItem('destiny_hist',JSON.stringify(h));}
 function pushHist(role,content){var h=getHist();h.push({role:role,content:content});saveHist(h);}
+function saveVisitSummary(){
+  if(!CALLSIGN)return;
+  var h=getHist();
+  var topics=h.filter(function(m){return m.role==='user';}).slice(-3).map(function(m){
+    return m.content.replace(/[^\w\s\$]/g,' ').trim().split(/\s+/).slice(0,7).join(' ');
+  });
+  if(!topics.length)return;
+  localStorage.setItem('destiny_visit',JSON.stringify({name:CALLSIGN,topics:topics,ts:Date.now()}));
+}
+function getVisitSummary(){try{return JSON.parse(localStorage.getItem('destiny_visit')||'null');}catch(e){return null;}}
+window.addEventListener('beforeunload',saveVisitSummary);
 function getHistForAPI(){
   var h=getHist();
   // Drop any trailing orphaned user message (from a previous failed send)
@@ -2479,6 +2511,7 @@ async function sendMsg(){
         disconnectWallet();
       }
       incUsage();updateHUD();pushHist('assistant',reply);await addDestiny(reply,true,modelUsed);
+      saveVisitSummary();
       var rem=typeof data.remaining==='number'?data.remaining:null;
       if(rem!==null&&rem<=10&&rem>0)addCmd(['// '+rem+' TRANSMISSION'+(rem===1?'':'S')+' REMAINING TODAY']);
       if(rem===0)addCmd(['// DAILY LIMIT REACHED · RESETS AT MIDNIGHT UTC']);
