@@ -21,7 +21,7 @@ var ALLOWED_ORIGINS = [
 ];
 app.use(cors({
   origin: function(origin, callback) {
-    if (origin && ALLOWED_ORIGINS.indexOf(origin) !== -1) {
+    if (!origin || ALLOWED_ORIGINS.indexOf(origin) !== -1) {
       callback(null, true);
     } else {
       callback(new Error('CORS: origin not allowed'));
