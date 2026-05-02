@@ -1542,11 +1542,11 @@ function loadChatHistory(){
   var h=getHist().filter(function(m){return m.role==='user'||m.role==='assistant';});
   if(!h.length)return false;
   var userCount=h.filter(function(m){return m.role==='user';}).length;
-  addSys('SESSION RESUMED · '+userCount+' PRIOR EXCHANGE'+(userCount===1?'':'S')+' LOADED');
   h.forEach(function(msg){
     if(msg.role==='user')addHero(msg.content);
     else if(msg.role==='assistant')addDestiny(msg.content,false);
   });
+  addSys('SESSION RESUMED · '+userCount+' PRIOR EXCHANGE'+(userCount===1?'':'S')+' LOADED');
   feed.scrollTop=feed.scrollHeight;
   return true;
 }
