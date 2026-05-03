@@ -1259,8 +1259,15 @@ async function connectWallet(){
   var wBtn=document.getElementById('wallet-btn');
   var provider=window.phantom?.solana||window.backpack?.solana||(window.solana?.isPhantom||window.solana?.isBackpack?window.solana:null);
   if(!provider){
-    addCmd(['// NO WALLET DETECTED · OPEN THIS SITE INSIDE PHANTOM OR BACKPACK BROWSER']);
-    addCmd(['// PHANTOM: TAP BROWSER TAB → NAVIGATE TO THIS URL']);
+    var _mob=/iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+    if(_mob){
+      addCmd(['// NO WALLET DETECTED · OPEN THIS SITE INSIDE PHANTOM OR BACKPACK APP']);
+      addCmd(['// PHANTOM MOBILE: phantom.app  ·  TAP BROWSER → ENTER THIS URL']);
+    } else {
+      addCmd(['// NO WALLET EXTENSION FOUND']);
+      addCmd(['// INSTALL PHANTOM AT PHANTOM.APP · THEN REFRESH AND CLICK CONNECT']);
+      addCmd(['// NO WALLET NEEDED · START CHATTING FREE BELOW — 20 MESSAGES/DAY']);
+    }
     _connecting=false;return;
   }
   wBtn.textContent='⬡ CONNECTING...';wBtn.disabled=true;
@@ -1584,6 +1591,9 @@ function finishBoot(){
             if(mt)verifyMagicToken(mt);
             showStarters();
             if(getRemaining()>0)inputEl.focus();
+            setTimeout(function(){
+              addCmd(['// FREE ACCESS ACTIVE · 20 TRANSMISSIONS/DAY · NO WALLET NEEDED','// CONNECT WALLET + HOLD 500K $DESTINY → SONNET 4.6 + 30 MSG/DAY']);
+            },1200);
           });
         });
       } else {
@@ -1817,6 +1827,52 @@ function addDestiny(text,typewriter,modelTag){
     });
   }
   return Promise.resolve();
+}
+
+// ── Streaming DESTINY bubble ──────────────────────────────────────────────
+function startDestinyStream(){
+  var w=document.createElement('div');w.className='msg';
+  var cw=document.createElement('div');cw.className='codec-wrap transmitting';
+  var lbl=document.createElement('div');lbl.className='codec-label';
+  var ll=document.createElement('span');ll.className='codec-label-left';ll.textContent='HERO TRANSMISSION';
+  var lr=document.createElement('span');lr.className='codec-label-right';
+  var freqSpan=document.createElement('span');freqSpan.className='codec-freq-tag';freqSpan.textContent='FREQ 140.85';
+  lr.appendChild(freqSpan);lbl.appendChild(ll);lbl.appendChild(lr);cw.appendChild(lbl);
+  var pc=document.createElement('div');pc.className='codec-portrait-col';
+  var pf=document.createElement('div');pf.className='codec-portrait-frame';
+  var img=document.createElement('img');img.className='codec-portrait-img';img.src='destiny.png';img.alt='';img.draggable=false;
+  var ps=document.createElement('div');ps.className='codec-portrait-scan';
+  pf.appendChild(img);pf.appendChild(ps);pc.appendChild(pf);
+  var wv=document.createElement('div');wv.className='codec-wave';
+  for(var s=0;s<10;s++){var sp=document.createElement('span');wv.appendChild(sp);}
+  pc.appendChild(wv);cw.appendChild(pc);
+  var cc=document.createElement('div');cc.className='codec-content';
+  var ch=document.createElement('div');ch.className='codec-head';
+  var cn=document.createElement('span');cn.className='codec-name';cn.textContent='DESTINY';
+  var ct=document.createElement('span');ct.className='codec-ts';ct.textContent=ts();
+  ch.appendChild(cn);ch.appendChild(ct);
+  var ctxt=document.createElement('div');ctxt.className='codec-text tcur';
+  cc.appendChild(ch);cc.appendChild(ctxt);cw.appendChild(cc);
+  w.appendChild(cw);feed.appendChild(w);feed.scrollTop=feed.scrollHeight;
+  playSound('codec-open');
+  return {
+    append:function(text){ctxt.textContent+=text;feed.scrollTop=feed.scrollHeight;},
+    getText:function(){return ctxt.textContent;},
+    finalize:function(modelTag){
+      cw.classList.remove('transmitting');ctxt.classList.remove('tcur');
+      ctxt.classList.add('glow-in','glitching');
+      ctxt.style.animationDelay=GDELAYS[Math.floor(Math.random()*GDELAYS.length)];
+      if(modelTag){
+        var MODEL_DISPLAY={sonnet:'SONNET 4.6',haiku:'HAIKU 4.5'};
+        var sep=document.createElement('span');sep.className='codec-freq-tag';sep.textContent=' · ';
+        var modSpan=document.createElement('span');modSpan.className='codec-model-tag';
+        modSpan.textContent=MODEL_DISPLAY[modelTag]||modelTag.toUpperCase();
+        if(modelTag==='sonnet')modSpan.style.color='var(--cyan)';
+        lr.appendChild(sep);lr.appendChild(modSpan);
+      }
+      speakDestiny(ctxt.textContent);
+    }
+  };
 }
 
 // Think (codec connecting)
@@ -2512,16 +2568,35 @@ async function sendMsg(){
   if(_sess&&_sess.expires<=Date.now()){disconnectWallet();addCmd(['// SESSION EXPIRED · RECONNECT WALLET TO RESTORE SONNET ACCESS']);}
 
   try{
-    var reqBody={visitorId:getVid(),model:ACTIVE_MODEL,sessionToken:getSessionToken(),message:text,history:getHistForAPI()};
+    var reqBody={visitorId:getVid(),model:ACTIVE_MODEL,sessionToken:getSessionToken(),message:text,history:getHistForAPI(),stream:true};
     if(imgBase64)reqBody.image=imgBase64;
     var res=await fetch(BACKEND+'/api/chat',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(reqBody)});
     hideThink();avCore.className='speaking';scanLine();
     var reply,modelUsed;
     if(res.status===429){reply='Signal exhausted. Return tomorrow, '+(CALLSIGN||'hero')+'.';incUsage();updateHUD();await addDestiny(reply,true);}
     else if(res.ok){
-      var data=await res.json();
-      reply=data.response||'Signal unclear. Try again.';modelUsed=data.model;
-      // Detect server session drop: we sent as operative but server responded as haiku
+      var streamEl=startDestinyStream();
+      var reader=res.body.getReader(),dec=new TextDecoder(),buf='',doneData=null,fullReply='';
+      try{
+        outer:while(true){
+          var chunk=await reader.read();
+          if(chunk.done)break;
+          buf+=dec.decode(chunk.value,{stream:true});
+          var parts=buf.split('\n\n');buf=parts.pop();
+          for(var pi=0;pi<parts.length;pi++){
+            var part=parts[pi];
+            if(!part.startsWith('data: '))continue;
+            try{
+              var d=JSON.parse(part.slice(6));
+              if(d.t){fullReply+=d.t;streamEl.append(d.t);}
+              if(d.done||d.error){doneData=d;break outer;}
+            }catch(e){}
+          }
+        }
+      }catch(e){}
+      reply=fullReply||'Signal unclear. Try again.';
+      modelUsed=doneData&&doneData.model;
+      streamEl.finalize(modelUsed);
       if(modelUsed==='haiku'&&ACTIVE_MODEL==='sonnet'){
         var _isEmailSess=getSession()&&getSession().emailAuth;
         addCmd([_isEmailSess
@@ -2529,9 +2604,9 @@ async function sendMsg(){
           :'// SESSION EXPIRED · RECONNECT WALLET TO RESTORE HERO ACCESS']);
         disconnectWallet();
       }
-      incUsage();updateHUD();pushHist('assistant',reply);await addDestiny(reply,true,modelUsed);
+      incUsage();updateHUD();pushHist('assistant',reply);
       saveVisitSummary();
-      var rem=typeof data.remaining==='number'?data.remaining:null;
+      var rem=doneData&&typeof doneData.remaining==='number'?doneData.remaining:null;
       if(rem!==null&&rem<=10&&rem>0)addCmd(['// '+rem+' TRANSMISSION'+(rem===1?'':'S')+' REMAINING TODAY']);
       if(rem===0)addCmd(['// DAILY LIMIT REACHED · RESETS AT MIDNIGHT UTC']);
     }

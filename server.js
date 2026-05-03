@@ -527,13 +527,46 @@ app.post('/api/chat', jsonLarge, async function(req, res) {
   var ALLOWED_MODELS = { sonnet: 'claude-sonnet-4-6', haiku: 'claude-haiku-4-5-20251001' };
   var modelKey = (tier === 'operative') ? 'sonnet' : 'haiku';
   var modelId  = ALLOWED_MODELS[modelKey];
+  var maxTokens = (modelKey === 'sonnet') ? 1000 : 500;
 
+  // ── Streaming path (SSE) ──────────────────────────────────────────────────
+  if (body.stream) {
+    res.setHeader('Content-Type', 'text/event-stream');
+    res.setHeader('Cache-Control', 'no-cache');
+    res.setHeader('Connection', 'keep-alive');
+    res.flushHeaders();
+    var fullText = '';
+    try {
+      var msgStream = client.messages.stream({
+        model: modelId, max_tokens: maxTokens,
+        system: DESTINY_CHAT_PROMPT, messages: messages
+      });
+      msgStream.on('text', function(text) {
+        fullText += text;
+        res.write('data: ' + JSON.stringify({ t: text }) + '\n\n');
+      });
+      await msgStream.finalMessage();
+      if (tier === 'operative' && walletAddress) {
+        var sTextMessages = messages.map(function(m) {
+          return { role: m.role, content: typeof m.content === 'string' ? m.content : message };
+        });
+        sTextMessages.push({ role: 'assistant', content: fullText });
+        await saveHistory(walletAddress, sTextMessages.slice(-40));
+      }
+      res.write('data: ' + JSON.stringify({ done: true, remaining: remaining, model: modelKey }) + '\n\n');
+      res.end();
+    } catch (err) {
+      console.error('Stream error:', err.message || err);
+      try { res.write('data: ' + JSON.stringify({ error: true }) + '\n\n'); res.end(); } catch(e) {}
+    }
+    return;
+  }
+
+  // ── Non-streaming fallback ────────────────────────────────────────────────
   try {
     var msg = await client.messages.create({
-      model: modelId,
-      max_tokens: (modelKey === 'sonnet') ? 500 : 300,
-      system: DESTINY_CHAT_PROMPT,
-      messages: messages
+      model: modelId, max_tokens: maxTokens,
+      system: DESTINY_CHAT_PROMPT, messages: messages
     });
     var text = (msg.content && msg.content[0] && msg.content[0].text) ? msg.content[0].text.trim() : 'Signal unclear.';
 
