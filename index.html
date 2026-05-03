@@ -146,6 +146,8 @@
     .cmd-text { font-size:11px;letter-spacing:1.5px;color:rgba(0,255,65,0.55);line-height:1.6; }
     @keyframes cmd-flash-anim { 0%{color:rgba(0,255,65,1);text-shadow:0 0 8px rgba(0,255,65,0.7);} 100%{color:rgba(0,255,65,0.55);text-shadow:none;} }
     .cmd-flash .cmd-text { animation:cmd-flash-anim 0.5s ease forwards; }
+    @keyframes cmd-fade-out { 0%{opacity:1;max-height:40px;margin-bottom:0;} 100%{opacity:0;max-height:0;margin-bottom:-4px;padding:0;} }
+    .msg.cmd-fading { animation:cmd-fade-out 0.6s ease forwards;overflow:hidden; }
 
     /* Token scan panel */
     .tscan-wrap {
@@ -731,7 +733,7 @@
     .hero-img-placeholder { font-size:9px;letter-spacing:1px;color:rgba(0,212,255,0.3);border:1px dashed rgba(0,212,255,0.18);padding:6px 10px;margin-bottom:7px;display:inline-block; }
 
     /* Help nav buttons */
-    #help-nav { display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:20px;border-bottom:1px solid rgba(0,255,65,0.1);padding-bottom:16px; }
+    #help-nav { display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:20px;border-bottom:1px solid rgba(0,255,65,0.1);padding-bottom:16px; }
     .help-nav-btn {
       text-decoration:none;display:flex;flex-direction:column;gap:4px;
       padding:12px 12px;border:1px solid rgba(0,212,255,0.28);
@@ -752,6 +754,10 @@
     .help-nav-btn-tg .help-nav-lbl { color:rgba(36,161,222,0.9); }
     .help-nav-btn-tg .help-nav-desc { color:rgba(36,161,222,0.45); }
     .help-nav-btn-tg:hover { border-color:rgba(36,161,222,0.7);background:rgba(36,161,222,0.08);box-shadow:0 0 18px rgba(36,161,222,0.1); }
+    .help-nav-btn-dex { border-color:rgba(0,255,65,0.25);background:rgba(0,255,65,0.03); }
+    .help-nav-btn-dex .help-nav-lbl { color:var(--green); }
+    .help-nav-btn-dex .help-nav-desc { color:rgba(0,255,65,0.45); }
+    .help-nav-btn-dex:hover { border-color:var(--green);background:rgba(0,255,65,0.07);box-shadow:0 0 18px rgba(0,255,65,0.1); }
 
     /* CA */
     #ca-badge { position:fixed;bottom:72px;right:14px;font-size:9px;text-align:right;cursor:pointer;z-index:50;user-select:none;line-height:1.6; }
@@ -972,9 +978,10 @@
       #cmd-scroll-hint { display:flex; font-size:18px; }
 
       /* Email / mission / scan bars — compact */
-      #email-bar { padding:4px 10px; gap:8px; }
-      #email-input { font-size:13px; }
-      #email-bar-send { padding:4px 8px; }
+      #email-bar { padding:4px 10px; gap:6px; }
+      #email-bar-pfx { display:none; }
+      #email-input { font-size:13px; min-width:0; }
+      #email-bar-send { padding:4px 10px; white-space:nowrap; flex-shrink:0; }
       #mission-bar { padding:3px 10px; gap:8px; }
       #mission-bar-text { font-size:8px; }
       #scan-hint { padding:4px 10px; font-size:8px; }
@@ -1145,7 +1152,7 @@
   <div id="help-header"><div id="help-close" onclick="closeHelp()">✕</div></div>
   <div id="help-nav">
     <a href="https://dream-production-0bfd.up.railway.app/" target="_blank" rel="noopener" class="help-nav-btn">
-      <span class="help-nav-lbl">⬡ WORLD</span>
+      <span class="help-nav-lbl">⬡ DREAM 🌍</span>
       <span class="help-nav-desc">3D terminal world</span>
     </a>
     <a href="https://github.com/HyperscapeAI/hyperscape" target="_blank" rel="noopener" class="help-nav-btn">
@@ -1155,6 +1162,10 @@
     <a href="https://jup.ag/swap/SOL-3AwkJnZL7xrf8ffUwEsSkKndQkPSj2vfR3CqvyFpk8UP" target="_blank" rel="noopener" class="help-nav-btn help-nav-btn-buy">
       <span class="help-nav-lbl">⬡ BUY $DESTINY</span>
       <span class="help-nav-desc">Trade on Jupiter</span>
+    </a>
+    <a href="https://dexscreener.com/solana/ds4ldnlstcjd1kmtccnjfa9ucqbcfws3ihg1sbdaqtjz" target="_blank" rel="noopener" class="help-nav-btn help-nav-btn-dex">
+      <span class="help-nav-lbl">⬡ DEXSCREENER</span>
+      <span class="help-nav-desc">$DESTINY chart</span>
     </a>
     <a href="https://x.com/terminaldestiny" target="_blank" rel="noopener" class="help-nav-btn help-nav-btn-x">
       <span class="help-nav-lbl">𝕏 TWITTER</span>
@@ -2076,6 +2087,12 @@ function addCmd(lines){
   feed.appendChild(w);feed.scrollTop=feed.scrollHeight;
   playSound('cmd-blip');
   _lastCmd={text:key,el:cw,ts:now};
+  if(lines.length===1){
+    setTimeout(function(){
+      w.classList.add('cmd-fading');
+      setTimeout(function(){ if(w.parentNode) w.parentNode.removeChild(w); },650);
+    },9000);
+  }
 }
 
 var STATUS_POOL=[
