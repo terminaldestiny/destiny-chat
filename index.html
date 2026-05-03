@@ -542,7 +542,7 @@
     .codec-ts   { font-size:9px;letter-spacing:1px;color:rgba(0,255,65,0.22);margin-left:auto; }
     .codec-text {
       font-size:13.5px;line-height:1.72;word-break:break-word;
-      color:rgba(0,255,65,0.88);
+      color:rgba(255,255,255,0.92);
     }
     /* Glow in */
     @keyframes glow-in {
@@ -574,7 +574,7 @@
     .hero-head { display:flex;align-items:center;justify-content:flex-end;gap:8px;margin-bottom:5px; }
     .hero-name { font-size:9px;letter-spacing:3px;font-weight:bold;color:var(--cyan);text-shadow:0 0 7px var(--cyan); }
     .hero-ts   { font-size:9px;letter-spacing:1px;color:rgba(0,212,255,0.22); }
-    .hero-text { font-size:13.5px;line-height:1.72;word-break:break-word;color:rgba(0,212,255,0.88);text-align:right; }
+    .hero-text { font-size:13.5px;line-height:1.72;word-break:break-word;color:rgba(255,255,255,0.92);text-align:right; }
 
     /* ── SYSTEM messages ───────────────────────────── */
     .sys-wrap {
@@ -2578,6 +2578,7 @@ function looksLikeCA(str){
 }
 
 function showScanHint(addr){
+  if(document.getElementById('email-bar').classList.contains('on')) return;
   _pendingScanAddr=addr;
   scanHintEl.textContent='';
   var prefix=document.createTextNode('⬡ CONTRACT DETECTED — ');
