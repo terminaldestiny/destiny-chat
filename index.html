@@ -1223,8 +1223,11 @@ function applyTierUI(tier,balance){
   var mBtn=document.getElementById('model-toggle-btn');
   var dBtn=document.getElementById('disconnect-btn');
   var aBtn=document.getElementById('attach-btn');
+  var eBtn=document.getElementById('email-btn');
   wBtn.style.display='none';
   dBtn.style.display='inline-flex';
+  var sess=getSession();
+  if(eBtn) eBtn.style.display=(sess&&sess.emailAuth)?'none':'inline-flex';
   if(tier==='operative'){
     badge.textContent='OPERATIVE';badge.style.display='inline-block';
     mBtn.textContent='⬡ SONNET';
@@ -2560,6 +2563,7 @@ function disconnectWallet(){
   wBtn.style.display='';wBtn.textContent='◈ CONNECT';wBtn.classList.remove('verified');wBtn.disabled=false;
   mBtn.textContent='⬡ SONNET 🔒';mBtn.style.borderColor='';mBtn.style.color='';
   dBtn.style.display='none';
+  document.getElementById('email-btn').style.display='inline-flex';
   document.getElementById('attach-btn').classList.remove('on');
   DAILY_LIMIT=20;
   updateHUD();
