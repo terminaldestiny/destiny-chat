@@ -1924,6 +1924,7 @@ function openEmailBar(mode){
   _emailBarMode=mode||'login';
   var pfx=document.getElementById('email-bar-pfx');
   if(pfx)pfx.textContent=mode==='link'?'✉ LINK EMAIL':'✉ EMAIL LOGIN';
+  document.getElementById('scan-hint').classList.remove('on');
   document.getElementById('email-bar').classList.add('on');
   setTimeout(function(){document.getElementById('email-input').focus();},60);
 }
@@ -1978,7 +1979,7 @@ async function verifyMagicToken(token){
     var res=await fetch(BACKEND+'/api/auth/magic-verify',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({token:token})});
     var data=await res.json();
     if(res.ok&&!data.error){
-      saveSession({sessionToken:data.sessionToken,tier:data.tier,balance:data.balance,wallet:data.wallet,expires:Date.now()+604800000});
+      saveSession({sessionToken:data.sessionToken,tier:data.tier,balance:data.balance,wallet:data.wallet,expires:Date.now()+604800000,emailAuth:true});
       applyTierUI(data.tier,data.balance);
       if(data.email)localStorage.setItem('destiny_email',data.email);
       if(data.tier==='operative'){
@@ -2499,7 +2500,10 @@ async function sendMsg(){
       reply=data.response||'Signal unclear. Try again.';modelUsed=data.model;
       // Detect server session drop: we sent as operative but server responded as haiku
       if(modelUsed==='haiku'&&ACTIVE_MODEL==='sonnet'){
-        addCmd(['// SESSION EXPIRED · SERVER RESTARTED · RECONNECT WALLET TO RESTORE HERO ACCESS']);
+        var _isEmailSess=getSession()&&getSession().emailAuth;
+        addCmd([_isEmailSess
+          ?'// SESSION EXPIRED · CLICK ✉ EMAIL TO RESTORE HERO ACCESS'
+          :'// SESSION EXPIRED · RECONNECT WALLET TO RESTORE HERO ACCESS']);
         disconnectWallet();
       }
       incUsage();updateHUD();pushHist('assistant',reply);await addDestiny(reply,true,modelUsed);
