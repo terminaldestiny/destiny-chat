@@ -95,7 +95,7 @@
 
     /* Boot lines */
     #boot-lines { width:min(460px,88vw); }
-    .bl { font-size:11px;letter-spacing:2px;margin-bottom:6px;opacity:0;animation:bl-in 0.12s ease forwards; }
+    .bl { font-size:12.5px;letter-spacing:2px;margin-bottom:6px;opacity:0;animation:bl-in 0.12s ease forwards; }
     .bl-dim { color:rgba(0,255,65,0.32); }
     .bl-red { color:var(--red);text-shadow:0 0 10px var(--rg); }
     .bl-acc { color:var(--cyan); }
@@ -995,7 +995,7 @@
       #boot-logo-name { font-size:clamp(28px,8vw,48px); letter-spacing:8px; }
       #boot-logo-sub { font-size:7px; margin-top:6px; }
       .boot-bar-wrap { margin:4px 0 8px; }
-      .bl { margin-bottom:3px; font-size:10px; }
+      .bl { margin-bottom:3px; font-size:11px; }
 
       /* Callsign modal — fit in landscape viewport */
       #callsign-box {
@@ -1537,12 +1537,11 @@ var bootEl=document.getElementById('boot'),uiEl=document.getElementById('ui'),in
 var bootLinesEl=null;
 
 var BOOT=[
-  {t:'INITIALIZING NEURAL MESH...',c:'dim'},
   {t:'BAR',c:'bar'},
   {t:'RALLYING HEROES TO BATTLE RUGPULLS',c:'red'},
   {t:'LOCATING HERO...',c:'dim'},
-  {t:'SIGNAL LOCK CONFIRMED',c:'acc'},
   {t:'RESPONSE MATRIX: PRIMED',c:'dim'},
+  {t:'YOU WERE NEVER ALONE',c:'acc'},
 ];
 
 function initBoot(){
@@ -1575,7 +1574,7 @@ function loadChatHistory(){
 
 function finishBoot(){
   var last=document.createElement('div');last.className='bl bl-win';
-  last.textContent=CALLSIGN?'> CHANNEL OPEN. WELCOME BACK, '+CALLSIGN+'.':'> CHANNEL OPEN.';
+  last.textContent=CALLSIGN?'> '+CALLSIGN+'.':'> HERO.';
   bootLinesEl.appendChild(last);
   setTimeout(function(){
     bootEl.classList.add('out');uiEl.classList.add('on');
