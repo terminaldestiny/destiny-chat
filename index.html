@@ -2185,7 +2185,7 @@ async function runScan(addr){
   addCmd(['// SCANNING: '+addr.slice(0,10)+'...'+addr.slice(-6),'QUERYING DEXSCREENER...']);
   try{
     var _ctrl=new AbortController();var _t=setTimeout(function(){_ctrl.abort();},8000);
-    var res=await fetch('https://api.dexscreener.com/latest/dex/tokens/'+encodeURIComponent(addr),{signal:_ctrl.signal});
+    var res=await fetch(BACKEND+'/api/scan/'+encodeURIComponent(addr),{signal:_ctrl.signal});
     clearTimeout(_t);
     if(!res.ok)throw new Error('API '+res.status);
     var data=await res.json();

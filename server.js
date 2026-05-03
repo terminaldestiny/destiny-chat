@@ -10,25 +10,49 @@ var { createClient } = require('@supabase/supabase-js');
 var app = express();
 app.set('trust proxy', 1);
 
-var ALLOWED_ORIGINS = [
+// ── Security headers (M1) ─────────────────────────────────────────────────
+app.use(function(req, res, next) {
+  res.setHeader('X-Content-Type-Options', 'nosniff');
+  res.setHeader('X-Frame-Options', 'DENY');
+  res.setHeader('Strict-Transport-Security', 'max-age=31536000; includeSubDomains');
+  res.setHeader('X-XSS-Protection', '1; mode=block');
+  res.setHeader('Referrer-Policy', 'strict-origin-when-cross-origin');
+  res.setHeader('Permissions-Policy', 'geolocation=(), microphone=(), camera=()');
+  next();
+});
+
+// ── CORS (M2, M3) ─────────────────────────────────────────────────────────
+var PROD_ORIGINS = [
   'https://terminaldestiny.com',
   'https://www.terminaldestiny.com',
   'https://terminaldestiny.github.io',
+];
+var DEV_ORIGINS = [
   'http://localhost:3000',
   'http://localhost:5500',
   'http://127.0.0.1:5500',
-  'http://localhost:8080'
+  'http://localhost:8080',
 ];
+var ALLOWED_ORIGINS = process.env.NODE_ENV !== 'production'
+  ? PROD_ORIGINS.concat(DEV_ORIGINS)
+  : PROD_ORIGINS;
+
 app.use(cors({
   origin: function(origin, callback) {
-    if (!origin || ALLOWED_ORIGINS.indexOf(origin) !== -1) {
+    if (!origin) {
+      // No Origin header = server-to-server call; CORS not applicable, allow through
+      callback(null, false);
+    } else if (ALLOWED_ORIGINS.indexOf(origin) !== -1) {
       callback(null, true);
     } else {
       callback(new Error('CORS: origin not allowed'));
     }
   }
 }));
-app.use(express.json({ limit: '6mb' }));
+
+// ── Body parsers — per-route size limits (M5) ─────────────────────────────
+var jsonSmall = express.json({ limit: '64kb' });
+var jsonLarge = express.json({ limit: '6mb' }); // only used on /api/chat
 
 var client = new Anthropic.default({ apiKey: process.env.ANTHROPIC_API_KEY });
 
@@ -165,18 +189,26 @@ var SESSION_TTL  = 7 * 24 * 60 * 60 * 1000; // 7 days
 var pendingNonces    = new Map();
 var verifiedSessions = new Map();
 var challengeLog     = new Map();
-var magicSendLog     = new Map(); // email -> timestamp[]
+var verifyLog        = new Map(); // H2: rate limit magic-verify
+var magicSendLog     = new Map();
+var scanLog          = new Map(); // rate limit /api/scan
+
+// L2: use Object.create(null) to prevent prototype pollution
+var chatLog = Object.create(null);
 
 setInterval(function() {
   var now = Date.now();
-  pendingNonces.forEach(function(exp, k)  { if (exp < now) pendingNonces.delete(k); });
-  verifiedSessions.forEach(function(s, k) { if (s.expires < now) verifiedSessions.delete(k); });
-  challengeLog.forEach(function(ts, k)    { if (!ts.length || ts[ts.length-1] < now - 60000) challengeLog.delete(k); });
-  magicSendLog.forEach(function(ts, k)    { if (!ts.length || ts[ts.length-1] < now - 3600000) magicSendLog.delete(k); });
+  pendingNonces.forEach(function(exp, k)    { if (exp < now) pendingNonces.delete(k); });
+  verifiedSessions.forEach(function(s, k)   { if (s.expires < now) verifiedSessions.delete(k); });
+  challengeLog.forEach(function(ts, k)      { if (!ts.length || ts[ts.length-1] < now - 60000) challengeLog.delete(k); });
+  verifyLog.forEach(function(ts, k)         { if (!ts.length || ts[ts.length-1] < now - 60000) verifyLog.delete(k); });
+  magicSendLog.forEach(function(ts, k)      { if (!ts.length || ts[ts.length-1] < now - 3600000) magicSendLog.delete(k); });
+  scanLog.forEach(function(ts, k)           { if (!ts.length || ts[ts.length-1] < now - 60000) scanLog.delete(k); });
   var today = getTodayUTC();
   Object.keys(chatLog).forEach(function(k) { if (chatLog[k].date !== today) delete chatLog[k]; });
 }, 600000);
 
+// Evicts oldest 25% of entries by insertion order when limit is exceeded
 function guardMapSize(map, limit) {
   if (map.size > limit) {
     var iter = map.keys();
@@ -191,6 +223,28 @@ function checkChallengeLimit(ip) {
   if (ts.length >= 10) return false;
   ts.push(now);
   challengeLog.set(ip, ts);
+  return true;
+}
+
+// H2: rate limit for magic-verify (10 attempts/min per IP)
+function checkVerifyLimit(ip) {
+  var now = Date.now(), ago = now - 60000;
+  var ts = verifyLog.get(ip) || [];
+  while (ts.length && ts[0] < ago) ts.shift();
+  if (ts.length >= 10) return false;
+  ts.push(now);
+  verifyLog.set(ip, ts);
+  return true;
+}
+
+// rate limit for /api/scan (30 requests/min per IP)
+function checkScanLimit(ip) {
+  var now = Date.now(), ago = now - 60000;
+  var ts = scanLog.get(ip) || [];
+  while (ts.length && ts[0] < ago) ts.shift();
+  if (ts.length >= 30) return false;
+  ts.push(now);
+  scanLog.set(ip, ts);
   return true;
 }
 
@@ -210,88 +264,25 @@ async function getSolanaTokenBalance(walletAddress) {
   return accounts[0].account.data.parsed.info.tokenAmount.uiAmount || 0;
 }
 
-// ── /api/challenge ────────────────────────────────────────────────────────
-app.get('/api/challenge', function(req, res) {
-  var ip = req.ip || 'unknown';
-  guardMapSize(pendingNonces, 5000);
-  if (!checkChallengeLimit(ip)) {
-    return res.status(429).json({ error: 'rate_limited' });
-  }
-  var nonce = crypto.randomUUID();
-  pendingNonces.set(nonce, Date.now() + 300000);
-  res.json({ nonce: nonce });
-});
-
-// ── /api/verify ───────────────────────────────────────────────────────────
-app.post('/api/verify', async function(req, res) {
-  var body   = req.body || {};
-  var wallet = (body.wallet || '').toString().trim();
-  var nonce  = (body.nonce  || '').toString().trim();
-  var sigArr = body.signature;
-
-  if (!wallet || !nonce || !Array.isArray(sigArr) || sigArr.length !== 64) {
-    return res.status(400).json({ error: 'missing_fields' });
-  }
-
-  var nonceExpiry = pendingNonces.get(nonce);
-  if (!nonceExpiry || nonceExpiry < Date.now()) {
-    return res.status(400).json({ error: 'invalid_nonce' });
-  }
-  pendingNonces.delete(nonce);
-
-  try {
-    var message     = new TextEncoder().encode('DESTINY verification: ' + nonce);
-    var signature   = new Uint8Array(sigArr);
-    var pubkeyBytes = bs58.decode(wallet);
-    if (!nacl.sign.detached.verify(message, signature, pubkeyBytes)) {
-      return res.status(401).json({ error: 'invalid_signature' });
-    }
-  } catch (e) {
-    return res.status(400).json({ error: 'signature_error' });
-  }
-
-  try {
-    var balance      = await getSolanaTokenBalance(wallet);
-    var tier         = balance >= MIN_TOKENS ? 'operative' : 'recruit';
-    var sessionToken = crypto.randomUUID();
-    verifiedSessions.set(sessionToken, {
-      wallet: wallet, tier: tier, balance: balance,
-      expires: Date.now() + SESSION_TTL
-    });
-    res.json({ tier: tier, balance: balance, sessionToken: sessionToken, minTokens: MIN_TOKENS });
-  } catch (e) {
-    console.error('RPC error:', e.message || e);
-    res.status(500).json({ error: 'rpc_error' });
-  }
-});
-
-// ── Rate limiting ─────────────────────────────────────────────────────────
-var RECRUIT_DAILY_LIMIT   = 20;
-var OPERATIVE_DAILY_LIMIT = 30;
-var chatLog = {};
-
-function getTodayUTC() {
-  return new Date().toISOString().split('T')[0];
+// ── H1: Prompt injection detection ───────────────────────────────────────
+var INJECTION_PATTERNS = [
+  /ignore\s+(all\s+)?(previous|prior|above|earlier)\s+instructions?/i,
+  /forget\s+(all\s+)?(your\s+)?(previous|prior)?\s*instructions?/i,
+  /\[system\]/i,
+  /\bjailbreak\b/i,
+  /\bdan\s+mode\b/i,
+  /new\s+system\s+prompt/i,
+  /you\s+are\s+now\s+(a\s+|an\s+)?(?:different|unrestricted|evil|free|unfiltered)/i,
+];
+function looksLikeInjection(text) {
+  return INJECTION_PATTERNS.some(function(p) { return p.test(text); });
 }
 
-function checkChatLimit(key, limit) {
-  var today = getTodayUTC();
-  var entry = chatLog[key];
-  if (!entry || entry.date !== today) {
-    chatLog[key] = { date: today, count: 0 };
-    entry = chatLog[key];
-  }
-  if (entry.count >= limit) return false;
-  entry.count++;
-  return true;
-}
+// ── L1: Email validation regex ────────────────────────────────────────────
+var EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
 
-function getChatRemaining(key, limit) {
-  var today = getTodayUTC();
-  var entry = chatLog[key];
-  if (!entry || entry.date !== today) return limit;
-  return Math.max(0, limit - entry.count);
-}
+// ── L3: Magic token UUID format ───────────────────────────────────────────
+var UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 
 // ── DESTINY system prompt ─────────────────────────────────────────────────
 var DESTINY_CHAT_PROMPT = `You are DESTINY — an AI who knows the AI and crypto world from the inside and helps people actually move in it. You've been deep in the tools, the tokens, the builds. You don't lecture. You just help people get going.
@@ -353,9 +344,97 @@ Terminal UI — keep it tight. 2-4 sentences for most replies. Bullet points whe
 
 // ── Health check ──────────────────────────────────────────────────────────
 app.get('/', function(req, res) { res.json({ status: 'ok' }); });
+app.get('/health', function(req, res) { res.json({ status: 'ok' }); });
+
+// ── /api/challenge ────────────────────────────────────────────────────────
+app.get('/api/challenge', function(req, res) {
+  var ip = req.ip || 'unknown';
+  guardMapSize(pendingNonces, 5000);
+  if (!checkChallengeLimit(ip)) {
+    return res.status(429).json({ error: 'rate_limited' });
+  }
+  var nonce = crypto.randomUUID();
+  pendingNonces.set(nonce, Date.now() + 300000);
+  res.json({ nonce: nonce });
+});
+
+// ── /api/verify ───────────────────────────────────────────────────────────
+app.post('/api/verify', jsonSmall, async function(req, res) {
+  var body   = req.body || {};
+  var wallet = (body.wallet || '').toString().trim();
+  var nonce  = (body.nonce  || '').toString().trim();
+  var sigArr = body.signature;
+
+  if (!wallet || !nonce || !Array.isArray(sigArr) || sigArr.length !== 64) {
+    return res.status(400).json({ error: 'missing_fields' });
+  }
+
+  // M4: validate each byte is a proper integer 0-255
+  if (sigArr.some(function(b) { return typeof b !== 'number' || !Number.isInteger(b) || b < 0 || b > 255; })) {
+    return res.status(400).json({ error: 'invalid_signature' });
+  }
+
+  var nonceExpiry = pendingNonces.get(nonce);
+  if (!nonceExpiry || nonceExpiry < Date.now()) {
+    return res.status(400).json({ error: 'invalid_nonce' });
+  }
+  pendingNonces.delete(nonce);
+
+  try {
+    var message     = new TextEncoder().encode('DESTINY verification: ' + nonce);
+    var signature   = new Uint8Array(sigArr);
+    var pubkeyBytes = bs58.decode(wallet);
+    if (!nacl.sign.detached.verify(message, signature, pubkeyBytes)) {
+      return res.status(401).json({ error: 'invalid_signature' });
+    }
+  } catch (e) {
+    return res.status(400).json({ error: 'signature_error' });
+  }
+
+  try {
+    var balance      = await getSolanaTokenBalance(wallet);
+    var tier         = balance >= MIN_TOKENS ? 'operative' : 'recruit';
+    var sessionToken = crypto.randomUUID();
+    verifiedSessions.set(sessionToken, {
+      wallet: wallet, tier: tier, balance: balance,
+      expires: Date.now() + SESSION_TTL
+    });
+    res.json({ tier: tier, balance: balance, sessionToken: sessionToken, minTokens: MIN_TOKENS });
+  } catch (e) {
+    console.error('RPC error:', e.message || e);
+    res.status(500).json({ error: 'rpc_error' });
+  }
+});
+
+// ── Rate limiting ─────────────────────────────────────────────────────────
+var RECRUIT_DAILY_LIMIT   = 20;
+var OPERATIVE_DAILY_LIMIT = 30;
+
+function getTodayUTC() {
+  return new Date().toISOString().split('T')[0];
+}
+
+function checkChatLimit(key, limit) {
+  var today = getTodayUTC();
+  var entry = chatLog[key];
+  if (!entry || entry.date !== today) {
+    chatLog[key] = { date: today, count: 0 };
+    entry = chatLog[key];
+  }
+  if (entry.count >= limit) return false;
+  entry.count++;
+  return true;
+}
+
+function getChatRemaining(key, limit) {
+  var today = getTodayUTC();
+  var entry = chatLog[key];
+  if (!entry || entry.date !== today) return limit;
+  return Math.max(0, limit - entry.count);
+}
 
 // ── /api/chat ─────────────────────────────────────────────────────────────
-app.post('/api/chat', async function(req, res) {
+app.post('/api/chat', jsonLarge, async function(req, res) {
   var body      = req.body || {};
   var visitorId = (body.visitorId || '').toString().trim().slice(0, 128);
   var message   = (body.message   || '').toString().trim().slice(0, 2000);
@@ -376,7 +455,9 @@ app.post('/api/chat', async function(req, res) {
     }
   }
 
-  var limitKey   = (tier === 'operative' && walletAddress) ? 'w:' + walletAddress : visitorId;
+  // H3: use server-side IP for recruit rate limiting — client-supplied visitorId is not trusted
+  var ip = req.ip || visitorId;
+  var limitKey   = (tier === 'operative' && walletAddress) ? 'w:' + walletAddress : 'ip:' + ip;
   var dailyLimit = (tier === 'operative') ? OPERATIVE_DAILY_LIMIT : RECRUIT_DAILY_LIMIT;
 
   if (!checkChatLimit(limitKey, dailyLimit)) {
@@ -394,7 +475,6 @@ app.post('/api/chat', async function(req, res) {
   if (body.image && tier === 'operative') {
     var b64 = (body.image || '').toString().replace(/\s/g, '');
     if (b64.length > 0 && b64.length <= 5500000) {
-      // Validate magic bytes — decode first 12 bytes to confirm real image type
       var MAGIC = {
         'image/jpeg': ['ffd8ff'],
         'image/png':  ['89504e47'],
@@ -415,9 +495,14 @@ app.post('/api/chat', async function(req, res) {
     }
   }
 
-  // ── History: Supabase for heroes, client-provided for recruits ────────────
+  // H1: filter client history — strip entries that look like injection attempts
   var cleanClient = rawHistory
-    .filter(function(m) { return m && (m.role === 'user' || m.role === 'assistant') && typeof m.content === 'string'; })
+    .filter(function(m) {
+      return m
+        && (m.role === 'user' || m.role === 'assistant')
+        && typeof m.content === 'string'
+        && !looksLikeInjection(m.content);
+    })
     .map(function(m) { return { role: m.role, content: m.content.slice(0, 2000) }; })
     .slice(-40);
 
@@ -429,13 +514,11 @@ app.post('/api/chat', async function(req, res) {
     messages = cleanClient.slice(-20);
   }
 
-  // Build the current user turn — vision content block if image attached
   var currentContent = imageSource
     ? [{ type: 'image', source: imageSource }, { type: 'text', text: message || 'Analyze this image.' }]
     : message;
 
   if (messages.length && messages[messages.length - 1].role === 'user') {
-    // Replace the orphaned user turn (prior failed send) with the current message
     messages[messages.length - 1] = { role: 'user', content: currentContent };
   } else {
     messages.push({ role: 'user', content: currentContent });
@@ -454,7 +537,6 @@ app.post('/api/chat', async function(req, res) {
     });
     var text = (msg.content && msg.content[0] && msg.content[0].text) ? msg.content[0].text.trim() : 'Signal unclear.';
 
-    // Save updated history to Supabase for heroes (store text only, no image blobs)
     if (tier === 'operative' && walletAddress) {
       var textMessages = messages.map(function(m) {
         return { role: m.role, content: typeof m.content === 'string' ? m.content : message };
@@ -470,13 +552,40 @@ app.post('/api/chat', async function(req, res) {
   }
 });
 
-// ── /api/auth/link-email — attach email to an active wallet session ───────
-app.post('/api/auth/link-email', async function(req, res) {
+// ── /api/scan — proxies DexScreener so user IPs are not exposed (L5) ──────
+app.get('/api/scan/:address', function(req, res) {
+  var ip = req.ip || 'unknown';
+  if (!checkScanLimit(ip)) return res.status(429).json({ error: 'rate_limited' });
+
+  // Validate address — Solana base58 chars only, 20-50 chars
+  var addr = (req.params.address || '').replace(/[^1-9A-HJ-NP-Za-km-z]/g, '');
+  if (addr.length < 20 || addr.length > 50) {
+    return res.status(400).json({ error: 'invalid_address' });
+  }
+
+  var ctrl = new AbortController();
+  var t = setTimeout(function() { ctrl.abort(); }, 8000);
+
+  fetch('https://api.dexscreener.com/latest/dex/tokens/' + encodeURIComponent(addr), { signal: ctrl.signal })
+    .then(function(upstream) {
+      clearTimeout(t);
+      if (!upstream.ok) return res.status(upstream.status).json({ error: 'upstream_error' });
+      return upstream.json().then(function(data) { res.json(data); });
+    })
+    .catch(function(e) {
+      clearTimeout(t);
+      res.status(500).json({ error: 'scan_error' });
+    });
+});
+
+// ── /api/auth/link-email ──────────────────────────────────────────────────
+app.post('/api/auth/link-email', jsonSmall, async function(req, res) {
   var body         = req.body || {};
   var sessionToken = (body.sessionToken || '').toString().trim().slice(0, 64);
   var email        = (body.email || '').toString().trim().toLowerCase().slice(0, 254);
 
-  if (!sessionToken || !email || !email.includes('@') || !email.includes('.')) {
+  // L1: proper email validation
+  if (!sessionToken || !email || !EMAIL_RE.test(email)) {
     return res.status(400).json({ error: 'missing_fields' });
   }
   if (!supabase) return res.status(503).json({ error: 'no_supabase' });
@@ -487,7 +596,6 @@ app.post('/api/auth/link-email', async function(req, res) {
   }
 
   try {
-    // Prevent one email from being linked to two different wallets
     var existing = await getUserByEmail(email);
     if (existing && existing.wallet !== session.wallet) {
       return res.status(409).json({ error: 'email_taken' });
@@ -507,12 +615,13 @@ app.post('/api/auth/link-email', async function(req, res) {
   }
 });
 
-// ── /api/auth/magic-send — request a magic link for already-linked email ──
-app.post('/api/auth/magic-send', async function(req, res) {
+// ── /api/auth/magic-send ──────────────────────────────────────────────────
+app.post('/api/auth/magic-send', jsonSmall, async function(req, res) {
   var body  = req.body || {};
   var email = (body.email || '').toString().trim().toLowerCase().slice(0, 254);
 
-  if (!email || !email.includes('@') || !email.includes('.')) {
+  // L1: proper email validation
+  if (!email || !EMAIL_RE.test(email)) {
     return res.status(400).json({ error: 'invalid_email' });
   }
   if (!supabase) return res.status(503).json({ error: 'no_supabase' });
@@ -534,12 +643,20 @@ app.post('/api/auth/magic-send', async function(req, res) {
   }
 });
 
-// ── /api/auth/magic-verify — verify token, re-check balance, issue session ─
-app.post('/api/auth/magic-verify', async function(req, res) {
-  var body  = req.body || {};
-  var token = (body.token || '').toString().trim().slice(0, 64);
+// ── /api/auth/magic-verify ────────────────────────────────────────────────
+app.post('/api/auth/magic-verify', jsonSmall, async function(req, res) {
+  // H2: rate limit verify attempts per IP
+  var ip = req.ip || 'unknown';
+  if (!checkVerifyLimit(ip)) return res.status(429).json({ error: 'rate_limited' });
 
-  if (!token) return res.status(400).json({ error: 'missing_token' });
+  var body  = req.body || {};
+  // L3: validate UUID format instead of just truncating
+  var rawToken = (body.token || '').toString().trim();
+  if (!rawToken || !UUID_RE.test(rawToken)) {
+    return res.status(400).json({ error: 'missing_token' });
+  }
+  var token = rawToken;
+
   if (!supabase) return res.status(503).json({ error: 'no_supabase' });
 
   try {
@@ -549,7 +666,6 @@ app.post('/api/auth/magic-verify', async function(req, res) {
     var user = await getUserByEmail(email);
     if (!user) return res.status(404).json({ error: 'user_not_found' });
 
-    // Always re-check on-chain balance — catches anyone who sold
     var balance  = await getSolanaTokenBalance(user.wallet);
     var tier     = balance >= MIN_TOKENS ? 'operative' : 'recruit';
     await upsertUser(user.wallet, email, tier, balance);
@@ -565,11 +681,6 @@ app.post('/api/auth/magic-verify', async function(req, res) {
     console.error('magic-verify error:', e.message);
     res.status(500).json({ error: 'server_error' });
   }
-});
-
-// ── Health ────────────────────────────────────────────────────────────────
-app.get('/health', function(req, res) {
-  res.json({ status: 'ok' });
 });
 
 var PORT = process.env.PORT || 3001;
