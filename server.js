@@ -397,7 +397,7 @@ app.post('/api/verify', jsonSmall, async function(req, res) {
     var sessionToken = crypto.randomUUID();
     verifiedSessions.set(sessionToken, {
       wallet: wallet, tier: tier, balance: balance,
-      expires: Date.now() + SESSION_TTL
+      expires: Date.now() + SESSION_TTL, lastBalanceCheck: Date.now()
     });
     res.json({ tier: tier, balance: balance, sessionToken: sessionToken, minTokens: MIN_TOKENS });
   } catch (e) {
@@ -407,8 +407,9 @@ app.post('/api/verify', jsonSmall, async function(req, res) {
 });
 
 // ── Rate limiting ─────────────────────────────────────────────────────────
-var RECRUIT_DAILY_LIMIT   = 20;
-var OPERATIVE_DAILY_LIMIT = 30;
+var RECRUIT_DAILY_LIMIT      = 20;
+var OPERATIVE_DAILY_LIMIT    = 30;
+var BALANCE_RECHECK_INTERVAL = 6 * 60 * 60 * 1000; // 6 hours
 
 function getTodayUTC() {
   return new Date().toISOString().split('T')[0];
@@ -447,11 +448,31 @@ app.post('/api/chat', jsonLarge, async function(req, res) {
   var sessionToken = (body.sessionToken || '').toString().trim().slice(0, 64);
   var tier = 'recruit';
   var walletAddress = null;
+  var session = null;
   if (sessionToken) {
-    var session = verifiedSessions.get(sessionToken);
+    session = verifiedSessions.get(sessionToken);
     if (session && session.expires > Date.now()) {
       tier = session.tier;
       walletAddress = session.wallet;
+    }
+  }
+
+  // Re-check token balance every 6 hours to catch heroes who sold
+  if (tier === 'operative' && walletAddress && session) {
+    if (Date.now() - (session.lastBalanceCheck || 0) > BALANCE_RECHECK_INTERVAL) {
+      try {
+        var freshBalance = await getSolanaTokenBalance(walletAddress);
+        session.balance = freshBalance;
+        session.lastBalanceCheck = Date.now();
+        if (freshBalance < MIN_TOKENS) {
+          session.tier = 'recruit';
+          tier = 'recruit';
+          walletAddress = null;
+        }
+      } catch (e) {
+        console.error('Balance recheck error:', e.message);
+        session.lastBalanceCheck = Date.now(); // avoid hammering RPC if it's down
+      }
     }
   }
 
@@ -706,7 +727,7 @@ app.post('/api/auth/magic-verify', jsonSmall, async function(req, res) {
     var sessionToken = crypto.randomUUID();
     verifiedSessions.set(sessionToken, {
       wallet: user.wallet, tier: tier, balance: balance,
-      expires: Date.now() + SESSION_TTL
+      expires: Date.now() + SESSION_TTL, lastBalanceCheck: Date.now()
     });
 
     res.json({ tier, balance, sessionToken, wallet: user.wallet, email, minTokens: MIN_TOKENS });
