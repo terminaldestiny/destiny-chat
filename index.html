@@ -1574,20 +1574,16 @@ function finishBoot(){
       } else {
         var visit=getVisitSummary();
         if(visit&&visit.topics&&visit.topics.length>0&&CALLSIGN){
-          showThink();
-          var greetPrompt='[GREETING] The user just opened the page. Greet them as a returning visitor. Name: '+CALLSIGN+'. They previously discussed: '+visit.topics.join(' / ')+'. Write a 1-2 sentence personalized opening — use their name, reference one past topic naturally. Stay in character as DESTINY.';
+          var topic=visit.topics[0]||'';
+          var greetings=[
+            'Back again, '+CALLSIGN+'. Last time we were on "'+topic+'". Picking up where we left off, or something new?',
+            'Welcome back, '+CALLSIGN+'. Still thinking about "'+topic+'"? Or are we pivoting to something new?',
+            CALLSIGN+'. Good to have you back. We left off on "'+topic+'" — want to continue?',
+            'Back, '+CALLSIGN+'. "'+topic+'" — still on your mind, or new mission today?'
+          ];
+          var wbMsg=greetings[Math.floor(Math.random()*greetings.length)];
           loadChatHistory();if(mt)verifyMagicToken(mt);
-          fetch(BACKEND+'/api/chat',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({visitorId:getVid(),model:'haiku',sessionToken:getSessionToken(),message:greetPrompt,history:[]})})
-            .then(function(r){return r.json();})
-            .then(function(d){
-              hideThink();avCore.className='speaking';scanLine();
-              var reply=d.response||('Welcome back, '+CALLSIGN+'. Ready when you are.');
-              addDestiny(reply,true).then(function(){if(getRemaining()>0)inputEl.focus();});
-            })
-            .catch(function(){
-              hideThink();
-              addDestiny('Welcome back, '+CALLSIGN+'. Ready when you are.',true).then(function(){if(getRemaining()>0)inputEl.focus();});
-            });
+          addDestiny(wbMsg,true).then(function(){if(getRemaining()>0)inputEl.focus();});
         } else {
           var wbMsg=CALLSIGN
             ?'Welcome back, '+CALLSIGN+'. Ready when you are — AI, crypto, code, building. Let\'s get to work.'
