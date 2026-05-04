@@ -184,6 +184,7 @@ var BUILDER_RE = /\b(build|deploy|code|app|project|develop|launch|ship|create|pr
 var VALID_EMBLEMS   = ['hexagon','diamond','skull','shield','sword','signal','star','lightning','infinity','target'];
 var VALID_THEMES    = ['green','cyan','amber','red','purple'];
 var VALID_PATTERNS  = ['none','grid','scan','circuit'];
+var VALID_ROLES     = ['','BUILDER','TRADER','DEGEN','FOUNDER','SCOUT','SHADOW','GHOST','PILOT'];
 
 async function ensureHero(wallet, codename, balance) {
   if (!supabase) return null;
@@ -240,7 +241,7 @@ async function getAllHeroes() {
       return { serial: h.serial, codename: h.codename, emblem: h.emblem, titles: h.titles,
                total_conversations: h.total_conversations, days_active: h.days_active,
                joined_at: h.joined_at, rank, gold: b >= 2000000,
-               theme: h.theme || 'green', tagline: h.tagline || '', bg_pattern: h.bg_pattern || 'none' };
+               theme: h.theme || 'green', tagline: h.tagline || '', bg_pattern: h.bg_pattern || 'none', role: h.role || '' };
     });
   } catch (e) { console.error('getAllHeroes:', e.message); return []; }
 }
@@ -866,6 +867,10 @@ app.patch('/api/heroes/me', jsonSmall, async function(req, res) {
   if (body.bg_pattern !== undefined) {
     if (!VALID_PATTERNS.includes(body.bg_pattern)) return res.status(400).json({ error: 'invalid_pattern' });
     updates.bg_pattern = body.bg_pattern;
+  }
+  if (body.role !== undefined) {
+    if (!VALID_ROLES.includes(body.role)) return res.status(400).json({ error: 'invalid_role' });
+    updates.role = body.role;
   }
   if (!Object.keys(updates).length) return res.status(400).json({ error: 'nothing_to_update' });
   try {

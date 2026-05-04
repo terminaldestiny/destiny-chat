@@ -28,11 +28,14 @@ body::before{content:'';position:fixed;inset:0;background:repeating-linear-gradi
 #my-section{display:none;padding:24px 20px 0;position:relative;z-index:1;}
 #my-lbl{font-size:9px;letter-spacing:4px;color:rgba(0,212,255,0.4);margin-bottom:18px;}
 
-/* ── Customize toggle (mobile) ──────────────── */
-#customize-toggle{display:none;width:100%;background:rgba(0,255,65,0.04);border:1px solid rgba(0,255,65,0.18);color:rgba(0,255,65,0.6);font-family:inherit;font-size:9px;letter-spacing:3px;padding:11px;cursor:pointer;margin-bottom:16px;transition:.15s;text-align:left;}
-#customize-toggle:hover{background:rgba(0,255,65,0.08);color:var(--green);}
-#customize-toggle .arrow{float:right;transition:transform .2s;}
-#customize-toggle.open .arrow{transform:rotate(180deg);}
+/* ── Card column ────────────────────────────── */
+#card-col{display:flex;flex-direction:column;gap:0;flex-shrink:0;width:300px;}
+
+/* ── Customize toggle ───────────────────────── */
+#customize-toggle{width:100%;background:rgba(0,255,65,0.06);border:1px solid rgba(0,255,65,0.35);border-top:none;color:var(--green);font-family:inherit;font-size:10px;letter-spacing:3px;padding:13px 16px;cursor:pointer;transition:.15s;display:flex;align-items:center;justify-content:space-between;}
+#customize-toggle:hover{background:rgba(0,255,65,0.12);box-shadow:0 4px 20px rgba(0,255,65,0.08);}
+#customize-toggle .ct-icon{font-size:14px;transition:transform .25s;}
+#customize-toggle.open .ct-icon{transform:rotate(180deg);}
 
 /* ── Card + panel layout ────────────────────── */
 #my-wrap{display:flex;gap:30px;align-items:flex-start;flex-wrap:wrap;}
@@ -65,8 +68,9 @@ body::before{content:'';position:fixed;inset:0;background:repeating-linear-gradi
 @keyframes dot-pulse{0%,100%{opacity:.3;transform:scale(1);}50%{opacity:1;transform:scale(1.3);}}
 #pc-name{font-size:20px;font-weight:bold;letter-spacing:2px;color:#fff;margin-bottom:5px;word-break:break-all;text-shadow:0 0 30px rgba(255,255,255,0.1);}
 #pc-tagline{font-size:9px;letter-spacing:1.2px;color:rgba(255,255,255,0.32);font-style:italic;margin-bottom:14px;min-height:13px;}
-#pc-rank{display:inline-block;font-size:8px;letter-spacing:3px;padding:3px 12px;margin-bottom:12px;border:1px solid;position:relative;transition:all .4s;}
+#pc-rank{display:inline-block;font-size:8px;letter-spacing:3px;padding:3px 12px;margin-bottom:6px;border:1px solid;position:relative;transition:all .4s;}
 #pc-rank::before{content:'▸';margin-right:6px;opacity:.7;}
+#pc-role{display:none;font-size:8px;letter-spacing:3px;padding:2px 10px;margin-bottom:12px;border:1px solid rgba(255,255,255,0.15);color:rgba(255,255,255,0.4);display:inline-block;margin-left:6px;vertical-align:middle;}
 #pc-titles{display:flex;flex-wrap:wrap;gap:5px;margin-bottom:14px;min-height:18px;}
 .pc-title{font-size:7px;letter-spacing:1.5px;color:var(--cyan);border:1px solid rgba(0,212,255,0.22);padding:2px 7px;animation:title-glow 3s ease-in-out infinite;}
 @keyframes title-glow{0%,100%{border-color:rgba(0,212,255,0.22);text-shadow:none;}50%{border-color:rgba(0,212,255,0.5);text-shadow:0 0 8px rgba(0,212,255,0.4);}}
@@ -182,6 +186,15 @@ body::before{content:'';position:fixed;inset:0;background:repeating-linear-gradi
 #modal-share-btn{display:flex;align-items:center;justify-content:center;gap:10px;padding:12px;cursor:pointer;font-size:9px;letter-spacing:2.5px;border:1px solid rgba(255,255,255,0.1);color:rgba(255,255,255,0.5);transition:.15s;}
 #modal-share-btn:hover{color:#fff;border-color:rgba(255,255,255,0.3);}
 
+/* ── Role picker ────────────────────────────── */
+#role-grid{display:flex;gap:6px;flex-wrap:wrap;}
+.role-opt{padding:6px 14px;border:1px solid rgba(255,255,255,0.1);font-size:8px;letter-spacing:2.5px;color:rgba(255,255,255,0.35);cursor:pointer;transition:.15s;}
+.role-opt:hover{border-color:rgba(255,255,255,0.28);color:rgba(255,255,255,0.65);}
+.role-opt.active{border-color:var(--green);color:var(--green);background:rgba(0,255,65,0.05);}
+.role-opt.none-opt{font-style:italic;color:rgba(255,255,255,0.2);}
+/* community card role tag */
+.hcard-role{display:inline-block;font-size:7px;letter-spacing:2px;color:rgba(255,255,255,0.35);border:1px solid rgba(255,255,255,0.1);padding:1px 7px;margin-left:6px;vertical-align:middle;}
+
 /* ── Loading ─────────────────────────────────── */
 #loading{padding:60px 20px;text-align:center;font-size:10px;letter-spacing:3px;color:rgba(0,255,65,0.28);z-index:1;position:relative;}
 #no-results{padding:40px 20px;font-size:10px;letter-spacing:2px;color:rgba(0,255,65,0.25);display:none;z-index:1;position:relative;}
@@ -192,9 +205,8 @@ body::before{content:'';position:fixed;inset:0;background:repeating-linear-gradi
   #my-section,#search-wrap,.sec-div,#no-session{padding-left:14px;padding-right:14px;}
   #grid{padding:14px;gap:10px;}
   #my-wrap{flex-direction:column;}
-  #preview-card{width:100%;}
+  #card-col{width:100%;}
   #emblem-grid{grid-template-columns:repeat(5,1fr);}
-  #customize-toggle{display:block;}
   #edit-panel{display:none;}
   #edit-panel.open{display:block;}
 }
@@ -217,13 +229,10 @@ body::before{content:'';position:fixed;inset:0;background:repeating-linear-gradi
 <div id="my-section">
   <div id="my-lbl">// YOUR CARD</div>
 
-  <button id="customize-toggle" onclick="toggleCustomize()">
-    ⬡ CUSTOMIZE CARD <span class="arrow">▾</span>
-  </button>
-
   <div id="my-wrap">
 
-    <!-- live preview card -->
+    <!-- card column: preview + toggle button -->
+    <div id="card-col">
     <div id="preview-card">
       <div id="pc-bar"></div>
       <div id="pc-pattern"></div>
@@ -235,7 +244,9 @@ body::before{content:'';position:fixed;inset:0;background:repeating-linear-gradi
         <div id="pc-emblem-wrap"><div id="pc-emblem">⬡</div></div>
         <div id="pc-name"></div>
         <div id="pc-tagline"></div>
-        <div id="pc-rank">OPERATIVE</div>
+        <div style="margin-bottom:12px;">
+          <span id="pc-rank">OPERATIVE</span><span id="pc-role"></span>
+        </div>
         <div id="pc-titles"></div>
         <div id="pc-divider"></div>
         <div id="pc-stats">
@@ -249,6 +260,10 @@ body::before{content:'';position:fixed;inset:0;background:repeating-linear-gradi
         </div>
       </div>
     </div>
+    <button id="customize-toggle" onclick="toggleCustomize()">
+      <span>⬡ CUSTOMIZE CARD</span><span class="ct-icon">▾</span>
+    </button>
+    </div><!-- end #card-col -->
 
     <!-- edit panel -->
     <div id="edit-panel">
@@ -293,6 +308,20 @@ body::before{content:'';position:fixed;inset:0;background:repeating-linear-gradi
           <div class="pat-opt" data-p="grid"    onclick="pickPattern('grid')">GRID</div>
           <div class="pat-opt" data-p="scan"    onclick="pickPattern('scan')">SCAN</div>
           <div class="pat-opt" data-p="circuit" onclick="pickPattern('circuit')">CIRCUIT</div>
+        </div>
+      </div>
+      <div class="e-row">
+        <div class="e-lbl">ROLE</div>
+        <div id="role-grid">
+          <div class="role-opt none-opt" data-r="" onclick="pickRole('')">NONE</div>
+          <div class="role-opt" data-r="BUILDER"  onclick="pickRole('BUILDER')">BUILDER</div>
+          <div class="role-opt" data-r="TRADER"   onclick="pickRole('TRADER')">TRADER</div>
+          <div class="role-opt" data-r="DEGEN"    onclick="pickRole('DEGEN')">DEGEN</div>
+          <div class="role-opt" data-r="FOUNDER"  onclick="pickRole('FOUNDER')">FOUNDER</div>
+          <div class="role-opt" data-r="SCOUT"    onclick="pickRole('SCOUT')">SCOUT</div>
+          <div class="role-opt" data-r="SHADOW"   onclick="pickRole('SHADOW')">SHADOW</div>
+          <div class="role-opt" data-r="GHOST"    onclick="pickRole('GHOST')">GHOST</div>
+          <div class="role-opt" data-r="PILOT"    onclick="pickRole('PILOT')">PILOT</div>
         </div>
       </div>
       <button id="save-btn" onclick="saveCard()">SAVE CHANGES</button>
@@ -355,7 +384,7 @@ var THEME_RGBA={
   purple:function(a){return 'rgba(204,68,255,'+a+')';}
 };
 var allHeroes=[], activeHero=null, myHero=null;
-var p={codename:'',emblem:'hexagon',theme:'green',tagline:'',bg_pattern:'none'};
+var p={codename:'',emblem:'hexagon',theme:'green',tagline:'',bg_pattern:'none',role:''};
 
 function getSession(){try{var s=JSON.parse(localStorage.getItem('destiny_session')||'null');return(s&&s.expires>Date.now())?s:null;}catch(e){return null;}}
 function fmtSerial(n){return 'TD-'+String(n).padStart(3,'0');}
@@ -370,7 +399,6 @@ function toggleCustomize(){
   var panel=document.getElementById('edit-panel');
   var open=panel.classList.toggle('open');
   btn.classList.toggle('open',open);
-  btn.querySelector('.arrow').textContent=open?'▴':'▾';
 }
 
 // ── Pattern CSS ───────────────────────────────────────────────────────────
@@ -428,11 +456,15 @@ function updatePreview(){
   document.getElementById('pc-divider').style.color=th;
   document.getElementById('pc-url').style.color=ra('0.28');
   document.getElementById('pc-footer').style.borderTopColor=ra('0.07');
+  // role badge
+  var roleEl=document.getElementById('pc-role');
+  if(p.role){roleEl.textContent=p.role;roleEl.style.display='inline-block';}
+  else{roleEl.style.display='none';}
 }
 
 function populateMyCard(h){
   p.codename=h.codename; p.emblem=h.emblem||'hexagon';
-  p.theme=h.theme||'green'; p.tagline=h.tagline||''; p.bg_pattern=h.bg_pattern||'none';
+  p.theme=h.theme||'green'; p.tagline=h.tagline||''; p.bg_pattern=h.bg_pattern||'none'; p.role=h.role||'';
 
   document.getElementById('codename-input').value=h.codename;
   document.getElementById('tagline-input').value=h.tagline||'';
@@ -445,6 +477,7 @@ function populateMyCard(h){
   document.getElementById('pc-joined').textContent='SINCE '+fmtDate(h.joined_at);
 
   document.querySelectorAll('.embl').forEach(function(el){el.classList.toggle('active',el.dataset.e===p.emblem);});
+  document.querySelectorAll('.role-opt').forEach(function(el){el.classList.toggle('active',el.dataset.r===p.role);});
   document.querySelectorAll('.embl.active').forEach(function(el){el.style.borderColor=THEME_HEX[p.theme];el.style.boxShadow='0 0 10px '+cRgba(p.theme,'0.3');});
   document.querySelectorAll('.tswatch').forEach(function(el){el.classList.toggle('active',el.dataset.t===p.theme);});
   document.querySelectorAll('.pat-opt').forEach(function(el){el.classList.toggle('active',el.dataset.p===p.bg_pattern);});
@@ -479,6 +512,11 @@ function pickPattern(pt){
   });
   updatePreview();
 }
+function pickRole(r){
+  p.role=r;
+  document.querySelectorAll('.role-opt').forEach(function(el){el.classList.toggle('active',el.dataset.r===r);});
+  updatePreview();
+}
 
 async function saveCard(){
   var sess=getSession();
@@ -490,7 +528,7 @@ async function saveCard(){
   try{
     var r=await fetch(BACKEND+'/api/heroes/me',{
       method:'PATCH',headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({sessionToken:sess.sessionToken,codename:cn,emblem:p.emblem,theme:p.theme,tagline:p.tagline,bg_pattern:p.bg_pattern})
+      body:JSON.stringify({sessionToken:sess.sessionToken,codename:cn,emblem:p.emblem,theme:p.theme,tagline:p.tagline,bg_pattern:p.bg_pattern,role:p.role})
     });
     if(r.ok){
       myHero.codename=cn; myHero.emblem=p.emblem; myHero.theme=p.theme;
@@ -501,7 +539,7 @@ async function saveCard(){
       if(idx!==-1){
         allHeroes[idx].codename=cn; allHeroes[idx].emblem=p.emblem;
         allHeroes[idx].theme=p.theme; allHeroes[idx].tagline=p.tagline;
-        allHeroes[idx].bg_pattern=p.bg_pattern;
+        allHeroes[idx].bg_pattern=p.bg_pattern; allHeroes[idx].role=p.role;
         renderGrid(allHeroes);
       }
       var msg=document.getElementById('save-msg');
@@ -540,7 +578,7 @@ function renderCard(h,delay){
     '</div>',
     '<div class="hcard-name">'+escHtml(h.codename)+'</div>',
     h.tagline?'<div class="hcard-tagline">"'+escHtml(h.tagline)+'"</div>':'<div class="hcard-tagline"></div>',
-    '<div class="hcard-rank" style="color:'+th+';border-color:'+ra('0.4')+';box-shadow:0 0 8px '+ra('0.1')+'">'+h.rank+'</div>',
+    '<div style="margin-bottom:9px;"><span class="hcard-rank" style="color:'+th+';border-color:'+ra('0.4')+';box-shadow:0 0 8px '+ra('0.1')+'">'+h.rank+'</span>'+(h.role?'<span class="hcard-role">'+escHtml(h.role)+'</span>':'')+'</div>',
     '<div class="hcard-titles">'+((h.titles||[]).map(function(t){return '<span class="hcard-title">'+escHtml(t)+'</span>';})).join('')+'</div>',
     '<div class="hcard-stats">',
       '<div><div class="hstat-val">'+(h.total_conversations||0)+'</div><div class="hstat-lbl">TRANSMISSIONS</div></div>',
@@ -593,7 +631,7 @@ function openModal(h){
   document.getElementById('modal-serial').textContent=fmtSerial(h.serial);
   document.getElementById('modal-name').textContent=h.codename;
   document.getElementById('modal-tagline').textContent=h.tagline?'"'+h.tagline+'"':'';
-  document.getElementById('modal-rank').textContent='▸ '+h.rank;
+  document.getElementById('modal-rank').textContent='▸ '+h.rank+(h.role?' · '+h.role:'');
   document.getElementById('modal-emblem').textContent=EMBLEMS[h.emblem]||'⬡';
   document.getElementById('modal-titles').innerHTML=(h.titles||[]).map(function(t){return '<span class="modal-chip">'+escHtml(t)+'</span>';}).join('');
   document.getElementById('ms-tx').textContent=h.total_conversations||0;
@@ -683,11 +721,19 @@ function buildShareCanvas(h){
 
   // rank badge
   ctx.font='9px "Courier New"'; ctx.fillStyle=th;
-  var rw=ctx.measureText('▸ '+h.rank).width+22;
+  var rankTxt='▸ '+h.rank;
+  var rw=ctx.measureText(rankTxt).width+22;
   ctx.strokeStyle=ra('0.5'); ctx.lineWidth=1;
   ctx.shadowColor=th; ctx.shadowBlur=8;
   ctx.strokeRect(22,nextY,rw,20);
-  ctx.shadowBlur=0; ctx.fillText('▸ '+h.rank,33,nextY+13);
+  ctx.shadowBlur=0; ctx.fillText(rankTxt,33,nextY+13);
+  if(h.role){
+    ctx.font='8px "Courier New"'; ctx.fillStyle='rgba(255,255,255,0.35)';
+    ctx.strokeStyle='rgba(255,255,255,0.12)'; ctx.lineWidth=1;
+    var rolew=ctx.measureText(h.role).width+18;
+    ctx.strokeRect(22+rw+8,nextY+1,rolew,18);
+    ctx.fillText(h.role,22+rw+17,nextY+13);
+  }
 
   // titles inline
   var tx2=22+rw+10;
