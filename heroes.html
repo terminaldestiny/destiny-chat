@@ -20,18 +20,58 @@
   #hdr-title{font-size:13px;letter-spacing:6px;color:var(--amber);font-weight:bold;text-shadow:0 0 14px rgba(255,170,0,0.4);}
   #hero-count{margin-left:auto;font-size:9px;letter-spacing:2.5px;color:rgba(0,255,65,0.45);}
 
+  /* ── My card section */
+  #my-section{display:none;padding:20px 20px 0;position:relative;z-index:1;}
+  #my-section-lbl{font-size:9px;letter-spacing:3.5px;color:rgba(0,212,255,0.5);margin-bottom:12px;}
+  #my-card-wrap{display:flex;gap:20px;align-items:flex-start;flex-wrap:wrap;}
+  #my-card{border:1px solid rgba(255,170,0,0.35);background:rgba(0,0,0,0.5);padding:18px 20px;min-width:240px;flex:0 0 auto;position:relative;}
+  #my-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:var(--amber);opacity:.6;}
+  #mc-top{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px;}
+  #mc-serial{font-size:9px;letter-spacing:2px;color:rgba(255,170,0,0.5);}
+  #mc-emblem{font-size:26px;line-height:1;}
+  #mc-name{font-size:17px;font-weight:bold;letter-spacing:1.5px;color:#fff;margin-bottom:3px;}
+  #mc-rank{font-size:9px;letter-spacing:3px;color:rgba(255,170,0,0.7);margin-bottom:8px;}
+  #mc-titles{display:flex;flex-wrap:wrap;gap:4px;margin-bottom:10px;min-height:16px;}
+  .mc-title{font-size:8px;letter-spacing:1.5px;color:var(--cyan);border:1px solid rgba(0,212,255,0.25);padding:2px 6px;}
+  #mc-stats{display:grid;grid-template-columns:1fr 1fr;gap:6px;border-top:1px solid rgba(255,170,0,0.1);padding-top:10px;}
+  .mc-stat{font-size:9px;letter-spacing:1px;color:rgba(255,255,255,0.35);}
+  .mc-stat span{color:rgba(255,255,255,0.75);display:block;font-size:12px;margin-bottom:1px;}
+
+  /* ── Edit panel */
+  #edit-panel{flex:1;min-width:240px;}
+  #edit-section-lbl{font-size:9px;letter-spacing:3px;color:rgba(0,212,255,0.45);margin-bottom:12px;}
+  .edit-row{margin-bottom:16px;}
+  .edit-lbl{font-size:8px;letter-spacing:2.5px;color:rgba(0,255,65,0.4);margin-bottom:6px;}
+  #codename-input{width:100%;background:rgba(0,0,0,0.5);border:1px solid rgba(0,255,65,0.2);color:rgba(255,255,255,0.85);font-family:inherit;font-size:13px;letter-spacing:2px;padding:9px 12px;outline:none;transition:.15s;text-transform:uppercase;}
+  #codename-input:focus{border-color:var(--cyan);box-shadow:0 0 10px rgba(0,212,255,0.08);}
+  #emblem-row{display:flex;gap:8px;flex-wrap:wrap;}
+  .embl{width:44px;height:44px;border:1px solid rgba(0,255,65,0.2);background:rgba(0,0,0,0.3);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:20px;transition:all .15s;user-select:none;}
+  .embl:hover{border-color:var(--amber);background:rgba(255,170,0,0.08);}
+  .embl.active{border-color:var(--amber);background:rgba(255,170,0,0.12);box-shadow:0 0 12px rgba(255,170,0,0.2);}
+  #save-btn{margin-top:4px;background:rgba(255,170,0,0.08);border:1px solid rgba(255,170,0,0.4);color:var(--amber);font-family:inherit;font-size:10px;letter-spacing:3px;padding:10px 24px;cursor:pointer;transition:.15s;}
+  #save-btn:hover{background:rgba(255,170,0,0.15);border-color:var(--amber);}
+  #save-btn:disabled{opacity:.4;cursor:default;}
+  #save-msg{font-size:9px;letter-spacing:2px;color:rgba(0,255,65,0.6);margin-left:14px;display:none;}
+
+  /* ── Share button */
+  #my-share{margin-top:12px;display:inline-flex;align-items:center;gap:8px;border:1px solid rgba(0,255,65,0.2);padding:9px 16px;cursor:pointer;font-size:9px;letter-spacing:2px;color:rgba(0,255,65,0.6);transition:.15s;background:none;}
+  #my-share:hover{border-color:var(--green);color:var(--green);}
+
+  /* ── Divider */
+  .section-div{height:1px;background:rgba(0,255,65,0.08);margin:20px 20px 0;}
+
   /* ── Search */
   #search-wrap{padding:20px 20px 0;position:relative;z-index:1;}
   #search-input{width:100%;max-width:400px;background:rgba(0,0,0,0.5);border:1px solid rgba(0,255,65,0.2);color:rgba(255,255,255,0.85);font-family:inherit;font-size:11px;letter-spacing:2px;padding:10px 14px;outline:none;transition:.15s;}
   #search-input::placeholder{color:rgba(0,255,65,0.25);}
-  #search-input:focus{border-color:var(--cyan);box-shadow:0 0 12px rgba(0,212,255,0.1);}
+  #search-input:focus{border-color:var(--cyan);box-shadow:0 0 12px rgba(0,212,255,0.08);}
 
   /* ── Grid */
-  #grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:14px;padding:20px;position:relative;z-index:1;}
-  #no-results{padding:40px 20px;font-size:10px;letter-spacing:2px;color:rgba(0,255,65,0.3);display:none;}
+  #grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:14px;padding:20px;position:relative;z-index:1;}
+  #no-results{padding:40px 20px;font-size:10px;letter-spacing:2px;color:rgba(0,255,65,0.3);display:none;position:relative;z-index:1;}
 
   /* ── Hero card */
-  .hcard{border:1px solid rgba(0,255,65,0.18);background:rgba(0,0,0,0.5);padding:0;cursor:pointer;transition:all .15s;position:relative;overflow:hidden;}
+  .hcard{border:1px solid rgba(0,255,65,0.18);background:rgba(0,0,0,0.5);cursor:pointer;transition:all .15s;position:relative;overflow:hidden;}
   .hcard::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:var(--green);opacity:.5;}
   .hcard.gold::before{background:var(--amber);}
   .hcard:hover{border-color:rgba(0,212,255,0.4);transform:translateY(-2px);box-shadow:0 4px 24px rgba(0,212,255,0.08);}
@@ -52,37 +92,37 @@
 
   /* ── Modal */
   #modal-backdrop{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.85);z-index:100;cursor:pointer;}
-  #modal{display:none;position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);z-index:101;width:min(480px,92vw);background:#030503;border:1px solid rgba(0,255,65,0.25);padding:0;}
+  #modal{display:none;position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);z-index:101;width:min(460px,92vw);background:#030503;border:1px solid rgba(0,255,65,0.25);}
   #modal.on,#modal-backdrop.on{display:block;}
   #modal-top{height:3px;background:linear-gradient(90deg,transparent,var(--green),transparent);}
   #modal.gold-modal #modal-top{background:linear-gradient(90deg,transparent,var(--amber),transparent);}
   #modal-body{padding:24px;}
-  #modal-close{position:absolute;top:14px;right:14px;cursor:pointer;color:rgba(0,255,65,0.4);font-size:14px;line-height:1;}
+  #modal-close{position:absolute;top:14px;right:14px;cursor:pointer;color:rgba(0,255,65,0.4);font-size:14px;}
   #modal-close:hover{color:var(--green);}
   #modal-serial{font-size:9px;letter-spacing:2.5px;color:rgba(0,255,65,0.4);margin-bottom:6px;}
   #modal.gold-modal #modal-serial{color:rgba(255,170,0,0.5);}
-  #modal-emblem{font-size:36px;float:right;line-height:1;margin-top:-6px;}
+  #modal-emblem{font-size:36px;float:right;line-height:1;margin-top:-4px;}
   #modal-name{font-size:22px;font-weight:bold;letter-spacing:2px;color:#fff;margin-bottom:4px;}
   #modal-rank{font-size:10px;letter-spacing:3.5px;color:rgba(0,255,65,0.6);margin-bottom:14px;}
   #modal.gold-modal #modal-rank{color:rgba(255,170,0,0.8);}
   #modal-titles{display:flex;flex-wrap:wrap;gap:5px;margin-bottom:16px;}
   .modal-title{font-size:9px;letter-spacing:1.5px;color:var(--cyan);border:1px solid rgba(0,212,255,0.3);padding:3px 8px;}
   #modal-divider{height:1px;background:rgba(0,255,65,0.1);margin:16px 0;}
-  #modal-stats{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px;}
+  #modal-stats{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px;}
   .mstat-lbl{font-size:8px;letter-spacing:2px;color:rgba(0,255,65,0.35);margin-bottom:3px;}
   .mstat-val{font-size:14px;letter-spacing:1px;color:rgba(255,255,255,0.85);}
-  #modal-joined{font-size:9px;letter-spacing:1.5px;color:rgba(255,255,255,0.3);margin-bottom:20px;}
+  #modal-joined{font-size:9px;letter-spacing:1.5px;color:rgba(255,255,255,0.28);margin-bottom:20px;}
   #modal-share{display:flex;align-items:center;justify-content:center;gap:10px;border:1px solid rgba(0,255,65,0.2);padding:12px;cursor:pointer;font-size:10px;letter-spacing:2px;color:rgba(0,255,65,0.7);transition:.15s;}
   #modal-share:hover{border-color:var(--green);color:var(--green);background:rgba(0,255,65,0.04);}
 
   /* ── Loading */
   #loading{padding:60px 20px;text-align:center;font-size:10px;letter-spacing:3px;color:rgba(0,255,65,0.3);position:relative;z-index:1;}
 
-  /* ── Mobile */
-  @media(max-width:520px){
+  @media(max-width:540px){
     #hdr{padding:10px 14px;}
-    #grid{padding:14px;gap:10px;}
-    #search-wrap{padding:14px 14px 0;}
+    #grid,#search-wrap,#my-section,.section-div{padding-left:14px;padding-right:14px;}
+    #my-card-wrap{flex-direction:column;}
+    #my-card,#edit-panel{min-width:0;width:100%;}
   }
 </style>
 </head>
@@ -94,6 +134,54 @@
   <div id="hero-count"></div>
 </div>
 
+<!-- My card (only shown when logged in as operative) -->
+<div id="my-section">
+  <div id="my-section-lbl">// YOUR CARD</div>
+  <div id="my-card-wrap">
+
+    <!-- Live preview card -->
+    <div id="my-card">
+      <div id="mc-top">
+        <div id="mc-serial"></div>
+        <div id="mc-emblem">⬡</div>
+      </div>
+      <div id="mc-name"></div>
+      <div id="mc-rank"></div>
+      <div id="mc-titles"></div>
+      <div id="mc-stats">
+        <div class="mc-stat"><span id="mc-tx">0</span>TRANSMISSIONS</div>
+        <div class="mc-stat"><span id="mc-days">0</span>DAYS ACTIVE</div>
+      </div>
+    </div>
+
+    <!-- Edit controls -->
+    <div id="edit-panel">
+      <div id="edit-section-lbl">// CUSTOMIZE</div>
+      <div class="edit-row">
+        <div class="edit-lbl">CALLSIGN</div>
+        <input type="text" id="codename-input" maxlength="24" autocomplete="off" placeholder="YOUR CALLSIGN" oninput="previewName(this.value)">
+      </div>
+      <div class="edit-row">
+        <div class="edit-lbl">EMBLEM</div>
+        <div id="emblem-row">
+          <div class="embl active" data-e="hexagon" onclick="pickEmblem('hexagon')">⬡</div>
+          <div class="embl" data-e="diamond"  onclick="pickEmblem('diamond')">◆</div>
+          <div class="embl" data-e="skull"    onclick="pickEmblem('skull')">☠</div>
+          <div class="embl" data-e="shield"   onclick="pickEmblem('shield')">⛨</div>
+          <div class="embl" data-e="sword"    onclick="pickEmblem('sword')">⚔</div>
+          <div class="embl" data-e="signal"   onclick="pickEmblem('signal')">≋</div>
+        </div>
+      </div>
+      <button id="save-btn" onclick="saveCard()">SAVE CHANGES</button>
+      <span id="save-msg">✓ SAVED</span>
+    </div>
+
+  </div>
+  <button id="my-share" onclick="shareMyCard()">𝕏 &nbsp;SHARE YOUR CARD</button>
+</div>
+
+<div class="section-div" id="wall-div" style="display:none"></div>
+
 <div id="search-wrap">
   <input type="text" id="search-input" placeholder="SEARCH CALLSIGN..." autocomplete="off" oninput="filterHeroes(this.value)">
 </div>
@@ -102,6 +190,7 @@
 <div id="grid"></div>
 <div id="no-results">NO HEROES FOUND</div>
 
+<!-- Modal for community wall cards -->
 <div id="modal-backdrop" onclick="closeModal()"></div>
 <div id="modal">
   <div id="modal-top"></div>
@@ -118,7 +207,7 @@
       <div><div class="mstat-lbl">DAYS ACTIVE</div><div class="mstat-val" id="mstat-days"></div></div>
     </div>
     <div id="modal-joined"></div>
-    <div id="modal-share" onclick="shareCard()">𝕏 &nbsp;SHARE THIS HERO CARD</div>
+    <div id="modal-share" onclick="shareModalCard()">𝕏 &nbsp;SHARE THIS HERO CARD</div>
   </div>
 </div>
 
@@ -129,10 +218,71 @@ var BACKEND = 'https://destiny-chat-production.up.railway.app';
 var EMBLEMS = { hexagon:'⬡', diamond:'◆', skull:'☠', shield:'⛨', sword:'⚔', signal:'≋' };
 var allHeroes = [];
 var activeHero = null;
+var myHero = null;
+var pendingEmblem = 'hexagon';
 
+// ── Session helpers (mirrors index.html) ─────────────────────────────────
+function getSession(){
+  try{ var s=JSON.parse(localStorage.getItem('destiny_session')||'null'); return(s&&s.expires>Date.now())?s:null; }
+  catch(e){ return null; }
+}
+
+// ── Formatting ────────────────────────────────────────────────────────────
 function fmtSerial(n){ return 'TD-' + String(n).padStart(3,'0'); }
 function fmtDate(iso){ return new Date(iso).toLocaleDateString('en-US',{year:'numeric',month:'short',day:'numeric'}); }
+function escHtml(s){ return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
 
+// ── My card preview ───────────────────────────────────────────────────────
+function populateMyCard(h){
+  document.getElementById('mc-serial').textContent = fmtSerial(h.serial);
+  document.getElementById('mc-emblem').textContent = EMBLEMS[h.emblem] || '⬡';
+  document.getElementById('mc-name').textContent = h.codename;
+  document.getElementById('mc-rank').textContent = h.rank;
+  document.getElementById('mc-titles').innerHTML = (h.titles||[]).map(function(t){ return '<span class="mc-title">'+escHtml(t)+'</span>'; }).join('');
+  document.getElementById('mc-tx').textContent = h.total_conversations || 0;
+  document.getElementById('mc-days').textContent = h.days_active || 0;
+  document.getElementById('codename-input').value = h.codename;
+  pendingEmblem = h.emblem || 'hexagon';
+  document.querySelectorAll('.embl').forEach(function(el){ el.classList.toggle('active', el.dataset.e === pendingEmblem); });
+}
+
+function previewName(val){
+  var v = val.trim().toUpperCase().slice(0, 24);
+  document.getElementById('mc-name').textContent = v || myHero.codename;
+}
+
+function pickEmblem(e){
+  pendingEmblem = e;
+  document.querySelectorAll('.embl').forEach(function(el){ el.classList.toggle('active', el.dataset.e === e); });
+  document.getElementById('mc-emblem').textContent = EMBLEMS[e] || '⬡';
+}
+
+async function saveCard(){
+  var sess = getSession();
+  if(!sess || !sess.sessionToken) return;
+  var btn = document.getElementById('save-btn');
+  var msg = document.getElementById('save-msg');
+  var cn = document.getElementById('codename-input').value.trim().toUpperCase().slice(0, 24);
+  if(!cn){ alert('Callsign cannot be empty.'); return; }
+  btn.disabled = true;
+  try {
+    var r = await fetch(BACKEND + '/api/heroes/me', {
+      method: 'PATCH',
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({ sessionToken: sess.sessionToken, codename: cn, emblem: pendingEmblem })
+    });
+    if(r.ok){
+      myHero.codename = cn;
+      myHero.emblem = pendingEmblem;
+      populateMyCard(myHero);
+      msg.style.display = 'inline';
+      setTimeout(function(){ msg.style.display = 'none'; }, 2500);
+    }
+  } catch(e){}
+  btn.disabled = false;
+}
+
+// ── Community wall ────────────────────────────────────────────────────────
 function renderCard(h){
   var card = document.createElement('div');
   card.className = 'hcard' + (h.gold ? ' gold' : '');
@@ -140,15 +290,15 @@ function renderCard(h){
   card.innerHTML = [
     '<div class="hcard-inner">',
       '<div class="hcard-top">',
-        '<div class="hcard-serial">' + fmtSerial(h.serial) + '</div>',
-        '<div class="hcard-emblem">' + (EMBLEMS[h.emblem] || '⬡') + '</div>',
+        '<div class="hcard-serial">',fmtSerial(h.serial),'</div>',
+        '<div class="hcard-emblem">',(EMBLEMS[h.emblem]||'⬡'),'</div>',
       '</div>',
-      '<div class="hcard-name">' + escHtml(h.codename) + '</div>',
-      '<div class="hcard-rank">' + h.rank + '</div>',
-      '<div class="hcard-titles">' + (h.titles||[]).map(function(t){ return '<span class="hcard-title">'+escHtml(t)+'</span>'; }).join('') + '</div>',
+      '<div class="hcard-name">',escHtml(h.codename),'</div>',
+      '<div class="hcard-rank">',h.rank,'</div>',
+      '<div class="hcard-titles">',(h.titles||[]).map(function(t){ return '<span class="hcard-title">'+escHtml(t)+'</span>'; }).join(''),'</div>',
       '<div class="hcard-stats">',
-        '<div class="hcard-stat"><span>' + (h.total_conversations||0) + '</span>TRANSMISSIONS</div>',
-        '<div class="hcard-stat"><span>' + (h.days_active||0) + '</span>DAYS ACTIVE</div>',
+        '<div class="hcard-stat"><span>',(h.total_conversations||0),'</span>TRANSMISSIONS</div>',
+        '<div class="hcard-stat"><span>',(h.days_active||0),'</span>DAYS ACTIVE</div>',
       '</div>',
     '</div>'
   ].join('');
@@ -158,20 +308,16 @@ function renderCard(h){
 function renderGrid(heroes){
   var grid = document.getElementById('grid');
   grid.innerHTML = '';
-  if(!heroes.length){
-    document.getElementById('no-results').style.display = 'block';
-    return;
-  }
-  document.getElementById('no-results').style.display = 'none';
+  document.getElementById('no-results').style.display = heroes.length ? 'none' : 'block';
   heroes.forEach(function(h){ grid.appendChild(renderCard(h)); });
 }
 
 function filterHeroes(q){
   q = q.trim().toLowerCase();
-  if(!q){ renderGrid(allHeroes); return; }
-  renderGrid(allHeroes.filter(function(h){ return h.codename.toLowerCase().includes(q); }));
+  renderGrid(q ? allHeroes.filter(function(h){ return h.codename.toLowerCase().includes(q); }) : allHeroes);
 }
 
+// ── Modal ─────────────────────────────────────────────────────────────────
 function openModal(h){
   activeHero = h;
   var modal = document.getElementById('modal');
@@ -193,124 +339,109 @@ function closeModal(){
   activeHero = null;
 }
 
-function shareCard(){
-  if(!activeHero) return;
-  var h = activeHero;
+// ── Canvas share card generator ───────────────────────────────────────────
+function buildShareCanvas(h){
   var canvas = document.getElementById('share-canvas');
   var W = 480, H = 260;
   canvas.width = W; canvas.height = H;
   var ctx = canvas.getContext('2d');
 
-  // Background
   ctx.fillStyle = '#030503';
   ctx.fillRect(0, 0, W, H);
+  for(var y = 0; y < H; y += 3){ ctx.fillStyle='rgba(0,0,0,0.12)'; ctx.fillRect(0,y,W,1.5); }
 
-  // Scanlines
-  for(var y = 0; y < H; y += 3){
-    ctx.fillStyle = 'rgba(0,0,0,0.12)';
-    ctx.fillRect(0, y, W, 1.5);
-  }
-
-  // Border
   var bc = h.gold ? '#ffaa00' : '#00ff41';
-  ctx.strokeStyle = bc;
-  ctx.lineWidth = 1.5;
+  ctx.strokeStyle = bc; ctx.lineWidth = 1.5;
   ctx.strokeRect(1, 1, W-2, H-2);
+  ctx.fillStyle = bc; ctx.globalAlpha = 0.6;
+  ctx.fillRect(1, 1, W-2, 2); ctx.globalAlpha = 1;
 
-  // Top accent bar
-  ctx.fillStyle = bc;
-  ctx.globalAlpha = 0.6;
-  ctx.fillRect(1, 1, W-2, 2);
-  ctx.globalAlpha = 1;
-
-  // Serial
   ctx.font = '10px "Courier New"';
   ctx.fillStyle = h.gold ? 'rgba(255,170,0,0.5)' : 'rgba(0,255,65,0.45)';
   ctx.fillText(fmtSerial(h.serial), 20, 26);
 
-  // Emblem
   ctx.font = '28px "Courier New"';
-  ctx.fillStyle = bc;
-  ctx.textAlign = 'right';
-  ctx.fillText(EMBLEMS[h.emblem] || '⬡', W-20, 36);
-  ctx.textAlign = 'left';
+  ctx.fillStyle = bc; ctx.textAlign = 'right';
+  ctx.fillText(EMBLEMS[h.emblem] || '⬡', W-20, 36); ctx.textAlign = 'left';
 
-  // Codename
   ctx.font = 'bold 26px "Courier New"';
-  ctx.fillStyle = '#ffffff';
-  ctx.shadowColor = h.gold ? bc : '#00ff41';
-  ctx.shadowBlur = 12;
-  ctx.fillText(h.codename.toUpperCase(), 20, 60);
-  ctx.shadowBlur = 0;
+  ctx.fillStyle = '#ffffff'; ctx.shadowColor = bc; ctx.shadowBlur = 12;
+  ctx.fillText(h.codename.toUpperCase(), 20, 60); ctx.shadowBlur = 0;
 
-  // Rank
   ctx.font = '10px "Courier New"';
   ctx.fillStyle = h.gold ? 'rgba(255,170,0,0.75)' : 'rgba(0,255,65,0.6)';
   ctx.fillText(h.rank, 20, 80);
 
-  // Titles
   if(h.titles && h.titles.length){
-    ctx.font = '9px "Courier New"';
-    ctx.fillStyle = 'rgba(0,212,255,0.8)';
+    ctx.font = '9px "Courier New"'; ctx.fillStyle = 'rgba(0,212,255,0.8)';
     ctx.fillText(h.titles.slice(0,3).map(function(t){ return '['+t+']'; }).join('  '), 20, 98);
   }
 
-  // Divider
-  ctx.strokeStyle = 'rgba(0,255,65,0.12)';
-  ctx.lineWidth = 1;
-  ctx.beginPath(); ctx.moveTo(20, 114); ctx.lineTo(W-20, 114); ctx.stroke();
+  ctx.strokeStyle = 'rgba(0,255,65,0.12)'; ctx.lineWidth = 1;
+  ctx.beginPath(); ctx.moveTo(20,114); ctx.lineTo(W-20,114); ctx.stroke();
 
-  // Stats
-  ctx.font = '10px "Courier New"';
-  ctx.fillStyle = 'rgba(255,255,255,0.35)';
-  ctx.fillText('TRANSMISSIONS', 20, 136);
-  ctx.fillText('DAYS ACTIVE', 200, 136);
-  ctx.font = '18px "Courier New"';
-  ctx.fillStyle = 'rgba(255,255,255,0.85)';
-  ctx.fillText(String(h.total_conversations || 0), 20, 160);
-  ctx.fillText(String(h.days_active || 0), 200, 160);
+  ctx.font = '10px "Courier New"'; ctx.fillStyle = 'rgba(255,255,255,0.35)';
+  ctx.fillText('TRANSMISSIONS', 20, 136); ctx.fillText('DAYS ACTIVE', 200, 136);
+  ctx.font = '18px "Courier New"'; ctx.fillStyle = 'rgba(255,255,255,0.85)';
+  ctx.fillText(String(h.total_conversations||0), 20, 160);
+  ctx.fillText(String(h.days_active||0), 200, 160);
 
-  // Joined
-  ctx.font = '9px "Courier New"';
-  ctx.fillStyle = 'rgba(255,255,255,0.25)';
+  ctx.font = '9px "Courier New"'; ctx.fillStyle = 'rgba(255,255,255,0.25)';
   ctx.fillText('JOINED ' + fmtDate(h.joined_at), 20, 182);
 
-  // Bottom bar
-  ctx.fillStyle = 'rgba(0,255,65,0.04)';
-  ctx.fillRect(0, H-44, W, 44);
-  ctx.strokeStyle = 'rgba(0,255,65,0.1)';
-  ctx.lineWidth = 1;
-  ctx.beginPath(); ctx.moveTo(0, H-44); ctx.lineTo(W, H-44); ctx.stroke();
+  ctx.fillStyle = 'rgba(0,255,65,0.04)'; ctx.fillRect(0, H-44, W, 44);
+  ctx.strokeStyle = 'rgba(0,255,65,0.1)'; ctx.lineWidth = 1;
+  ctx.beginPath(); ctx.moveTo(0,H-44); ctx.lineTo(W,H-44); ctx.stroke();
 
-  // URL
   ctx.font = '10px "Courier New"';
   ctx.fillStyle = h.gold ? 'rgba(255,170,0,0.45)' : 'rgba(0,255,65,0.4)';
-  ctx.textAlign = 'center';
-  ctx.fillText('terminaldestiny.com', W/2, H-16);
-  ctx.textAlign = 'left';
+  ctx.textAlign = 'center'; ctx.fillText('terminaldestiny.com', W/2, H-16); ctx.textAlign = 'left';
 
+  return canvas;
+}
+
+function doShare(canvas, codename){
   canvas.toBlob(function(blob){
-    var fname = 'hero-' + h.codename.toLowerCase().replace(/\s+/g,'-') + '.png';
+    var fname = 'hero-' + codename.toLowerCase().replace(/\s+/g,'-') + '.png';
     var file = new File([blob], fname, {type:'image/png'});
     var text = 'My Terminal ID. The signal chose me. terminaldestiny.com';
     if(navigator.canShare && navigator.canShare({files:[file]})){
-      navigator.share({files:[file], title:'DESTINY // '+h.codename, text:text}).catch(function(){});
+      navigator.share({files:[file], title:'DESTINY // '+codename, text:text}).catch(function(){});
     } else {
       var url = URL.createObjectURL(blob);
       var a = document.createElement('a'); a.href = url; a.download = fname;
       document.body.appendChild(a); a.click(); a.remove();
       setTimeout(function(){ URL.revokeObjectURL(url); }, 1000);
-      var xUrl = 'https://x.com/intent/tweet?text=' + encodeURIComponent(text);
-      window.open(xUrl, '_blank');
+      window.open('https://x.com/intent/tweet?text=' + encodeURIComponent(text), '_blank');
     }
   }, 'image/png');
 }
 
-function escHtml(s){
-  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
-}
+function shareMyCard(){ if(myHero){ doShare(buildShareCanvas(myHero), myHero.codename); } }
+function shareModalCard(){ if(activeHero){ doShare(buildShareCanvas(activeHero), activeHero.codename); } }
 
+// ── Init ──────────────────────────────────────────────────────────────────
 async function load(){
+  var sess = getSession();
+
+  // Try to load own hero card
+  if(sess && sess.sessionToken && sess.tier === 'operative'){
+    try {
+      var mr = await fetch(BACKEND + '/api/heroes/me', {
+        method: 'POST',
+        headers: {'Content-Type':'application/json'},
+        body: JSON.stringify({ sessionToken: sess.sessionToken })
+      });
+      if(mr.ok){
+        myHero = await mr.json();
+        populateMyCard(myHero);
+        document.getElementById('my-section').style.display = 'block';
+        document.getElementById('wall-div').style.display = 'block';
+      }
+    } catch(e){}
+  }
+
+  // Load community wall
   try {
     var data = await fetch(BACKEND + '/api/heroes').then(function(r){ return r.json(); });
     allHeroes = data.heroes || [];

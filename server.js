@@ -815,21 +815,50 @@ app.get('/api/heroes', async function(req, res) {
   res.json({ heroes: heroes, count: heroes.length });
 });
 
-// ── /api/heroes/emblem — update emblem (auth required) ───────────────────
-app.patch('/api/heroes/emblem', jsonSmall, async function(req, res) {
+// ── /api/heroes/me — get own hero card ───────────────────────────────────
+app.post('/api/heroes/me', jsonSmall, async function(req, res) {
   var body = req.body || {};
   var sessionToken = (body.sessionToken || '').toString().trim().slice(0, 64);
-  var emblem = (body.emblem || '').toString().trim();
-  if (!VALID_EMBLEMS.includes(emblem)) return res.status(400).json({ error: 'invalid_emblem' });
   if (!sessionToken) return res.status(401).json({ error: 'unauthorized' });
   var session = verifiedSessions.get(sessionToken);
   if (!session || session.expires < Date.now()) return res.status(401).json({ error: 'session_expired' });
   if (!supabase) return res.status(503).json({ error: 'no_supabase' });
   try {
-    await supabase.from('heroes').update({ emblem: emblem }).eq('wallet', session.wallet);
-    res.json({ ok: true, emblem: emblem });
+    var { data, error } = await supabase.from('heroes').select('*').eq('wallet', session.wallet).single();
+    if (error || !data) return res.status(404).json({ error: 'not_found' });
+    var b = data.balance || 0;
+    var rank = b >= 50000000 ? 'LEGEND' : b >= 10000000 ? 'COMMANDER' : b >= 2000000 ? 'AGENT' : 'OPERATIVE';
+    res.json({ serial: data.serial, codename: data.codename, emblem: data.emblem,
+               titles: data.titles, total_conversations: data.total_conversations,
+               days_active: data.days_active, joined_at: data.joined_at, rank, gold: b >= 2000000 });
   } catch (e) {
-    console.error('emblem update error:', e.message);
+    res.status(500).json({ error: 'server_error' });
+  }
+});
+
+// ── /api/heroes/me PATCH — update emblem + codename ──────────────────────
+app.patch('/api/heroes/me', jsonSmall, async function(req, res) {
+  var body = req.body || {};
+  var sessionToken = (body.sessionToken || '').toString().trim().slice(0, 64);
+  if (!sessionToken) return res.status(401).json({ error: 'unauthorized' });
+  var session = verifiedSessions.get(sessionToken);
+  if (!session || session.expires < Date.now()) return res.status(401).json({ error: 'session_expired' });
+  if (!supabase) return res.status(503).json({ error: 'no_supabase' });
+  var updates = {};
+  if (body.emblem !== undefined) {
+    if (!VALID_EMBLEMS.includes(body.emblem)) return res.status(400).json({ error: 'invalid_emblem' });
+    updates.emblem = body.emblem;
+  }
+  if (body.codename !== undefined) {
+    var cn = body.codename.toString().trim().slice(0, 24);
+    if (cn.length < 1) return res.status(400).json({ error: 'invalid_codename' });
+    updates.codename = cn;
+  }
+  if (!Object.keys(updates).length) return res.status(400).json({ error: 'nothing_to_update' });
+  try {
+    await supabase.from('heroes').update(updates).eq('wallet', session.wallet);
+    res.json({ ok: true });
+  } catch (e) {
     res.status(500).json({ error: 'server_error' });
   }
 });

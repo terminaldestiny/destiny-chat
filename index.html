@@ -763,13 +763,6 @@
     .help-nav-btn-heroes .help-nav-lbl { color:var(--amber); }
     .help-nav-btn-heroes .help-nav-desc { color:rgba(255,170,0,0.45); }
     .help-nav-btn-heroes:hover { border-color:var(--amber);background:rgba(255,170,0,0.08);box-shadow:0 0 18px rgba(255,170,0,0.1); }
-    /* ── Emblem picker ─────────────────────────────────────────────── */
-    #emblem-section { display:none;margin-top:18px;padding-top:16px;border-top:1px solid rgba(0,255,65,0.1); }
-    #emblem-section-lbl { font-size:9px;letter-spacing:3px;color:rgba(0,212,255,0.5);margin-bottom:10px; }
-    #emblem-grid { display:flex;gap:8px;flex-wrap:wrap; }
-    .emblem-opt { width:44px;height:44px;border:1px solid rgba(0,255,65,0.2);background:rgba(0,0,0,0.3);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:20px;transition:all .15s; }
-    .emblem-opt:hover { border-color:var(--amber);background:rgba(255,170,0,0.08); }
-    .emblem-opt.active { border-color:var(--amber);background:rgba(255,170,0,0.12);box-shadow:0 0 12px rgba(255,170,0,0.2); }
 
     /* CA */
     #ca-badge { position:fixed;bottom:72px;right:14px;font-size:9px;text-align:right;cursor:pointer;z-index:50;user-select:none;line-height:1.6; }
@@ -1202,17 +1195,6 @@
     <span id="share-card-lbl">⬡ SHARE YOUR HERO CARD</span>
     <span id="share-card-desc">Generate your terminal ID · share to X</span>
   </div>
-  <div id="emblem-section">
-    <div id="emblem-section-lbl">// CHOOSE YOUR EMBLEM</div>
-    <div id="emblem-grid">
-      <div class="emblem-opt" data-emblem="hexagon" title="Hexagon" onclick="setEmblem('hexagon')">⬡</div>
-      <div class="emblem-opt" data-emblem="diamond" title="Diamond" onclick="setEmblem('diamond')">◆</div>
-      <div class="emblem-opt" data-emblem="skull"   title="Skull"   onclick="setEmblem('skull')">☠</div>
-      <div class="emblem-opt" data-emblem="shield"  title="Shield"  onclick="setEmblem('shield')">⛨</div>
-      <div class="emblem-opt" data-emblem="sword"   title="Sword"   onclick="setEmblem('sword')">⚔</div>
-      <div class="emblem-opt" data-emblem="signal"  title="Signal"  onclick="setEmblem('signal')">≋</div>
-    </div>
-  </div>
 </div>
 
 <script>
@@ -1254,7 +1236,6 @@ function applyTierUI(tier,balance){
   dBtn.style.display='inline-flex';
   var sess=getSession();
   if(eBtn) eBtn.style.display=(sess&&sess.emailAuth)?'none':'inline-flex';
-  var emblemSec=document.getElementById('emblem-section');
   if(tier==='operative'){
     badge.textContent='OPERATIVE';badge.style.display='inline-block';
     mBtn.textContent='⬡ SONNET';
@@ -1262,14 +1243,12 @@ function applyTierUI(tier,balance){
     ACTIVE_MODEL='sonnet';
     aBtn.classList.add('on');
     DAILY_LIMIT=30;
-    if(emblemSec) emblemSec.style.display='block';
   } else {
     badge.style.display='none';
     mBtn.textContent='⬡ SONNET 🔒';mBtn.style.borderColor='';mBtn.style.color='';
     ACTIVE_MODEL='haiku';
     aBtn.classList.remove('on');
     DAILY_LIMIT=20;
-    if(emblemSec) emblemSec.style.display='none';
   }
   if(fillEl) updateHUD();
 }
@@ -2790,36 +2769,8 @@ function fbCopy(){var ta=document.createElement('textarea');ta.value=CA;ta.style
 })();
 
 // ── Help ──────────────────────────────────────────────────────────
-function openHelp(){
-  document.getElementById('help-ovl').classList.add('on');
-  document.getElementById('help-backdrop').classList.add('on');
-  // Highlight active emblem
-  var sess=getSession();
-  if(sess&&sess.emblem){
-    document.querySelectorAll('.emblem-opt').forEach(function(el){
-      el.classList.toggle('active',el.dataset.emblem===sess.emblem);
-    });
-  }
-}
+function openHelp(){document.getElementById('help-ovl').classList.add('on');document.getElementById('help-backdrop').classList.add('on');}
 function closeHelp(){document.getElementById('help-ovl').classList.remove('on');document.getElementById('help-backdrop').classList.remove('on');}
-
-async function setEmblem(emblem){
-  var sess=getSession();
-  if(!sess||!sess.sessionToken)return;
-  try {
-    var r=await fetch(BACKEND+'/api/heroes/emblem',{
-      method:'PATCH',headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({sessionToken:sess.sessionToken,emblem:emblem})
-    });
-    if(r.ok){
-      sess.emblem=emblem;saveSession(sess);
-      document.querySelectorAll('.emblem-opt').forEach(function(el){
-        el.classList.toggle('active',el.dataset.emblem===emblem);
-      });
-      addCmd(['// EMBLEM UPDATED · '+emblem.toUpperCase()]);
-    }
-  } catch(e){}
-}
 </script>
 </body>
 </html>
