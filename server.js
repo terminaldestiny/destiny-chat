@@ -181,7 +181,9 @@ async function sendMagicLinkEmail(to, token) {
 
 // ── Hero registry ─────────────────────────────────────────────────────────
 var BUILDER_RE = /\b(build|deploy|code|app|project|develop|launch|ship|create|program|api|backend|frontend|database|startup|product)\b/i;
-var VALID_EMBLEMS = ['skull', 'shield', 'sword', 'signal', 'hexagon', 'diamond'];
+var VALID_EMBLEMS   = ['hexagon','diamond','skull','shield','sword','signal','star','lightning','infinity','target'];
+var VALID_THEMES    = ['green','cyan','amber','red','purple'];
+var VALID_PATTERNS  = ['none','grid','scan','circuit'];
 
 async function ensureHero(wallet, codename, balance) {
   if (!supabase) return null;
@@ -233,13 +235,12 @@ async function getAllHeroes() {
       .order('serial', { ascending: true });
     if (error) throw error;
     return (data || []).map(function(h) {
-      // strip exact balance — only expose rank tier
       var b = h.balance || 0;
       var rank = b >= 50000000 ? 'LEGEND' : b >= 10000000 ? 'COMMANDER' : b >= 2000000 ? 'AGENT' : 'OPERATIVE';
-      var gold = b >= 2000000;
       return { serial: h.serial, codename: h.codename, emblem: h.emblem, titles: h.titles,
                total_conversations: h.total_conversations, days_active: h.days_active,
-               joined_at: h.joined_at, rank, gold };
+               joined_at: h.joined_at, rank, gold: b >= 2000000,
+               theme: h.theme || 'green', tagline: h.tagline || '', bg_pattern: h.bg_pattern || 'none' };
     });
   } catch (e) { console.error('getAllHeroes:', e.message); return []; }
 }
@@ -830,7 +831,8 @@ app.post('/api/heroes/me', jsonSmall, async function(req, res) {
     var rank = b >= 50000000 ? 'LEGEND' : b >= 10000000 ? 'COMMANDER' : b >= 2000000 ? 'AGENT' : 'OPERATIVE';
     res.json({ serial: data.serial, codename: data.codename, emblem: data.emblem,
                titles: data.titles, total_conversations: data.total_conversations,
-               days_active: data.days_active, joined_at: data.joined_at, rank, gold: b >= 2000000 });
+               days_active: data.days_active, joined_at: data.joined_at, rank, gold: b >= 2000000,
+               theme: data.theme || 'green', tagline: data.tagline || '', bg_pattern: data.bg_pattern || 'none' });
   } catch (e) {
     res.status(500).json({ error: 'server_error' });
   }
@@ -853,6 +855,17 @@ app.patch('/api/heroes/me', jsonSmall, async function(req, res) {
     var cn = body.codename.toString().trim().slice(0, 24);
     if (cn.length < 1) return res.status(400).json({ error: 'invalid_codename' });
     updates.codename = cn;
+  }
+  if (body.theme !== undefined) {
+    if (!VALID_THEMES.includes(body.theme)) return res.status(400).json({ error: 'invalid_theme' });
+    updates.theme = body.theme;
+  }
+  if (body.tagline !== undefined) {
+    updates.tagline = body.tagline.toString().trim().slice(0, 50);
+  }
+  if (body.bg_pattern !== undefined) {
+    if (!VALID_PATTERNS.includes(body.bg_pattern)) return res.status(400).json({ error: 'invalid_pattern' });
+    updates.bg_pattern = body.bg_pattern;
   }
   if (!Object.keys(updates).length) return res.status(400).json({ error: 'nothing_to_update' });
   try {
