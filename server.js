@@ -179,12 +179,78 @@ async function sendMagicLinkEmail(to, token) {
   }
 }
 
+// ── Hero registry ─────────────────────────────────────────────────────────
+var BUILDER_RE = /\b(build|deploy|code|app|project|develop|launch|ship|create|program|api|backend|frontend|database|startup|product)\b/i;
+var VALID_EMBLEMS = ['skull', 'shield', 'sword', 'signal', 'hexagon', 'diamond'];
+
+async function ensureHero(wallet, codename, balance) {
+  if (!supabase) return null;
+  try {
+    var { data: existing } = await supabase.from('heroes').select('*').eq('wallet', wallet).single();
+    if (existing) {
+      await supabase.from('heroes').update({
+        codename: (codename && codename !== 'HERO') ? codename : existing.codename,
+        balance: balance
+      }).eq('wallet', wallet);
+      return existing;
+    }
+    var titles = [];
+    if (new Date() <= EARLY_OPERATIVE_CUTOFF) titles.push('EARLY OPERATIVE');
+    var { data, error } = await supabase.from('heroes')
+      .insert({ wallet, codename: codename || 'HERO', balance, titles })
+      .select().single();
+    if (error) throw error;
+    return data;
+  } catch (e) { console.error('ensureHero:', e.message); return null; }
+}
+
+async function updateHeroActivity(wallet, message, hour) {
+  if (!supabase) return;
+  try {
+    var { data: hero } = await supabase.from('heroes').select('*').eq('wallet', wallet).single();
+    if (!hero) return;
+    var today = new Date().toISOString().slice(0, 10);
+    var activeDates = hero.active_dates || [];
+    if (!activeDates.includes(today)) activeDates = activeDates.concat([today]);
+    var titles = hero.titles || [];
+    if (hour >= 0 && hour < 5 && !titles.includes('NIGHT OWL')) titles.push('NIGHT OWL');
+    if (BUILDER_RE.test(message) && !titles.includes('FIRST BUILDER')) titles.push('FIRST BUILDER');
+    await supabase.from('heroes').update({
+      total_conversations: (hero.total_conversations || 0) + 1,
+      active_dates: activeDates,
+      days_active: activeDates.length,
+      titles,
+      last_active_at: new Date().toISOString()
+    }).eq('wallet', wallet);
+  } catch (e) { console.error('updateHeroActivity:', e.message); }
+}
+
+async function getAllHeroes() {
+  if (!supabase) return [];
+  try {
+    var { data, error } = await supabase.from('heroes')
+      .select('serial,codename,emblem,titles,total_conversations,days_active,joined_at,balance')
+      .order('serial', { ascending: true });
+    if (error) throw error;
+    return (data || []).map(function(h) {
+      // strip exact balance — only expose rank tier
+      var b = h.balance || 0;
+      var rank = b >= 50000000 ? 'LEGEND' : b >= 10000000 ? 'COMMANDER' : b >= 2000000 ? 'AGENT' : 'OPERATIVE';
+      var gold = b >= 2000000;
+      return { serial: h.serial, codename: h.codename, emblem: h.emblem, titles: h.titles,
+               total_conversations: h.total_conversations, days_active: h.days_active,
+               joined_at: h.joined_at, rank, gold };
+    });
+  } catch (e) { console.error('getAllHeroes:', e.message); return []; }
+}
+
 // ── Holder verification ───────────────────────────────────────────────────
 var DESTINY_MINT = '3AwkJnZL7xrf8ffUwEsSkKndQkPSj2vfR3CqvyFpk8UP';
 var MIN_TOKENS   = 500000;
 var SOLANA_RPC   = 'https://api.mainnet-beta.solana.com';
 var SITE_URL     = process.env.SITE_URL || 'https://terminaldestiny.github.io/destiny-chat/';
-var SESSION_TTL  = 7 * 24 * 60 * 60 * 1000; // 7 days
+var SESSION_TTL             = 7 * 24 * 60 * 60 * 1000; // 7 days
+var EARLY_OPERATIVE_CUTOFF  = new Date('2026-06-01T00:00:00Z'); // first-month title window
 
 var pendingNonces    = new Map();
 var verifiedSessions = new Map();
@@ -399,6 +465,10 @@ app.post('/api/verify', jsonSmall, async function(req, res) {
       wallet: wallet, tier: tier, balance: balance,
       expires: Date.now() + SESSION_TTL, lastBalanceCheck: Date.now()
     });
+    if (tier === 'operative') {
+      var codename = (body.codename || '').toString().trim().slice(0, 32);
+      ensureHero(wallet, codename, balance);
+    }
     res.json({ tier: tier, balance: balance, sessionToken: sessionToken, minTokens: MIN_TOKENS });
   } catch (e) {
     console.error('RPC error:', e.message || e);
@@ -573,6 +643,7 @@ app.post('/api/chat', jsonLarge, async function(req, res) {
         });
         sTextMessages.push({ role: 'assistant', content: fullText });
         await saveHistory(walletAddress, sTextMessages.slice(-40));
+        updateHeroActivity(walletAddress, message, new Date().getUTCHours());
       }
       res.write('data: ' + JSON.stringify({ done: true, remaining: remaining, model: modelKey }) + '\n\n');
       res.end();
@@ -729,10 +800,36 @@ app.post('/api/auth/magic-verify', jsonSmall, async function(req, res) {
       wallet: user.wallet, tier: tier, balance: balance,
       expires: Date.now() + SESSION_TTL, lastBalanceCheck: Date.now()
     });
+    if (tier === 'operative') ensureHero(user.wallet, null, balance);
 
     res.json({ tier, balance, sessionToken, wallet: user.wallet, email, minTokens: MIN_TOKENS });
   } catch (e) {
     console.error('magic-verify error:', e.message);
+    res.status(500).json({ error: 'server_error' });
+  }
+});
+
+// ── /api/heroes — community wall (public) ────────────────────────────────
+app.get('/api/heroes', async function(req, res) {
+  var heroes = await getAllHeroes();
+  res.json({ heroes: heroes, count: heroes.length });
+});
+
+// ── /api/heroes/emblem — update emblem (auth required) ───────────────────
+app.patch('/api/heroes/emblem', jsonSmall, async function(req, res) {
+  var body = req.body || {};
+  var sessionToken = (body.sessionToken || '').toString().trim().slice(0, 64);
+  var emblem = (body.emblem || '').toString().trim();
+  if (!VALID_EMBLEMS.includes(emblem)) return res.status(400).json({ error: 'invalid_emblem' });
+  if (!sessionToken) return res.status(401).json({ error: 'unauthorized' });
+  var session = verifiedSessions.get(sessionToken);
+  if (!session || session.expires < Date.now()) return res.status(401).json({ error: 'session_expired' });
+  if (!supabase) return res.status(503).json({ error: 'no_supabase' });
+  try {
+    await supabase.from('heroes').update({ emblem: emblem }).eq('wallet', session.wallet);
+    res.json({ ok: true, emblem: emblem });
+  } catch (e) {
+    console.error('emblem update error:', e.message);
     res.status(500).json({ error: 'server_error' });
   }
 });
