@@ -232,7 +232,7 @@ async function getAllHeroes() {
   if (!supabase) return [];
   try {
     var { data, error } = await supabase.from('heroes')
-      .select('serial,codename,emblem,titles,total_conversations,days_active,joined_at,balance')
+      .select('serial,codename,emblem,titles,total_conversations,days_active,joined_at,balance,theme,tagline,bg_pattern,role,last_active_at')
       .order('serial', { ascending: true });
     if (error) throw error;
     return (data || []).map(function(h) {
@@ -241,7 +241,8 @@ async function getAllHeroes() {
       return { serial: h.serial, codename: h.codename, emblem: h.emblem, titles: h.titles,
                total_conversations: h.total_conversations, days_active: h.days_active,
                joined_at: h.joined_at, rank, gold: b >= 2000000,
-               theme: h.theme || 'green', tagline: h.tagline || '', bg_pattern: h.bg_pattern || 'none', role: h.role || '' };
+               theme: h.theme || 'green', tagline: h.tagline || '', bg_pattern: h.bg_pattern || 'none',
+               role: h.role || '', last_active_at: h.last_active_at || null };
     });
   } catch (e) { console.error('getAllHeroes:', e.message); return []; }
 }
@@ -833,7 +834,8 @@ app.post('/api/heroes/me', jsonSmall, async function(req, res) {
     res.json({ serial: data.serial, codename: data.codename, emblem: data.emblem,
                titles: data.titles, total_conversations: data.total_conversations,
                days_active: data.days_active, joined_at: data.joined_at, rank, gold: b >= 2000000,
-               theme: data.theme || 'green', tagline: data.tagline || '', bg_pattern: data.bg_pattern || 'none' });
+               theme: data.theme || 'green', tagline: data.tagline || '', bg_pattern: data.bg_pattern || 'none',
+               role: data.role || '', last_active_at: data.last_active_at || null });
   } catch (e) {
     res.status(500).json({ error: 'server_error' });
   }
