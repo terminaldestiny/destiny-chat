@@ -180,6 +180,12 @@
   <button id="my-share" onclick="shareMyCard()">𝕏 &nbsp;SHARE YOUR CARD</button>
 </div>
 
+<div id="no-session" style="display:none;padding:20px;position:relative;z-index:1;font-size:9px;letter-spacing:2.5px;color:rgba(0,255,65,0.35);border:1px solid rgba(0,255,65,0.1);margin:20px 20px 0;line-height:1.9;">
+  // NO ACTIVE SESSION DETECTED<br>
+  // CONNECT YOUR WALLET IN THE TERMINAL TO CLAIM YOUR HERO CARD<br>
+  // <a href="/" style="color:rgba(0,212,255,0.6);text-decoration:none;">← BACK TO TERMINAL</a>
+</div>
+
 <div class="section-div" id="wall-div" style="display:none"></div>
 
 <div id="search-wrap">
@@ -437,8 +443,17 @@ async function load(){
         populateMyCard(myHero);
         document.getElementById('my-section').style.display = 'block';
         document.getElementById('wall-div').style.display = 'block';
+      } else {
+        // Session exists locally but server doesn't recognize it (server restarted)
+        document.getElementById('no-session').style.display = 'block';
+        document.getElementById('wall-div').style.display = 'block';
       }
-    } catch(e){}
+    } catch(e){
+      document.getElementById('no-session').style.display = 'block';
+    }
+  } else {
+    document.getElementById('no-session').style.display = 'block';
+    document.getElementById('wall-div').style.display = 'block';
   }
 
   // Load community wall
