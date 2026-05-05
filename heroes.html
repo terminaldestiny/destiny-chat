@@ -287,7 +287,40 @@ body::before{content:'';position:fixed;inset:0;background:repeating-linear-gradi
   #filter-bar{flex-direction:column;align-items:flex-start;gap:10px;}
   #search-input{max-width:100%;width:100%;}
   #stat-tiers{font-size:10px!important;}
+  #rank-legend{padding-left:14px;padding-right:14px;}
 }
+
+/* ── Live ticker ─────────────────────────── */
+#ticker-wrap{height:30px;overflow:hidden;border-bottom:1px solid rgba(0,255,65,0.07);position:relative;z-index:1;display:none;}
+#ticker-wrap:hover #ticker-inner{animation-play-state:paused;}
+#ticker-inner{display:inline-flex;align-items:center;height:100%;white-space:nowrap;will-change:transform;}
+@keyframes ticker-scroll{0%{transform:translateX(0);}100%{transform:translateX(-50%);}}
+.tick-item{display:inline-flex;align-items:center;gap:9px;padding:0 22px;font-size:8px;letter-spacing:1.5px;color:rgba(255,255,255,0.3);}
+.tick-div{color:rgba(0,255,65,0.2);}
+.tick-name{color:rgba(255,255,255,0.62);font-weight:bold;letter-spacing:2px;}
+.tick-LEGEND{color:#ffaa00;}
+.tick-COMMANDER{color:#cc44ff;}
+.tick-AGENT{color:#00d4ff;}
+.tick-OPERATIVE{color:#00ff41;}
+.tick-time{color:rgba(255,255,255,0.16);}
+
+/* ── Rank legend ─────────────────────────── */
+#rank-legend{display:flex;align-items:center;flex-wrap:wrap;gap:2px;padding:10px 20px 0;position:relative;z-index:1;font-size:7px;letter-spacing:1.5px;}
+.rl-item{display:inline-flex;align-items:center;gap:5px;white-space:nowrap;}
+.rl-req{color:rgba(255,255,255,0.16);}
+.rl-sep{color:rgba(255,255,255,0.1);margin:0 8px;}
+.rl-label{color:rgba(255,255,255,0.1);font-size:7px;letter-spacing:1px;}
+
+/* ── Ghost card ──────────────────────────── */
+.hcard-ghost{border-style:dashed!important;border-color:rgba(0,255,65,0.08)!important;}
+.hcard-ghost:hover{border-color:rgba(0,255,65,0.2)!important;box-shadow:0 4px 24px rgba(0,255,65,0.04)!important;transform:translateY(-4px);}
+.ghost-body{padding:24px 15px 22px;text-align:center;}
+.ghost-serial{font-size:8px;letter-spacing:2.5px;color:rgba(0,255,65,0.12);margin-bottom:14px;}
+.ghost-emblem{font-size:30px;color:rgba(255,255,255,0.05);margin-bottom:12px;line-height:1;}
+.ghost-label{font-size:10px;letter-spacing:3.5px;color:rgba(255,255,255,0.1);margin-bottom:6px;}
+.ghost-sub{font-size:7px;letter-spacing:1.5px;color:rgba(255,255,255,0.07);margin-bottom:18px;}
+.ghost-cta{display:inline-block;font-size:7px;letter-spacing:2.5px;color:rgba(0,212,255,0.28);border:1px solid rgba(0,212,255,0.13);padding:5px 14px;}
+.hcard-ghost:hover .ghost-cta{color:rgba(0,212,255,0.55);border-color:rgba(0,212,255,0.3);}
 </style>
 </head>
 <body>
@@ -325,6 +358,8 @@ body::before{content:'';position:fixed;inset:0;background:repeating-linear-gradi
     <span class="si-lbl">TIER BREAKDOWN</span>
   </div>
 </div>
+
+<div id="ticker-wrap"><div id="ticker-inner"></div></div>
 
 <div id="no-session">
   <span class="ns-alert">// ACCESS LEVEL: HERO REQUIRED</span>
@@ -480,6 +515,18 @@ body::before{content:'';position:fixed;inset:0;background:repeating-linear-gradi
     <button class="s-tab" data-sort="new"     onclick="setSort('new')">NEWEST</button>
   </div>
   <input type="text" id="search-input" placeholder="SEARCH CALLSIGN..." autocomplete="off" oninput="onSearch(this.value)">
+</div>
+
+<div id="rank-legend">
+  <span class="rl-item"><span style="color:#ffaa00">◆ LEGEND</span><span class="rl-req">50M+ $DESTINY</span></span>
+  <span class="rl-sep">/</span>
+  <span class="rl-item"><span style="color:#cc44ff">◆ COMMANDER</span><span class="rl-req">10M+</span></span>
+  <span class="rl-sep">/</span>
+  <span class="rl-item"><span style="color:#00d4ff">◆ AGENT</span><span class="rl-req">2M+</span></span>
+  <span class="rl-sep">/</span>
+  <span class="rl-item"><span style="color:#00ff41">◆ OPERATIVE</span><span class="rl-req">500K+</span></span>
+  <span class="rl-sep">&nbsp;&nbsp;·&nbsp;&nbsp;</span>
+  <span class="rl-label">$DESTINY REQUIRED</span>
 </div>
 
 <div id="loading">SCANNING FIELD ROSTER</div>
@@ -888,6 +935,9 @@ function renderGrid(newSerials){
     if(newSerials&&newSerials.has(h.serial))card.classList.add('hcard-new-arrival');
     grid.appendChild(card);
   });
+  if(!currentQuery&&allHeroes.length>0){
+    grid.appendChild(renderGhostCard(allHeroes.length+1,isRefresh?0:list.length*35));
+  }
 }
 
 // ── Modal ─────────────────────────────────────────────────────────────────
@@ -1122,6 +1172,62 @@ function doShare(canvas,h){
 function shareMyCard(){if(myHero)doShare(buildShareCanvas(myHero),myHero);}
 function shareModalCard(){if(activeHero)doShare(buildShareCanvas(activeHero),activeHero);}
 
+// ── Ticker ────────────────────────────────────────────────────────────────
+function relTime(iso){
+  if(!iso)return '';
+  var diff=Date.now()-new Date(iso).getTime();
+  if(diff<3600000)return Math.max(1,Math.floor(diff/60000))+'m ago';
+  if(diff<86400000)return Math.floor(diff/3600000)+'h ago';
+  if(diff<604800000)return Math.floor(diff/86400000)+'d ago';
+  return '';
+}
+function buildTicker(heroes){
+  var wrap=document.getElementById('ticker-wrap');
+  var inner=document.getElementById('ticker-inner');
+  var sorted=heroes.slice().sort(function(a,b){
+    return (b.last_active_at?new Date(b.last_active_at).getTime():0)-(a.last_active_at?new Date(a.last_active_at).getTime():0);
+  });
+  if(!sorted.length){wrap.style.display='none';return;}
+  var sep='<span class="tick-item" style="color:rgba(0,255,65,0.18);padding:0 8px;">◆◆◆</span>';
+  var items=sorted.map(function(h){
+    var t=relTime(h.last_active_at);
+    return '<span class="tick-item">'
+      +'<span style="font-size:12px;line-height:1;color:'+cHex(h.theme||'green')+'">'+( EMBLEMS[h.emblem]||'⬡')+'</span>'
+      +'<span class="tick-name">'+escHtml(h.codename)+'</span>'
+      +'<span class="tick-div">·</span>'
+      +'<span class="tick-'+h.rank+'">'+h.rank+'</span>'
+      +'<span class="tick-div">·</span>'
+      +'<span>'+(h.total_conversations||0)+' TX</span>'
+      +(t?'<span class="tick-div">·</span><span class="tick-time">'+t+'</span>':'')
+      +'</span>';
+  }).join(sep);
+  inner.innerHTML=items+sep+items+sep;
+  setTimeout(function(){
+    var half=inner.scrollWidth/2;
+    var dur=Math.max(18,Math.round(half/75));
+    inner.style.animation='ticker-scroll '+dur+'s linear infinite';
+  },0);
+  wrap.style.display='block';
+}
+
+// ── Ghost card ────────────────────────────────────────────────────────────
+function renderGhostCard(slotNum,delay){
+  var card=document.createElement('div');
+  card.className='hcard hcard-ghost';
+  card.style.animationDelay=(delay||0)+'ms';
+  card.onclick=function(){window.location.href='/';};
+  var body=document.createElement('div');
+  body.className='ghost-body';
+  body.innerHTML=
+    '<div class="ghost-serial">'+fmtSerial(slotNum)+'</div>'
+    +'<div class="ghost-emblem">?</div>'
+    +'<div class="ghost-label">SLOT AVAILABLE</div>'
+    +'<div class="ghost-sub">500K+ $DESTINY REQUIRED</div>'
+    +'<div class="ghost-cta">→ CLAIM AT TERMINAL</div>';
+  card.appendChild(body);
+  return card;
+}
+
 // ── Auto-refresh ──────────────────────────────────────────────────────────
 async function refreshHeroes(){
   var dot=document.getElementById('sync-dot');
@@ -1135,6 +1241,7 @@ async function refreshHeroes(){
     allHeroes=fresh;
     document.getElementById('hero-count').textContent='HEROES: '+allHeroes.length;
     populateStats(allHeroes);
+    buildTicker(allHeroes);
     renderGrid(newSerials);
   }catch(e){}
   setTimeout(function(){dot.classList.remove('on');},800);
@@ -1167,6 +1274,7 @@ async function load(){
     document.getElementById('loading').style.display='none';
     document.getElementById('hero-count').textContent='HEROES: '+allHeroes.length;
     populateStats(allHeroes);
+    buildTicker(allHeroes);
     renderGrid();
     var params=new URLSearchParams(location.search);
     var deepSerial=params.get('serial');
