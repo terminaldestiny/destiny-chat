@@ -213,6 +213,22 @@ body::before{content:'';position:fixed;inset:0;background:repeating-linear-gradi
 #modal-share-btn{display:flex;align-items:center;justify-content:center;gap:10px;padding:12px;cursor:pointer;font-size:9px;letter-spacing:2.5px;border:1px solid rgba(255,255,255,0.1);color:rgba(255,255,255,0.5);transition:.15s;background:none;width:100%;font-family:inherit;}
 #modal-share-btn:hover{color:#fff;border-color:rgba(255,255,255,0.3);}
 
+/* ── X handle in modal ─────────────────────── */
+#modal-x{margin-bottom:16px;display:none;}
+.modal-x-link{color:rgba(255,255,255,0.45);font-size:10px;letter-spacing:2px;text-decoration:none;display:inline-flex;align-items:center;gap:7px;border:1px solid rgba(255,255,255,0.1);padding:5px 14px;transition:.15s;}
+.modal-x-link:hover{color:#fff;border-color:rgba(255,255,255,0.3);}
+
+/* ── New hero arrival flash ────────────────── */
+.hcard-new-arrival{animation:card-in .4s ease forwards,glow-arrive 1.8s ease .35s!important;}
+@keyframes glow-arrive{0%{box-shadow:0 0 0 rgba(0,255,65,0);}30%{box-shadow:0 0 30px rgba(0,255,65,0.38),0 0 0 1px rgba(0,255,65,0.28);}100%{box-shadow:0 0 0 rgba(0,255,65,0);}}
+
+/* ── Sync dot ──────────────────────────────── */
+#sync-dot{font-size:7px;letter-spacing:1.5px;color:rgba(0,255,65,0.25);opacity:0;transition:opacity .3s;white-space:nowrap;}
+#sync-dot.on{opacity:1;}
+
+/* ── Tier breakdown stat ───────────────────── */
+#stat-tiers{font-size:12px;font-weight:bold;letter-spacing:.5px;display:block;margin-bottom:3px;line-height:1.5;}
+
 /* ── Loading ───────────────────────────────── */
 #loading{padding:60px 20px;text-align:center;font-size:9px;letter-spacing:3px;color:rgba(0,255,65,0.28);z-index:1;position:relative;}
 #loading::after{content:'';animation:scan-dots 1.4s steps(4,end) infinite;}
@@ -228,10 +244,13 @@ body::before{content:'';position:fixed;inset:0;background:repeating-linear-gradi
   #grid{padding:12px 14px 40px;gap:10px;}
   #my-wrap{flex-direction:column;}
   #card-col{width:100%;}
+  #preview-card{width:100%;}
+  #customize-toggle{width:100%;}
   #edit-panel{display:none;}
   #edit-panel.open{display:block;}
   #filter-bar{flex-direction:column;align-items:flex-start;gap:10px;}
   #search-input{max-width:100%;width:100%;}
+  #stat-tiers{font-size:10px!important;}
 }
 </style>
 </head>
@@ -249,6 +268,7 @@ body::before{content:'';position:fixed;inset:0;background:repeating-linear-gradi
   <a href="/" id="back-link">← TERMINAL</a>
   <div id="hdr-title">◆ HEROES</div>
   <div id="hero-count"></div>
+  <div id="sync-dot">⟳ SYNCING</div>
 </div>
 
 <div id="stats-bar">
@@ -263,6 +283,10 @@ body::before{content:'';position:fixed;inset:0;background:repeating-linear-gradi
   <div class="stat-item">
     <span class="si-val" id="stat-active">—</span>
     <span class="si-lbl">ACTIVE PAST 24H</span>
+  </div>
+  <div class="stat-item">
+    <span id="stat-tiers">—</span>
+    <span class="si-lbl">TIER BREAKDOWN</span>
   </div>
 </div>
 
@@ -369,6 +393,10 @@ body::before{content:'';position:fixed;inset:0;background:repeating-linear-gradi
           <div class="role-opt" data-r="PILOT"    onclick="pickRole('PILOT')">PILOT</div>
         </div>
       </div>
+      <div class="e-row">
+        <div class="e-lbl">X HANDLE</div>
+        <input class="e-input" id="x-input" type="text" maxlength="16" autocomplete="off" placeholder="@YOURHANDLE" oninput="p.x_handle=this.value.replace(/^@/,'').trim();">
+      </div>
       <button id="save-btn" onclick="saveCard()">SAVE CHANGES</button>
       <span id="save-msg">✓ SAVED</span>
       <br>
@@ -420,6 +448,7 @@ body::before{content:'';position:fixed;inset:0;background:repeating-linear-gradi
       <div class="act-bar-track"><div class="act-bar-fill" id="act-fill"></div></div>
     </div>
     <div id="modal-joined"></div>
+    <div id="modal-x"></div>
     <button id="modal-share-btn" onclick="shareModalCard()">𝕏 &nbsp;SHARE THIS HERO CARD</button>
   </div>
 </div>
@@ -442,7 +471,7 @@ var RANK_ORD={LEGEND:4,COMMANDER:3,AGENT:2,OPERATIVE:1};
 
 var allHeroes=[],activeHero=null,myHero=null;
 var currentSort='default',currentQuery='';
-var p={codename:'',emblem:'hexagon',theme:'green',tagline:'',bg_pattern:'none',role:''};
+var p={codename:'',emblem:'hexagon',theme:'green',tagline:'',bg_pattern:'none',role:'',x_handle:''};
 
 function getSession(){try{var s=JSON.parse(localStorage.getItem('destiny_session')||'null');return(s&&s.expires>Date.now())?s:null;}catch(e){return null;}}
 function fmtSerial(n){return 'TD-'+String(n).padStart(3,'0');}
@@ -471,6 +500,14 @@ function populateStats(heroes){
   animCount(document.getElementById('stat-heroes'),heroes.length);
   animCount(document.getElementById('stat-tx'),totalTx);
   animCount(document.getElementById('stat-active'),active);
+  var tc={LEGEND:0,COMMANDER:0,AGENT:0,OPERATIVE:0};
+  heroes.forEach(function(h){if(tc[h.rank]!==undefined)tc[h.rank]++;});
+  var parts=[];
+  if(tc.LEGEND)parts.push('<span style="color:#ffaa00">'+tc.LEGEND+' LGD</span>');
+  if(tc.COMMANDER)parts.push('<span style="color:#cc44ff">'+tc.COMMANDER+' CMD</span>');
+  if(tc.AGENT)parts.push('<span style="color:#00d4ff">'+tc.AGENT+' AGT</span>');
+  if(tc.OPERATIVE)parts.push('<span style="color:#00ff41">'+tc.OPERATIVE+' OPR</span>');
+  document.getElementById('stat-tiers').innerHTML=parts.length?parts.join('<span style="color:rgba(255,255,255,0.18)"> · </span>'):'—';
 }
 
 // ── Mobile toggle ────────────────────────────────────────────────────────
@@ -535,9 +572,10 @@ function updatePreview(){
 
 function populateMyCard(h){
   p.codename=h.codename; p.emblem=h.emblem||'hexagon';
-  p.theme=h.theme||'green'; p.tagline=h.tagline||''; p.bg_pattern=h.bg_pattern||'none'; p.role=h.role||'';
+  p.theme=h.theme||'green'; p.tagline=h.tagline||''; p.bg_pattern=h.bg_pattern||'none'; p.role=h.role||''; p.x_handle=h.x_handle||'';
   document.getElementById('codename-input').value=h.codename;
   document.getElementById('tagline-input').value=h.tagline||'';
+  document.getElementById('x-input').value=h.x_handle?('@'+h.x_handle):'';
   document.getElementById('pc-serial').textContent=fmtSerial(h.serial);
   document.getElementById('pc-ser2').textContent=fmtSerial(h.serial);
   document.getElementById('pc-rank').textContent='▸ '+h.rank;
@@ -595,17 +633,17 @@ async function saveCard(){
   try{
     var r=await fetch(BACKEND+'/api/heroes/me',{
       method:'PATCH',headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({sessionToken:sess.sessionToken,codename:cn,emblem:p.emblem,theme:p.theme,tagline:p.tagline,bg_pattern:p.bg_pattern,role:p.role})
+      body:JSON.stringify({sessionToken:sess.sessionToken,codename:cn,emblem:p.emblem,theme:p.theme,tagline:p.tagline,bg_pattern:p.bg_pattern,role:p.role,x_handle:p.x_handle})
     });
     if(r.ok){
       myHero.codename=cn; myHero.emblem=p.emblem; myHero.theme=p.theme;
-      myHero.tagline=p.tagline; myHero.bg_pattern=p.bg_pattern; myHero.role=p.role;
+      myHero.tagline=p.tagline; myHero.bg_pattern=p.bg_pattern; myHero.role=p.role; myHero.x_handle=p.x_handle;
       var idx=-1;
       for(var i=0;i<allHeroes.length;i++){if(allHeroes[i].serial===myHero.serial){idx=i;break;}}
       if(idx!==-1){
         allHeroes[idx].codename=cn; allHeroes[idx].emblem=p.emblem;
         allHeroes[idx].theme=p.theme; allHeroes[idx].tagline=p.tagline;
-        allHeroes[idx].bg_pattern=p.bg_pattern; allHeroes[idx].role=p.role;
+        allHeroes[idx].bg_pattern=p.bg_pattern; allHeroes[idx].role=p.role; allHeroes[idx].x_handle=p.x_handle;
         renderGrid();
       }
       var msg=document.getElementById('save-msg');
@@ -705,12 +743,21 @@ function renderCard(h,delay){
   return card;
 }
 
-function renderGrid(){
+function renderGrid(newSerials){
   var grid=document.getElementById('grid');
   grid.innerHTML='';
   var list=getSortedFiltered();
+  var isRefresh=newSerials!==undefined;
   document.getElementById('no-results').style.display=list.length?'none':'block';
-  list.forEach(function(h,i){grid.appendChild(renderCard(h,i*35));});
+  list.forEach(function(h,i){
+    var card=renderCard(h,isRefresh?0:i*35);
+    if(isRefresh&&!(newSerials&&newSerials.has(h.serial))){
+      card.style.animationDuration='0s';
+      card.style.opacity='1';
+    }
+    if(newSerials&&newSerials.has(h.serial))card.classList.add('hcard-new-arrival');
+    grid.appendChild(card);
+  });
 }
 
 // ── Modal ─────────────────────────────────────────────────────────────────
@@ -758,12 +805,19 @@ function openModal(h){
   document.getElementById('ms-serial').textContent=fmtSerial(h.serial);
   var daysField=h.joined_at?Math.floor((Date.now()-new Date(h.joined_at).getTime())/86400000):0;
   document.getElementById('modal-joined').textContent='JOINED '+fmtDate(h.joined_at)+' · '+daysField+' DAYS IN FIELD';
+  var xel=document.getElementById('modal-x');
+  if(h.x_handle){
+    xel.innerHTML='<a href="https://x.com/'+escHtml(h.x_handle)+'" target="_blank" rel="noopener" class="modal-x-link">𝕏 @'+escHtml(h.x_handle)+'</a>';
+    xel.style.display='block';
+  }else{xel.style.display='none';}
+  history.pushState(null,'',location.pathname+'?serial='+h.serial);
 }
 
 function closeModal(){
   document.getElementById('modal').classList.remove('on');
   document.getElementById('modal-backdrop').classList.remove('on');
   activeHero=null;
+  history.pushState(null,'',location.pathname);
 }
 
 document.addEventListener('keydown',function(e){if(e.key==='Escape')closeModal();});
@@ -864,13 +918,14 @@ function buildShareCanvas(h){
   return canvas;
 }
 
-function doShare(canvas,codename){
+function doShare(canvas,h){
+  var heroUrl=location.origin+location.pathname+'?serial='+h.serial;
+  var text='// TERMINAL DESTINY\n// HERO: '+h.codename+'\n'+heroUrl;
   canvas.toBlob(function(blob){
-    var fname='hero-'+codename.toLowerCase().replace(/\s+/g,'-')+'.png';
+    var fname='hero-'+h.codename.toLowerCase().replace(/\s+/g,'-')+'.png';
     var file=new File([blob],fname,{type:'image/png'});
-    var text='My Terminal ID. The signal chose me. terminaldestiny.com';
     if(navigator.canShare&&navigator.canShare({files:[file]})){
-      navigator.share({files:[file],title:'DESTINY // '+codename,text:text}).catch(function(){});
+      navigator.share({files:[file],title:'DESTINY // '+h.codename,text:text}).catch(function(){});
     } else {
       var url=URL.createObjectURL(blob);
       var a=document.createElement('a');a.href=url;a.download=fname;
@@ -880,8 +935,26 @@ function doShare(canvas,codename){
     }
   },'image/png');
 }
-function shareMyCard(){if(myHero)doShare(buildShareCanvas(myHero),myHero.codename);}
-function shareModalCard(){if(activeHero)doShare(buildShareCanvas(activeHero),activeHero.codename);}
+function shareMyCard(){if(myHero)doShare(buildShareCanvas(myHero),myHero);}
+function shareModalCard(){if(activeHero)doShare(buildShareCanvas(activeHero),activeHero);}
+
+// ── Auto-refresh ──────────────────────────────────────────────────────────
+async function refreshHeroes(){
+  var dot=document.getElementById('sync-dot');
+  dot.classList.add('on');
+  try{
+    var data=await fetch(BACKEND+'/api/heroes').then(function(r){return r.json();});
+    var fresh=data.heroes||[];
+    var prevSerials=new Set(allHeroes.map(function(h){return h.serial;}));
+    var newSerials=new Set();
+    fresh.forEach(function(h){if(!prevSerials.has(h.serial))newSerials.add(h.serial);});
+    allHeroes=fresh;
+    document.getElementById('hero-count').textContent='HEROES: '+allHeroes.length;
+    populateStats(allHeroes);
+    renderGrid(newSerials);
+  }catch(e){}
+  setTimeout(function(){dot.classList.remove('on');},800);
+}
 
 // ── Init ──────────────────────────────────────────────────────────────────
 async function load(){
@@ -911,12 +984,22 @@ async function load(){
     document.getElementById('hero-count').textContent='HEROES: '+allHeroes.length;
     populateStats(allHeroes);
     renderGrid();
+    var params=new URLSearchParams(location.search);
+    var deepSerial=params.get('serial');
+    var deepName=params.get('hero');
+    if(deepSerial||deepName){
+      var target=allHeroes.find(function(h){
+        return deepSerial?String(h.serial)===deepSerial:h.codename.toLowerCase()===(deepName||'').toLowerCase();
+      });
+      if(target)openModal(target);
+    }
   }catch(e){
     document.getElementById('loading').textContent='// FAILED TO LOAD — CHECK CONNECTION';
   }
 }
 
 load();
+setInterval(refreshHeroes,60000);
 </script>
 </body>
 </html>
