@@ -184,7 +184,7 @@ var BUILDER_RE = /\b(build|deploy|code|app|project|develop|launch|ship|create|pr
 var VALID_EMBLEMS   = ['hexagon','diamond','skull','shield','sword','signal','star','lightning','infinity','target','psi','omega','delta','phi','prism','nexus','origin','apex'];
 var VALID_THEMES    = ['green','cyan','amber','red','purple','blue','pink','orange'];
 var VALID_PATTERNS  = ['none','grid','scan','circuit','dot','hex','rain','cross'];
-var VALID_FX        = ['none','barcode','glitch','hologram','classified'];
+var VALID_FX        = ['none','glitch','hologram','classified'];
 var VALID_ROLES     = ['','BUILDER','TRADER','DEGEN','FOUNDER','SCOUT','SHADOW','GHOST','PILOT'];
 
 async function ensureHero(wallet, codename, balance) {
@@ -233,24 +233,24 @@ async function getAllHeroes() {
   if (!supabase) return [];
   try {
     var { data, error } = await supabase.from('heroes')
-      .select('serial,codename,emblem,titles,total_conversations,days_active,joined_at,balance,theme,tagline,bg_pattern,role,last_active_at,x_handle,fx')
+      .select('serial,codename,emblem,titles,total_conversations,days_active,joined_at,balance,theme,tagline,bg_pattern,last_active_at,x_handle,fx,show_barcode')
       .order('serial', { ascending: true });
     if (error) throw error;
     return (data || []).map(function(h) {
       var b = h.balance || 0;
-      var rank = b >= 50000000 ? 'LEGEND' : b >= 10000000 ? 'COMMANDER' : b >= 2000000 ? 'AGENT' : 'OPERATIVE';
+      var rank = b >= 10000000 ? 'LEGEND' : b >= 2000000 ? 'COMMANDER' : b >= 500000 ? 'AGENT' : 'OPERATIVE';
       return { serial: h.serial, codename: h.codename, emblem: h.emblem, titles: h.titles,
                total_conversations: h.total_conversations, days_active: h.days_active,
                joined_at: h.joined_at, rank, gold: b >= 2000000,
                theme: h.theme || 'green', tagline: h.tagline || '', bg_pattern: h.bg_pattern || 'none',
-               role: h.role || '', last_active_at: h.last_active_at || null, x_handle: h.x_handle || '', fx: h.fx || 'none' };
+               last_active_at: h.last_active_at || null, x_handle: h.x_handle || '', fx: h.fx || 'none', show_barcode: h.show_barcode || false };
     });
   } catch (e) { console.error('getAllHeroes:', e.message); return []; }
 }
 
 // ── Holder verification ───────────────────────────────────────────────────
 var DESTINY_MINT = '3AwkJnZL7xrf8ffUwEsSkKndQkPSj2vfR3CqvyFpk8UP';
-var MIN_TOKENS   = 500000;
+var MIN_TOKENS   = 250000;
 var SOLANA_RPC   = 'https://api.mainnet-beta.solana.com';
 var SITE_URL     = process.env.SITE_URL || 'https://terminaldestiny.github.io/destiny-chat/';
 var SESSION_TTL             = 7 * 24 * 60 * 60 * 1000; // 7 days
@@ -889,7 +889,7 @@ app.post('/api/heroes/me', jsonSmall, async function(req, res) {
                titles: data.titles, total_conversations: data.total_conversations,
                days_active: data.days_active, joined_at: data.joined_at, rank, gold: b >= 2000000,
                theme: data.theme || 'green', tagline: data.tagline || '', bg_pattern: data.bg_pattern || 'none',
-               role: data.role || '', last_active_at: data.last_active_at || null, x_handle: data.x_handle || '', fx: data.fx || 'none' });
+               last_active_at: data.last_active_at || null, x_handle: data.x_handle || '', fx: data.fx || 'none', show_barcode: data.show_barcode || false });
   } catch (e) {
     res.status(500).json({ error: 'server_error' });
   }
@@ -924,9 +924,8 @@ app.patch('/api/heroes/me', jsonSmall, async function(req, res) {
     if (!VALID_PATTERNS.includes(body.bg_pattern)) return res.status(400).json({ error: 'invalid_pattern' });
     updates.bg_pattern = body.bg_pattern;
   }
-  if (body.role !== undefined) {
-    if (!VALID_ROLES.includes(body.role)) return res.status(400).json({ error: 'invalid_role' });
-    updates.role = body.role;
+  if (body.show_barcode !== undefined) {
+    updates.show_barcode = !!body.show_barcode;
   }
   if (body.x_handle !== undefined) {
     var xh = body.x_handle.toString().replace(/^@/, '').replace(/[^a-zA-Z0-9_.]/g, '').slice(0, 15);

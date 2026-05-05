@@ -127,12 +127,11 @@ body::before{content:'';position:fixed;inset:0;background:repeating-linear-gradi
 #my-share{margin-top:14px;display:inline-flex;align-items:center;gap:9px;border:1px solid rgba(255,255,255,0.1);padding:9px 18px;cursor:pointer;font-size:9px;letter-spacing:2px;color:rgba(255,255,255,0.45);transition:.15s;background:none;}
 #my-share:hover{border-color:rgba(255,255,255,0.3);color:rgba(255,255,255,0.8);}
 
-/* ── Role picker ───────────────────────────── */
-#role-grid{display:flex;gap:6px;flex-wrap:wrap;}
-.role-opt{padding:6px 14px;border:1px solid rgba(255,255,255,0.1);font-size:8px;letter-spacing:2.5px;color:rgba(255,255,255,0.35);cursor:pointer;transition:.15s;}
-.role-opt:hover{border-color:rgba(255,255,255,0.28);color:rgba(255,255,255,0.65);}
-.role-opt.active{border-color:var(--green);color:var(--green);background:rgba(0,255,65,0.05);}
-.role-opt.none-opt{font-style:italic;color:rgba(255,255,255,0.2);}
+/* ── Barcode toggle ─────────────────────────── */
+#barcode-toggle-row{display:flex;gap:6px;}
+.bc-opt{padding:7px 22px;border:1px solid rgba(255,255,255,0.1);font-size:8px;letter-spacing:2.5px;color:rgba(255,255,255,0.32);cursor:pointer;transition:.15s;}
+.bc-opt:hover{border-color:rgba(255,255,255,0.28);color:rgba(255,255,255,0.65);}
+.bc-opt.active{color:var(--amber);border-color:rgba(255,170,0,0.5);background:rgba(255,170,0,0.04);}
 
 /* ── Divider ───────────────────────────────── */
 .sec-div{height:1px;background:rgba(0,255,65,0.07);margin:28px 20px 0;display:none;}
@@ -386,7 +385,7 @@ body::before{content:'';position:fixed;inset:0;background:repeating-linear-gradi
         <div id="pc-name"></div>
         <div id="pc-tagline"></div>
         <div style="margin-bottom:12px;">
-          <span id="pc-rank">OPERATIVE</span><span id="pc-role"></span>
+          <span id="pc-rank">OPERATIVE</span>
         </div>
         <div id="pc-titles"></div>
         <div id="pc-divider"></div>
@@ -470,24 +469,16 @@ body::before{content:'';position:fixed;inset:0;background:repeating-linear-gradi
         </div>
       </div>
       <div class="e-row">
-        <div class="e-lbl">ROLE</div>
-        <div id="role-grid">
-          <div class="role-opt none-opt" data-r="" onclick="pickRole('')">NONE</div>
-          <div class="role-opt" data-r="BUILDER"  onclick="pickRole('BUILDER')">BUILDER</div>
-          <div class="role-opt" data-r="TRADER"   onclick="pickRole('TRADER')">TRADER</div>
-          <div class="role-opt" data-r="DEGEN"    onclick="pickRole('DEGEN')">DEGEN</div>
-          <div class="role-opt" data-r="FOUNDER"  onclick="pickRole('FOUNDER')">FOUNDER</div>
-          <div class="role-opt" data-r="SCOUT"    onclick="pickRole('SCOUT')">SCOUT</div>
-          <div class="role-opt" data-r="SHADOW"   onclick="pickRole('SHADOW')">SHADOW</div>
-          <div class="role-opt" data-r="GHOST"    onclick="pickRole('GHOST')">GHOST</div>
-          <div class="role-opt" data-r="PILOT"    onclick="pickRole('PILOT')">PILOT</div>
+        <div class="e-lbl">BARCODE STRIP</div>
+        <div id="barcode-toggle-row">
+          <div class="bc-opt active" data-v="0" onclick="pickBarcode(false)">OFF</div>
+          <div class="bc-opt" data-v="1" onclick="pickBarcode(true)">ON</div>
         </div>
       </div>
       <div class="e-row">
         <div class="e-lbl">SPECIAL EFFECT</div>
         <div id="fx-grid">
           <div class="fx-opt" data-f="none"       onclick="pickFx('none')">NONE</div>
-          <div class="fx-opt" data-f="barcode"    onclick="pickFx('barcode')">BARCODE</div>
           <div class="fx-opt" data-f="glitch"     onclick="pickFx('glitch')">GLITCH</div>
           <div class="fx-opt" data-f="hologram"   onclick="pickFx('hologram')">HOLOGRAM</div>
           <div class="fx-opt" data-f="classified" onclick="pickFx('classified')">CLASSIFIED</div>
@@ -518,13 +509,13 @@ body::before{content:'';position:fixed;inset:0;background:repeating-linear-gradi
 </div>
 
 <div id="rank-legend">
-  <span class="rl-item"><span style="color:#ffaa00">◆ LEGEND</span><span class="rl-req">50M+ $DESTINY</span></span>
+  <span class="rl-item"><span style="color:#ffaa00">◆ LEGEND</span><span class="rl-req">10M+ $DESTINY</span></span>
   <span class="rl-sep">/</span>
-  <span class="rl-item"><span style="color:#cc44ff">◆ COMMANDER</span><span class="rl-req">10M+</span></span>
+  <span class="rl-item"><span style="color:#cc44ff">◆ COMMANDER</span><span class="rl-req">2M+</span></span>
   <span class="rl-sep">/</span>
-  <span class="rl-item"><span style="color:#00d4ff">◆ AGENT</span><span class="rl-req">2M+</span></span>
+  <span class="rl-item"><span style="color:#00d4ff">◆ AGENT</span><span class="rl-req">500K+</span></span>
   <span class="rl-sep">/</span>
-  <span class="rl-item"><span style="color:#00ff41">◆ OPERATIVE</span><span class="rl-req">500K+</span></span>
+  <span class="rl-item"><span style="color:#00ff41">◆ OPERATIVE</span><span class="rl-req">250K+</span></span>
   <span class="rl-sep">&nbsp;&nbsp;·&nbsp;&nbsp;</span>
   <span class="rl-label">$DESTINY REQUIRED</span>
 </div>
@@ -590,7 +581,7 @@ var RANK_ORD={LEGEND:4,COMMANDER:3,AGENT:2,OPERATIVE:1};
 
 var allHeroes=[],activeHero=null,myHero=null;
 var currentSort='default',currentQuery='';
-var p={codename:'',emblem:'hexagon',theme:'green',tagline:'',bg_pattern:'none',role:'',x_handle:'',fx:'none'};
+var p={codename:'',emblem:'hexagon',theme:'green',tagline:'',bg_pattern:'none',x_handle:'',fx:'none',show_barcode:false};
 var BAR_W=[2,1,1,2,3,1,2,1,1,1,3,2,1,1,2,1,1,3,1,2,2,1,1,2,3,1,1,2,1,1,2,3,1,1,2,1,2,1,1,3,1,2,1,1,3,1,2,1];
 function buildBarcodeGradient(color){
   var stops=[],pos=0;
@@ -707,14 +698,14 @@ function updatePreview(){
   document.getElementById('pc-url').style.color=ra('0.28');
   document.getElementById('pc-footer').style.borderTopColor=ra('0.07');
 
-  var roleEl=document.getElementById('pc-role');
-  if(p.role){roleEl.textContent=p.role;roleEl.style.display='inline-block';}
-  else{roleEl.style.display='none';}
   // FX
   var card=document.getElementById('preview-card');
   card.classList.remove('fx-glitch','fx-hologram','fx-classified');
+  if(p.fx==='glitch')card.classList.add('fx-glitch');
+  else if(p.fx==='hologram')card.classList.add('fx-hologram');
+  else if(p.fx==='classified')card.classList.add('fx-classified');
   var bcEl=document.getElementById('pc-barcode');
-  if(p.fx==='barcode'){
+  if(p.show_barcode){
     bcEl.style.display='block';
     document.getElementById('pc-barcode-bars').style.backgroundImage=buildBarcodeGradient(th);
     document.getElementById('pc-barcode-bars').style.boxShadow='0 0 4px '+ra('0.3');
@@ -722,15 +713,12 @@ function updatePreview(){
     document.getElementById('pc-barcode-serial').style.color=ra('0.4');
   }else{
     bcEl.style.display='none';
-    if(p.fx==='glitch')card.classList.add('fx-glitch');
-    else if(p.fx==='hologram')card.classList.add('fx-hologram');
-    else if(p.fx==='classified')card.classList.add('fx-classified');
   }
 }
 
 function populateMyCard(h){
   p.codename=h.codename; p.emblem=h.emblem||'hexagon';
-  p.theme=h.theme||'green'; p.tagline=h.tagline||''; p.bg_pattern=h.bg_pattern||'none'; p.role=h.role||''; p.x_handle=h.x_handle||''; p.fx=h.fx||'none';
+  p.theme=h.theme||'green'; p.tagline=h.tagline||''; p.bg_pattern=h.bg_pattern||'none'; p.x_handle=h.x_handle||''; p.fx=h.fx||'none'; p.show_barcode=h.show_barcode||false;
   document.getElementById('codename-input').value=h.codename;
   document.getElementById('tagline-input').value=h.tagline||'';
   document.getElementById('x-input').value=h.x_handle?('@'+h.x_handle):'';
@@ -742,11 +730,11 @@ function populateMyCard(h){
   document.getElementById('pc-days').textContent=h.days_active||0;
   document.getElementById('pc-joined').textContent='SINCE '+fmtDate(h.joined_at);
   document.querySelectorAll('.embl').forEach(function(el){el.classList.toggle('active',el.dataset.e===p.emblem);});
-  document.querySelectorAll('.role-opt').forEach(function(el){el.classList.toggle('active',el.dataset.r===p.role);});
   document.querySelectorAll('.embl.active').forEach(function(el){el.style.borderColor=THEME_HEX[p.theme];el.style.boxShadow='0 0 10px '+cRgba(p.theme,'0.3');});
   document.querySelectorAll('.tswatch').forEach(function(el){el.classList.toggle('active',el.dataset.t===p.theme);});
   document.querySelectorAll('.pat-opt').forEach(function(el){el.classList.toggle('active',el.dataset.p===p.bg_pattern);});
   document.querySelectorAll('.fx-opt').forEach(function(el){el.classList.toggle('active',el.dataset.f===p.fx);});
+  document.querySelectorAll('.bc-opt').forEach(function(el){el.classList.toggle('active',el.dataset.v===(p.show_barcode?'1':'0'));});
   document.getElementById('theme-name').textContent=THEME_NAME[p.theme]||'';
   updatePreview();
 }
@@ -777,9 +765,9 @@ function pickPattern(pt){
   });
   updatePreview();
 }
-function pickRole(r){
-  p.role=r;
-  document.querySelectorAll('.role-opt').forEach(function(el){el.classList.toggle('active',el.dataset.r===r);});
+function pickBarcode(v){
+  p.show_barcode=v;
+  document.querySelectorAll('.bc-opt').forEach(function(el){el.classList.toggle('active',el.dataset.v===(v?'1':'0'));});
   updatePreview();
 }
 function pickFx(f){
@@ -797,17 +785,17 @@ async function saveCard(){
   try{
     var r=await fetch(BACKEND+'/api/heroes/me',{
       method:'PATCH',headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({sessionToken:sess.sessionToken,codename:cn,emblem:p.emblem,theme:p.theme,tagline:p.tagline,bg_pattern:p.bg_pattern,role:p.role,x_handle:p.x_handle,fx:p.fx})
+      body:JSON.stringify({sessionToken:sess.sessionToken,codename:cn,emblem:p.emblem,theme:p.theme,tagline:p.tagline,bg_pattern:p.bg_pattern,x_handle:p.x_handle,fx:p.fx,show_barcode:p.show_barcode})
     });
     if(r.ok){
       myHero.codename=cn; myHero.emblem=p.emblem; myHero.theme=p.theme;
-      myHero.tagline=p.tagline; myHero.bg_pattern=p.bg_pattern; myHero.role=p.role; myHero.x_handle=p.x_handle; myHero.fx=p.fx;
+      myHero.tagline=p.tagline; myHero.bg_pattern=p.bg_pattern; myHero.x_handle=p.x_handle; myHero.fx=p.fx; myHero.show_barcode=p.show_barcode;
       var idx=-1;
       for(var i=0;i<allHeroes.length;i++){if(allHeroes[i].serial===myHero.serial){idx=i;break;}}
       if(idx!==-1){
         allHeroes[idx].codename=cn; allHeroes[idx].emblem=p.emblem;
         allHeroes[idx].theme=p.theme; allHeroes[idx].tagline=p.tagline;
-        allHeroes[idx].bg_pattern=p.bg_pattern; allHeroes[idx].role=p.role; allHeroes[idx].x_handle=p.x_handle; allHeroes[idx].fx=p.fx;
+        allHeroes[idx].bg_pattern=p.bg_pattern; allHeroes[idx].x_handle=p.x_handle; allHeroes[idx].fx=p.fx; allHeroes[idx].show_barcode=p.show_barcode;
         renderGrid();
       }
       var msg=document.getElementById('save-msg');
@@ -901,7 +889,7 @@ function renderCard(h,delay){
     '</div>',
     '<div class="hcard-name">'+(isActiveH?'<span class="dot-active" title="Active in last 24h"></span>':'')+escHtml(h.codename)+'</div>',
     h.tagline?'<div class="hcard-tagline">"'+escHtml(h.tagline)+'"</div>':'<div class="hcard-tagline"></div>',
-    '<div style="margin-bottom:9px;"><span class="hcard-rank" style="color:'+th+';border-color:'+ra('0.45')+';box-shadow:0 0 8px '+ra('0.1')+'">'+h.rank+'</span>'+(h.role?'<span class="hcard-role">'+escHtml(h.role)+'</span>':'')+'</div>',
+    '<div style="margin-bottom:9px;"><span class="hcard-rank" style="color:'+th+';border-color:'+ra('0.45')+';box-shadow:0 0 8px '+ra('0.1')+'">'+h.rank+'</span></div>',
     '<div class="hcard-titles">'+((h.titles||[]).map(function(t){return '<span class="hcard-title">'+escHtml(t)+'</span>';})).join('')+'</div>',
     '<div class="hcard-stats">',
       '<div><div class="hstat-val">'+(h.total_conversations||0)+'</div><div class="hstat-lbl">TRANSMISSIONS</div></div>',
@@ -909,7 +897,7 @@ function renderCard(h,delay){
     '</div>'
   ].join('');
 
-  if(h.fx==='barcode'){
+  if(h.show_barcode){
     var bcDiv=document.createElement('div');
     bcDiv.className='hcard-barcode';
     bcDiv.style.backgroundImage=buildBarcodeGradient(th);
@@ -977,7 +965,7 @@ function openModal(h){
   document.getElementById('modal-serial').textContent=fmtSerial(h.serial);
   document.getElementById('modal-name').textContent=h.codename;
   document.getElementById('modal-tagline').textContent=h.tagline?'"'+h.tagline+'"':'';
-  document.getElementById('modal-rank').textContent='▸ '+h.rank+(h.role?' · '+h.role:'');
+  document.getElementById('modal-rank').textContent='▸ '+h.rank;
   document.getElementById('modal-emblem').textContent=EMBLEMS[h.emblem]||'⬡';
   document.getElementById('modal-titles').innerHTML=(h.titles||[]).map(function(t){return '<span class="modal-chip">'+escHtml(t)+'</span>';}).join('');
   document.getElementById('ms-tx').textContent=h.total_conversations||0;
@@ -1113,7 +1101,7 @@ function buildShareCanvas(h){
   ctx.textAlign='center'; ctx.fillText('terminaldestiny.com',W/2,H-11); ctx.textAlign='left';
 
   // ── FX overlays ──────────────────────────────────────────────────────────
-  if(h.fx==='barcode'){
+  if(h.show_barcode){
     var bY2=H-70;
     ctx.fillStyle=ra('0.06');ctx.fillRect(22,bY2-2,W-44,38);
     var bx2=24,isB=true;
