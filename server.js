@@ -184,6 +184,7 @@ var BUILDER_RE = /\b(build|deploy|code|app|project|develop|launch|ship|create|pr
 var VALID_EMBLEMS   = ['hexagon','diamond','skull','shield','sword','signal','star','lightning','infinity','target','psi','omega','delta','phi','prism','nexus','origin','apex'];
 var VALID_THEMES    = ['green','cyan','amber','red','purple','blue','pink','orange'];
 var VALID_PATTERNS  = ['none','grid','scan','circuit','dot','hex','rain','cross'];
+var VALID_FX        = ['none','barcode','glitch','hologram','classified'];
 var VALID_ROLES     = ['','BUILDER','TRADER','DEGEN','FOUNDER','SCOUT','SHADOW','GHOST','PILOT'];
 
 async function ensureHero(wallet, codename, balance) {
@@ -232,7 +233,7 @@ async function getAllHeroes() {
   if (!supabase) return [];
   try {
     var { data, error } = await supabase.from('heroes')
-      .select('serial,codename,emblem,titles,total_conversations,days_active,joined_at,balance,theme,tagline,bg_pattern,role,last_active_at,x_handle')
+      .select('serial,codename,emblem,titles,total_conversations,days_active,joined_at,balance,theme,tagline,bg_pattern,role,last_active_at,x_handle,fx')
       .order('serial', { ascending: true });
     if (error) throw error;
     return (data || []).map(function(h) {
@@ -242,7 +243,7 @@ async function getAllHeroes() {
                total_conversations: h.total_conversations, days_active: h.days_active,
                joined_at: h.joined_at, rank, gold: b >= 2000000,
                theme: h.theme || 'green', tagline: h.tagline || '', bg_pattern: h.bg_pattern || 'none',
-               role: h.role || '', last_active_at: h.last_active_at || null, x_handle: h.x_handle || '' };
+               role: h.role || '', last_active_at: h.last_active_at || null, x_handle: h.x_handle || '', fx: h.fx || 'none' };
     });
   } catch (e) { console.error('getAllHeroes:', e.message); return []; }
 }
@@ -888,7 +889,7 @@ app.post('/api/heroes/me', jsonSmall, async function(req, res) {
                titles: data.titles, total_conversations: data.total_conversations,
                days_active: data.days_active, joined_at: data.joined_at, rank, gold: b >= 2000000,
                theme: data.theme || 'green', tagline: data.tagline || '', bg_pattern: data.bg_pattern || 'none',
-               role: data.role || '', last_active_at: data.last_active_at || null, x_handle: data.x_handle || '' });
+               role: data.role || '', last_active_at: data.last_active_at || null, x_handle: data.x_handle || '', fx: data.fx || 'none' });
   } catch (e) {
     res.status(500).json({ error: 'server_error' });
   }
@@ -930,6 +931,10 @@ app.patch('/api/heroes/me', jsonSmall, async function(req, res) {
   if (body.x_handle !== undefined) {
     var xh = body.x_handle.toString().replace(/^@/, '').replace(/[^a-zA-Z0-9_.]/g, '').slice(0, 15);
     updates.x_handle = xh;
+  }
+  if (body.fx !== undefined) {
+    if (!VALID_FX.includes(body.fx)) return res.status(400).json({ error: 'invalid_fx' });
+    updates.fx = body.fx;
   }
   if (!Object.keys(updates).length) return res.status(400).json({ error: 'nothing_to_update' });
   try {

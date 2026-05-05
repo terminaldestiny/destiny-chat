@@ -216,6 +216,39 @@ body::before{content:'';position:fixed;inset:0;background:repeating-linear-gradi
 #modal-share-btn{display:flex;align-items:center;justify-content:center;gap:10px;padding:12px;cursor:pointer;font-size:9px;letter-spacing:2.5px;border:1px solid rgba(255,255,255,0.1);color:rgba(255,255,255,0.5);transition:.15s;background:none;width:100%;font-family:inherit;}
 #modal-share-btn:hover{color:#fff;border-color:rgba(255,255,255,0.3);}
 
+/* ── FX picker ─────────────────────────────── */
+#fx-grid{display:flex;gap:6px;flex-wrap:wrap;}
+.fx-opt{padding:7px 14px;border:1px solid rgba(255,255,255,0.08);font-size:8px;letter-spacing:2px;color:rgba(255,255,255,0.35);cursor:pointer;transition:.15s;}
+.fx-opt:hover{border-color:rgba(255,255,255,0.25);color:rgba(255,255,255,0.65);}
+.fx-opt.active{color:var(--amber);border-color:rgba(255,170,0,0.5);background:rgba(255,170,0,0.04);}
+
+/* ── Barcode strip on preview card ──────────── */
+#pc-barcode{display:none;margin:12px 0 6px;}
+#pc-barcode-bars{height:34px;opacity:.75;}
+#pc-barcode-serial{font-size:6px;letter-spacing:5px;text-align:center;margin-top:3px;}
+.hcard-barcode{height:16px;margin-top:8px;opacity:.6;}
+
+/* ── Special effects ────────────────────────── */
+.fx-glitch{animation:card-in .4s ease forwards,glitch-loop 7s 1s infinite!important;}
+@keyframes glitch-loop{
+  0%,82%,100%{filter:none;transform:none;}
+  83%{filter:hue-rotate(40deg) saturate(200%);transform:translateX(3px);}
+  84%{filter:none;transform:translateX(-2px);}
+  85%{filter:hue-rotate(-25deg) brightness(1.25);transform:translateY(1px) scaleX(1.005);}
+  86%{filter:none;transform:none;}
+}
+.fx-hologram{animation:holo-cycle 3.5s linear infinite!important;}
+@keyframes holo-cycle{
+  0%{border-color:rgba(0,255,65,.4);box-shadow:0 0 28px rgba(0,255,65,.12),inset 0 0 18px rgba(0,255,65,.03);}
+  20%{border-color:rgba(0,212,255,.55);box-shadow:0 0 36px rgba(0,212,255,.16),inset 0 0 22px rgba(0,212,255,.05);}
+  40%{border-color:rgba(204,68,255,.5);box-shadow:0 0 32px rgba(204,68,255,.14),inset 0 0 20px rgba(204,68,255,.04);}
+  60%{border-color:rgba(255,170,0,.5);box-shadow:0 0 34px rgba(255,170,0,.13),inset 0 0 21px rgba(255,170,0,.04);}
+  80%{border-color:rgba(255,34,136,.45);box-shadow:0 0 30px rgba(255,34,136,.12),inset 0 0 19px rgba(255,34,136,.03);}
+  100%{border-color:rgba(0,255,65,.4);box-shadow:0 0 28px rgba(0,255,65,.12),inset 0 0 18px rgba(0,255,65,.03);}
+}
+.fx-classified{position:relative;overflow:hidden;}
+.fx-classified::after{content:'CLASSIFIED';position:absolute;top:50%;left:50%;transform:translate(-50%,-50%) rotate(-22deg);font-size:20px;font-weight:bold;letter-spacing:7px;color:rgba(255,42,0,.13);border:2px solid rgba(255,42,0,.1);padding:4px 10px;pointer-events:none;z-index:3;white-space:nowrap;}
+
 /* ── X handle in modal ─────────────────────── */
 #modal-x{margin-bottom:16px;display:none;}
 .modal-x-link{color:rgba(255,255,255,0.45);font-size:10px;letter-spacing:2px;text-decoration:none;display:inline-flex;align-items:center;gap:7px;border:1px solid rgba(255,255,255,0.1);padding:5px 14px;transition:.15s;}
@@ -327,6 +360,10 @@ body::before{content:'';position:fixed;inset:0;background:repeating-linear-gradi
           <div><div class="pc-stat-lbl">DAYS ACTIVE</div><div class="pc-stat-val" id="pc-days">0</div></div>
           <div><div class="pc-stat-lbl">SERIAL</div><div class="pc-stat-val" id="pc-ser2"></div></div>
         </div>
+        <div id="pc-barcode">
+          <div id="pc-barcode-bars"></div>
+          <div id="pc-barcode-serial"></div>
+        </div>
         <div id="pc-footer">
           <div id="pc-url">terminaldestiny.com</div>
           <div id="pc-joined"></div>
@@ -409,6 +446,16 @@ body::before{content:'';position:fixed;inset:0;background:repeating-linear-gradi
           <div class="role-opt" data-r="SHADOW"   onclick="pickRole('SHADOW')">SHADOW</div>
           <div class="role-opt" data-r="GHOST"    onclick="pickRole('GHOST')">GHOST</div>
           <div class="role-opt" data-r="PILOT"    onclick="pickRole('PILOT')">PILOT</div>
+        </div>
+      </div>
+      <div class="e-row">
+        <div class="e-lbl">SPECIAL EFFECT</div>
+        <div id="fx-grid">
+          <div class="fx-opt" data-f="none"       onclick="pickFx('none')">NONE</div>
+          <div class="fx-opt" data-f="barcode"    onclick="pickFx('barcode')">BARCODE</div>
+          <div class="fx-opt" data-f="glitch"     onclick="pickFx('glitch')">GLITCH</div>
+          <div class="fx-opt" data-f="hologram"   onclick="pickFx('hologram')">HOLOGRAM</div>
+          <div class="fx-opt" data-f="classified" onclick="pickFx('classified')">CLASSIFIED</div>
         </div>
       </div>
       <div class="e-row">
@@ -496,7 +543,17 @@ var RANK_ORD={LEGEND:4,COMMANDER:3,AGENT:2,OPERATIVE:1};
 
 var allHeroes=[],activeHero=null,myHero=null;
 var currentSort='default',currentQuery='';
-var p={codename:'',emblem:'hexagon',theme:'green',tagline:'',bg_pattern:'none',role:'',x_handle:''};
+var p={codename:'',emblem:'hexagon',theme:'green',tagline:'',bg_pattern:'none',role:'',x_handle:'',fx:'none'};
+var BAR_W=[2,1,1,2,3,1,2,1,1,1,3,2,1,1,2,1,1,3,1,2,2,1,1,2,3,1,1,2,1,1,2,3,1,1,2,1,2,1,1,3,1,2,1,1,3,1,2,1];
+function buildBarcodeGradient(color){
+  var stops=[],pos=0;
+  BAR_W.forEach(function(w,i){
+    var c=i%2===0?color:'transparent';
+    stops.push(c+' '+pos+'px',c+' '+(pos+w)+'px');
+    pos+=w;
+  });
+  return 'repeating-linear-gradient(90deg,'+stops.join(',')+')';
+}
 
 function getSession(){try{var s=JSON.parse(localStorage.getItem('destiny_session')||'null');return(s&&s.expires>Date.now())?s:null;}catch(e){return null;}}
 function fmtSerial(n){return 'TD-'+String(n).padStart(3,'0');}
@@ -555,12 +612,10 @@ function applyBgPattern(el,pat,theme){
   } else if(pat==='circuit'){
     el.style.backgroundImage='repeating-linear-gradient(45deg,transparent,transparent 10px,'+ra('0.06')+' 10px,'+ra('0.06')+' 11px),repeating-linear-gradient(-45deg,transparent,transparent 10px,'+ra('0.06')+' 10px,'+ra('0.06')+' 11px)';
   } else if(pat==='dot'){
-    el.style.backgroundImage='radial-gradient(circle,'+ra('0.32')+' 1.5px,transparent 1.5px)';
-    el.style.backgroundSize='16px 16px';
+    el.style.backgroundImage='radial-gradient(circle,'+ra('0.45')+' 2px,transparent 2px)';
+    el.style.backgroundSize='14px 14px';
   } else if(pat==='hex'){
-    el.style.backgroundImage='radial-gradient(circle,'+ra('0.28')+' 1.5px,transparent 1.5px),radial-gradient(circle,'+ra('0.28')+' 1.5px,transparent 1.5px)';
-    el.style.backgroundSize='20px 34px';
-    el.style.backgroundPosition='0 0, 10px 17px';
+    el.style.backgroundImage='repeating-radial-gradient(circle at 50% 50%,transparent 0,transparent 14px,'+ra('0.08')+' 14px,'+ra('0.08')+' 15px)';
   } else if(pat==='rain'){
     el.style.backgroundImage='repeating-linear-gradient(90deg,transparent,transparent 9px,'+ra('0.05')+' 9px,'+ra('0.05')+' 10px)';
   } else if(pat==='cross'){
@@ -608,11 +663,27 @@ function updatePreview(){
   var roleEl=document.getElementById('pc-role');
   if(p.role){roleEl.textContent=p.role;roleEl.style.display='inline-block';}
   else{roleEl.style.display='none';}
+  // FX
+  var card=document.getElementById('preview-card');
+  card.classList.remove('fx-glitch','fx-hologram','fx-classified');
+  var bcEl=document.getElementById('pc-barcode');
+  if(p.fx==='barcode'){
+    bcEl.style.display='block';
+    document.getElementById('pc-barcode-bars').style.backgroundImage=buildBarcodeGradient(th);
+    document.getElementById('pc-barcode-bars').style.boxShadow='0 0 4px '+ra('0.3');
+    document.getElementById('pc-barcode-serial').textContent=document.getElementById('pc-serial').textContent||'TD-000';
+    document.getElementById('pc-barcode-serial').style.color=ra('0.4');
+  }else{
+    bcEl.style.display='none';
+    if(p.fx==='glitch')card.classList.add('fx-glitch');
+    else if(p.fx==='hologram')card.classList.add('fx-hologram');
+    else if(p.fx==='classified')card.classList.add('fx-classified');
+  }
 }
 
 function populateMyCard(h){
   p.codename=h.codename; p.emblem=h.emblem||'hexagon';
-  p.theme=h.theme||'green'; p.tagline=h.tagline||''; p.bg_pattern=h.bg_pattern||'none'; p.role=h.role||''; p.x_handle=h.x_handle||'';
+  p.theme=h.theme||'green'; p.tagline=h.tagline||''; p.bg_pattern=h.bg_pattern||'none'; p.role=h.role||''; p.x_handle=h.x_handle||''; p.fx=h.fx||'none';
   document.getElementById('codename-input').value=h.codename;
   document.getElementById('tagline-input').value=h.tagline||'';
   document.getElementById('x-input').value=h.x_handle?('@'+h.x_handle):'';
@@ -628,6 +699,7 @@ function populateMyCard(h){
   document.querySelectorAll('.embl.active').forEach(function(el){el.style.borderColor=THEME_HEX[p.theme];el.style.boxShadow='0 0 10px '+cRgba(p.theme,'0.3');});
   document.querySelectorAll('.tswatch').forEach(function(el){el.classList.toggle('active',el.dataset.t===p.theme);});
   document.querySelectorAll('.pat-opt').forEach(function(el){el.classList.toggle('active',el.dataset.p===p.bg_pattern);});
+  document.querySelectorAll('.fx-opt').forEach(function(el){el.classList.toggle('active',el.dataset.f===p.fx);});
   document.getElementById('theme-name').textContent=THEME_NAME[p.theme]||'';
   updatePreview();
 }
@@ -663,6 +735,11 @@ function pickRole(r){
   document.querySelectorAll('.role-opt').forEach(function(el){el.classList.toggle('active',el.dataset.r===r);});
   updatePreview();
 }
+function pickFx(f){
+  p.fx=f;
+  document.querySelectorAll('.fx-opt').forEach(function(el){el.classList.toggle('active',el.dataset.f===f);});
+  updatePreview();
+}
 
 async function saveCard(){
   var sess=getSession(); if(!sess||!sess.sessionToken)return;
@@ -673,17 +750,17 @@ async function saveCard(){
   try{
     var r=await fetch(BACKEND+'/api/heroes/me',{
       method:'PATCH',headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({sessionToken:sess.sessionToken,codename:cn,emblem:p.emblem,theme:p.theme,tagline:p.tagline,bg_pattern:p.bg_pattern,role:p.role,x_handle:p.x_handle})
+      body:JSON.stringify({sessionToken:sess.sessionToken,codename:cn,emblem:p.emblem,theme:p.theme,tagline:p.tagline,bg_pattern:p.bg_pattern,role:p.role,x_handle:p.x_handle,fx:p.fx})
     });
     if(r.ok){
       myHero.codename=cn; myHero.emblem=p.emblem; myHero.theme=p.theme;
-      myHero.tagline=p.tagline; myHero.bg_pattern=p.bg_pattern; myHero.role=p.role; myHero.x_handle=p.x_handle;
+      myHero.tagline=p.tagline; myHero.bg_pattern=p.bg_pattern; myHero.role=p.role; myHero.x_handle=p.x_handle; myHero.fx=p.fx;
       var idx=-1;
       for(var i=0;i<allHeroes.length;i++){if(allHeroes[i].serial===myHero.serial){idx=i;break;}}
       if(idx!==-1){
         allHeroes[idx].codename=cn; allHeroes[idx].emblem=p.emblem;
         allHeroes[idx].theme=p.theme; allHeroes[idx].tagline=p.tagline;
-        allHeroes[idx].bg_pattern=p.bg_pattern; allHeroes[idx].role=p.role; allHeroes[idx].x_handle=p.x_handle;
+        allHeroes[idx].bg_pattern=p.bg_pattern; allHeroes[idx].role=p.role; allHeroes[idx].x_handle=p.x_handle; allHeroes[idx].fx=p.fx;
         renderGrid();
       }
       var msg=document.getElementById('save-msg');
@@ -728,11 +805,17 @@ function renderCard(h,delay){
   var isLegend=h.rank==='LEGEND', isCommander=h.rank==='COMMANDER';
 
   var card=document.createElement('div');
-  card.className='hcard'+(isLegend?' hcard-legend':isCommander?' hcard-commander':'');
+  var fxClass=(h.fx==='classified'?' fx-classified':h.fx==='hologram'?' fx-hologram':'');
+  card.className='hcard'+(isLegend?' hcard-legend':isCommander?' hcard-commander':'')+fxClass;
   card.style.borderColor=ra(isLegend?'0.32':'0.18');
   if(isLegend)card.style.boxShadow='0 0 20px rgba(255,170,0,0.06)';
-  card.style.animationDelay=(delay||0)+'ms';
   card.style.setProperty('--cc',ra('0.35'));
+  if(h.fx==='glitch'){
+    var gDelay=Math.floor(Math.random()*7000);
+    card.style.animation='card-in .4s ease '+(delay||0)+'ms forwards,glitch-loop 7s linear '+gDelay+'ms infinite';
+  } else {
+    card.style.animationDelay=(delay||0)+'ms';
+  }
   card.dataset.serial=h.serial;
 
   card.addEventListener('mouseenter',function(){
@@ -779,6 +862,13 @@ function renderCard(h,delay){
     '</div>'
   ].join('');
 
+  if(h.fx==='barcode'){
+    var bcDiv=document.createElement('div');
+    bcDiv.className='hcard-barcode';
+    bcDiv.style.backgroundImage=buildBarcodeGradient(th);
+    bcDiv.style.boxShadow='0 0 4px '+ra('0.25');
+    body.appendChild(bcDiv);
+  }
   card.appendChild(bar); card.appendChild(pat); card.appendChild(body);
   return card;
 }
@@ -887,8 +977,9 @@ function buildShareCanvas(h){
     ctx.fillStyle=ra('0.32');
     for(var dy=8;dy<H;dy+=16){for(var dx=8;dx<W;dx+=16){ctx.beginPath();ctx.arc(dx,dy,1.5,0,Math.PI*2);ctx.fill();}}
   } else if(h.bg_pattern==='hex'){
-    ctx.fillStyle=ra('0.28');
-    for(var hr=0;hr*34<H+34;hr++){for(var hc=0;hc*20<W+20;hc++){var hox=hc*20+(hr%2?10:0),hoy=hr*34;ctx.beginPath();ctx.arc(hox,hoy,1.5,0,Math.PI*2);ctx.fill();}}
+    ctx.strokeStyle=ra('0.08'); ctx.lineWidth=1;
+    var maxRr=Math.sqrt(W*W+H*H)/2+16;
+    for(var rr=15;rr<maxRr;rr+=15){ctx.beginPath();ctx.arc(W/2,H/2,rr,0,Math.PI*2);ctx.stroke();}
   } else if(h.bg_pattern==='rain'){
     ctx.strokeStyle=ra('0.05'); ctx.lineWidth=1;
     for(var rx=10;rx<W;rx+=10){ctx.beginPath();ctx.moveTo(rx,0);ctx.lineTo(rx,H);ctx.stroke();}
@@ -970,6 +1061,44 @@ function buildShareCanvas(h){
   ctx.beginPath();ctx.moveTo(0,H-32);ctx.lineTo(W,H-32);ctx.stroke();
   ctx.font='9px "Courier New"'; ctx.fillStyle=ra('0.4');
   ctx.textAlign='center'; ctx.fillText('terminaldestiny.com',W/2,H-11); ctx.textAlign='left';
+
+  // ── FX overlays ──────────────────────────────────────────────────────────
+  if(h.fx==='barcode'){
+    var bY2=H-70;
+    ctx.fillStyle=ra('0.06');ctx.fillRect(22,bY2-2,W-44,38);
+    var bx2=24,isB=true;
+    while(bx2<W-24){
+      BAR_W.forEach(function(bw){if(bx2>=W-24)return;if(isB){ctx.fillStyle=ra('0.8');ctx.fillRect(bx2,bY2,bw*2,28);}bx2+=bw*2;isB=!isB;});
+    }
+    ctx.font='7px "Courier New"';ctx.fillStyle=ra('0.45');ctx.textAlign='center';
+    ctx.fillText(fmtSerial(h.serial)+'  ·  TD-FIELD-UNIT',W/2,bY2+34);ctx.textAlign='left';
+  }
+  if(h.fx==='classified'){
+    ctx.save();ctx.translate(W/2,H/2);ctx.rotate(-22*Math.PI/180);
+    ctx.font='bold 30px "Courier New"';
+    var cTxt='CLASSIFIED',cMet=ctx.measureText(cTxt);
+    ctx.strokeStyle='rgba(255,42,0,0.25)';ctx.lineWidth=2;
+    ctx.strokeRect(-cMet.width/2-12,-22,cMet.width+24,38);
+    ctx.fillStyle='rgba(255,42,0,0.1)';ctx.fillText(cTxt,-cMet.width/2,8);
+    ctx.restore();
+  }
+  if(h.fx==='hologram'){
+    var hG=ctx.createLinearGradient(0,0,W,H);
+    hG.addColorStop(0,'rgba(0,255,65,0.04)');hG.addColorStop(0.25,'rgba(0,212,255,0.05)');
+    hG.addColorStop(0.5,'rgba(204,68,255,0.04)');hG.addColorStop(0.75,'rgba(255,170,0,0.04)');
+    hG.addColorStop(1,'rgba(255,34,136,0.04)');
+    ctx.fillStyle=hG;ctx.fillRect(0,0,W,H);
+    ctx.strokeStyle='rgba(255,255,255,0.12)';ctx.lineWidth=1.5;ctx.strokeRect(1,1,W-2,H-2);
+  }
+  if(h.fx==='glitch'){
+    ctx.save();ctx.globalAlpha=0.4;
+    var sliceY=Math.floor(H*0.3),sliceH=Math.floor(H*0.06);
+    ctx.filter='hue-rotate(40deg) saturate(200%)';
+    ctx.drawImage(canvas,0,sliceY,W,sliceH,4,sliceY,W,sliceH);
+    ctx.filter='hue-rotate(-20deg)';
+    ctx.drawImage(canvas,0,sliceY+sliceH+20,W,8,-3,sliceY+sliceH+20,W,8);
+    ctx.restore();
+  }
   return canvas;
 }
 
