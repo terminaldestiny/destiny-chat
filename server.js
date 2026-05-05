@@ -275,7 +275,66 @@ setInterval(function() {
   scanLog.forEach(function(ts, k)           { if (!ts.length || ts[ts.length-1] < now - 60000) scanLog.delete(k); });
   var today = getTodayUTC();
   Object.keys(chatLog).forEach(function(k) { if (chatLog[k].date !== today) delete chatLog[k]; });
+  if (supabase) {
+    supabase.from('sessions').delete().lt('expires_at', new Date().toISOString())
+      .then(function() {}).catch(function(e) { console.error('session cleanup:', e.message); });
+  }
 }, 600000);
+
+// ── Session persistence (Supabase-backed, memory-cached) ──────────────────
+async function createSession(token, wallet, tier, balance) {
+  var expiresMs = Date.now() + SESSION_TTL;
+  var session = { wallet, tier, balance, expires: expiresMs, lastBalanceCheck: Date.now() };
+  verifiedSessions.set(token, session);
+  if (supabase) {
+    try {
+      await supabase.from('sessions').upsert(
+        { token, wallet, tier, balance,
+          expires_at: new Date(expiresMs).toISOString(),
+          last_balance_check: new Date().toISOString() },
+        { onConflict: 'token' }
+      );
+    } catch (e) { console.error('createSession DB:', e.message); }
+  }
+  return session;
+}
+
+async function getSession(token) {
+  var cached = verifiedSessions.get(token);
+  if (cached) {
+    if (cached.expires > Date.now()) return cached;
+    verifiedSessions.delete(token);
+  }
+  if (!supabase) return null;
+  try {
+    var { data, error } = await supabase.from('sessions')
+      .select('*').eq('token', token)
+      .gt('expires_at', new Date().toISOString())
+      .single();
+    if (error || !data) return null;
+    var session = {
+      wallet: data.wallet, tier: data.tier, balance: data.balance,
+      expires: new Date(data.expires_at).getTime(),
+      lastBalanceCheck: new Date(data.last_balance_check).getTime()
+    };
+    verifiedSessions.set(token, session);
+    return session;
+  } catch (e) { console.error('getSession DB:', e.message); return null; }
+}
+
+async function updateSession(token, updates) {
+  var cached = verifiedSessions.get(token);
+  if (cached) Object.assign(cached, updates);
+  if (!supabase) return;
+  var dbUp = {};
+  if (updates.tier !== undefined) dbUp.tier = updates.tier;
+  if (updates.balance !== undefined) dbUp.balance = updates.balance;
+  if (updates.lastBalanceCheck !== undefined) dbUp.last_balance_check = new Date(updates.lastBalanceCheck).toISOString();
+  if (!Object.keys(dbUp).length) return;
+  try {
+    await supabase.from('sessions').update(dbUp).eq('token', token);
+  } catch (e) { console.error('updateSession DB:', e.message); }
+}
 
 // Evicts oldest 25% of entries by insertion order when limit is exceeded
 function guardMapSize(map, limit) {
@@ -464,10 +523,7 @@ app.post('/api/verify', jsonSmall, async function(req, res) {
     var balance      = await getSolanaTokenBalance(wallet);
     var tier         = balance >= MIN_TOKENS ? 'operative' : 'recruit';
     var sessionToken = crypto.randomUUID();
-    verifiedSessions.set(sessionToken, {
-      wallet: wallet, tier: tier, balance: balance,
-      expires: Date.now() + SESSION_TTL, lastBalanceCheck: Date.now()
-    });
+    await createSession(sessionToken, wallet, tier, balance);
     if (tier === 'operative') {
       var codename = (body.codename || '').toString().trim().slice(0, 32);
       ensureHero(wallet, codename, balance);
@@ -523,8 +579,8 @@ app.post('/api/chat', jsonLarge, async function(req, res) {
   var walletAddress = null;
   var session = null;
   if (sessionToken) {
-    session = verifiedSessions.get(sessionToken);
-    if (session && session.expires > Date.now()) {
+    session = await getSession(sessionToken);
+    if (session) {
       tier = session.tier;
       walletAddress = session.wallet;
     }
@@ -535,16 +591,16 @@ app.post('/api/chat', jsonLarge, async function(req, res) {
     if (Date.now() - (session.lastBalanceCheck || 0) > BALANCE_RECHECK_INTERVAL) {
       try {
         var freshBalance = await getSolanaTokenBalance(walletAddress);
-        session.balance = freshBalance;
-        session.lastBalanceCheck = Date.now();
+        var recheckUpdates = { balance: freshBalance, lastBalanceCheck: Date.now() };
         if (freshBalance < MIN_TOKENS) {
-          session.tier = 'recruit';
+          recheckUpdates.tier = 'recruit';
           tier = 'recruit';
           walletAddress = null;
         }
+        await updateSession(sessionToken, recheckUpdates);
       } catch (e) {
         console.error('Balance recheck error:', e.message);
-        session.lastBalanceCheck = Date.now(); // avoid hammering RPC if it's down
+        await updateSession(sessionToken, { lastBalanceCheck: Date.now() });
       }
     }
   }
@@ -718,8 +774,8 @@ app.post('/api/auth/link-email', jsonSmall, async function(req, res) {
   }
   if (!supabase) return res.status(503).json({ error: 'no_supabase' });
 
-  var session = verifiedSessions.get(sessionToken);
-  if (!session || session.expires < Date.now()) {
+  var session = await getSession(sessionToken);
+  if (!session) {
     return res.status(401).json({ error: 'invalid_session' });
   }
 
@@ -799,10 +855,7 @@ app.post('/api/auth/magic-verify', jsonSmall, async function(req, res) {
     await upsertUser(user.wallet, email, tier, balance);
 
     var sessionToken = crypto.randomUUID();
-    verifiedSessions.set(sessionToken, {
-      wallet: user.wallet, tier: tier, balance: balance,
-      expires: Date.now() + SESSION_TTL, lastBalanceCheck: Date.now()
-    });
+    await createSession(sessionToken, user.wallet, tier, balance);
     if (tier === 'operative') ensureHero(user.wallet, null, balance);
 
     res.json({ tier, balance, sessionToken, wallet: user.wallet, email, minTokens: MIN_TOKENS });
@@ -823,8 +876,8 @@ app.post('/api/heroes/me', jsonSmall, async function(req, res) {
   var body = req.body || {};
   var sessionToken = (body.sessionToken || '').toString().trim().slice(0, 64);
   if (!sessionToken) return res.status(401).json({ error: 'unauthorized' });
-  var session = verifiedSessions.get(sessionToken);
-  if (!session || session.expires < Date.now()) return res.status(401).json({ error: 'session_expired' });
+  var session = await getSession(sessionToken);
+  if (!session) return res.status(401).json({ error: 'session_expired' });
   if (!supabase) return res.status(503).json({ error: 'no_supabase' });
   try {
     var { data, error } = await supabase.from('heroes').select('*').eq('wallet', session.wallet).single();
@@ -846,8 +899,8 @@ app.patch('/api/heroes/me', jsonSmall, async function(req, res) {
   var body = req.body || {};
   var sessionToken = (body.sessionToken || '').toString().trim().slice(0, 64);
   if (!sessionToken) return res.status(401).json({ error: 'unauthorized' });
-  var session = verifiedSessions.get(sessionToken);
-  if (!session || session.expires < Date.now()) return res.status(401).json({ error: 'session_expired' });
+  var session = await getSession(sessionToken);
+  if (!session) return res.status(401).json({ error: 'session_expired' });
   if (!supabase) return res.status(503).json({ error: 'no_supabase' });
   var updates = {};
   if (body.emblem !== undefined) {
