@@ -181,9 +181,9 @@ async function sendMagicLinkEmail(to, token) {
 
 // ── Hero registry ─────────────────────────────────────────────────────────
 var BUILDER_RE = /\b(build|deploy|code|app|project|develop|launch|ship|create|program|api|backend|frontend|database|startup|product)\b/i;
-var VALID_EMBLEMS   = ['hexagon','diamond','skull','shield','sword','signal','star','lightning','infinity','target'];
-var VALID_THEMES    = ['green','cyan','amber','red','purple'];
-var VALID_PATTERNS  = ['none','grid','scan','circuit'];
+var VALID_EMBLEMS   = ['hexagon','diamond','skull','shield','sword','signal','star','lightning','infinity','target','psi','omega','delta','phi','prism','nexus','origin','apex'];
+var VALID_THEMES    = ['green','cyan','amber','red','purple','blue','pink','orange'];
+var VALID_PATTERNS  = ['none','grid','scan','circuit','dot','hex','rain','cross'];
 var VALID_ROLES     = ['','BUILDER','TRADER','DEGEN','FOUNDER','SCOUT','SHADOW','GHOST','PILOT'];
 
 async function ensureHero(wallet, codename, balance) {

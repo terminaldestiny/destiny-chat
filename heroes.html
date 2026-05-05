@@ -98,7 +98,7 @@ body::before{content:'';position:fixed;inset:0;background:repeating-linear-gradi
 .e-input:focus{border-color:var(--cyan);box-shadow:0 0 12px rgba(0,212,255,0.07);}
 #tagline-input{text-transform:none;font-size:11px;letter-spacing:1px;}
 #tagline-input::placeholder{color:rgba(255,255,255,0.15);}
-#emblem-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:6px;}
+#emblem-grid{display:grid;grid-template-columns:repeat(6,1fr);gap:6px;}
 .embl{height:42px;border:1px solid rgba(0,255,65,0.14);background:rgba(0,0,0,0.4);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:19px;transition:all .15s;user-select:none;position:relative;}
 .embl:hover{border-color:rgba(255,255,255,0.3);background:rgba(255,255,255,0.04);transform:scale(1.08);}
 .embl.active{background:rgba(0,255,65,0.07);transform:scale(1.08);}
@@ -112,6 +112,9 @@ body::before{content:'';position:fixed;inset:0;background:repeating-linear-gradi
 .tswatch[data-t="amber"]{background:#ffaa00;}
 .tswatch[data-t="red"]{background:#ff2a00;}
 .tswatch[data-t="purple"]{background:#cc44ff;}
+.tswatch[data-t="blue"]{background:#0088ff;}
+.tswatch[data-t="pink"]{background:#ff2288;}
+.tswatch[data-t="orange"]{background:#ff6600;}
 .t-name{font-size:9px;letter-spacing:2.5px;color:rgba(255,255,255,0.4);margin-left:2px;}
 #pattern-row{display:flex;gap:6px;flex-wrap:wrap;}
 .pat-opt{padding:7px 14px;border:1px solid rgba(0,255,65,0.14);font-size:8px;letter-spacing:2px;color:rgba(255,255,255,0.38);cursor:pointer;transition:.15s;}
@@ -347,16 +350,24 @@ body::before{content:'';position:fixed;inset:0;background:repeating-linear-gradi
       <div class="e-row">
         <div class="e-lbl">EMBLEM</div>
         <div id="emblem-grid">
-          <div class="embl" data-e="hexagon"   onclick="pickEmblem('hexagon')">⬡</div>
-          <div class="embl" data-e="diamond"   onclick="pickEmblem('diamond')">◆</div>
-          <div class="embl" data-e="skull"     onclick="pickEmblem('skull')">☠</div>
-          <div class="embl" data-e="shield"    onclick="pickEmblem('shield')">⛨</div>
-          <div class="embl" data-e="sword"     onclick="pickEmblem('sword')">⚔</div>
-          <div class="embl" data-e="star"      onclick="pickEmblem('star')">✦</div>
-          <div class="embl" data-e="lightning" onclick="pickEmblem('lightning')">⚡</div>
-          <div class="embl" data-e="infinity"  onclick="pickEmblem('infinity')">∞</div>
-          <div class="embl" data-e="target"    onclick="pickEmblem('target')">◎</div>
-          <div class="embl" data-e="signal"    onclick="pickEmblem('signal')">≋</div>
+          <div class="embl" data-e="hexagon"   title="HEXAGON"   onclick="pickEmblem('hexagon')">⬡</div>
+          <div class="embl" data-e="diamond"   title="DIAMOND"   onclick="pickEmblem('diamond')">◆</div>
+          <div class="embl" data-e="skull"     title="SKULL"     onclick="pickEmblem('skull')">☠</div>
+          <div class="embl" data-e="shield"    title="SHIELD"    onclick="pickEmblem('shield')">⛨</div>
+          <div class="embl" data-e="sword"     title="SWORD"     onclick="pickEmblem('sword')">⚔</div>
+          <div class="embl" data-e="star"      title="STAR"      onclick="pickEmblem('star')">✦</div>
+          <div class="embl" data-e="lightning" title="LIGHTNING" onclick="pickEmblem('lightning')">⚡</div>
+          <div class="embl" data-e="infinity"  title="INFINITY"  onclick="pickEmblem('infinity')">∞</div>
+          <div class="embl" data-e="target"    title="TARGET"    onclick="pickEmblem('target')">◎</div>
+          <div class="embl" data-e="signal"    title="SIGNAL"    onclick="pickEmblem('signal')">≋</div>
+          <div class="embl" data-e="psi"       title="PSI"       onclick="pickEmblem('psi')">Ψ</div>
+          <div class="embl" data-e="omega"     title="OMEGA"     onclick="pickEmblem('omega')">Ω</div>
+          <div class="embl" data-e="delta"     title="DELTA"     onclick="pickEmblem('delta')">Δ</div>
+          <div class="embl" data-e="phi"       title="PHI"       onclick="pickEmblem('phi')">Φ</div>
+          <div class="embl" data-e="prism"     title="PRISM"     onclick="pickEmblem('prism')">◈</div>
+          <div class="embl" data-e="nexus"     title="NEXUS"     onclick="pickEmblem('nexus')">⁂</div>
+          <div class="embl" data-e="origin"    title="ORIGIN"    onclick="pickEmblem('origin')">⊕</div>
+          <div class="embl" data-e="apex"      title="APEX"      onclick="pickEmblem('apex')">▲</div>
         </div>
       </div>
       <div class="e-row">
@@ -367,6 +378,9 @@ body::before{content:'';position:fixed;inset:0;background:repeating-linear-gradi
           <div class="tswatch" data-t="amber"  title="GOLD"    onclick="pickTheme('amber')"></div>
           <div class="tswatch" data-t="red"    title="CRIMSON" onclick="pickTheme('red')"></div>
           <div class="tswatch" data-t="purple" title="VOID"    onclick="pickTheme('purple')"></div>
+          <div class="tswatch" data-t="blue"   title="DEEP"    onclick="pickTheme('blue')"></div>
+          <div class="tswatch" data-t="pink"   title="NOVA"    onclick="pickTheme('pink')"></div>
+          <div class="tswatch" data-t="orange" title="BLAZE"   onclick="pickTheme('orange')"></div>
           <span class="t-name" id="theme-name">SIGNAL</span>
         </div>
       </div>
@@ -377,6 +391,10 @@ body::before{content:'';position:fixed;inset:0;background:repeating-linear-gradi
           <div class="pat-opt" data-p="grid"    onclick="pickPattern('grid')">GRID</div>
           <div class="pat-opt" data-p="scan"    onclick="pickPattern('scan')">SCAN</div>
           <div class="pat-opt" data-p="circuit" onclick="pickPattern('circuit')">CIRCUIT</div>
+          <div class="pat-opt" data-p="dot"     onclick="pickPattern('dot')">DOT</div>
+          <div class="pat-opt" data-p="hex"     onclick="pickPattern('hex')">HEX</div>
+          <div class="pat-opt" data-p="rain"    onclick="pickPattern('rain')">RAIN</div>
+          <div class="pat-opt" data-p="cross"   onclick="pickPattern('cross')">CROSS</div>
         </div>
       </div>
       <div class="e-row">
@@ -457,15 +475,22 @@ body::before{content:'';position:fixed;inset:0;background:repeating-linear-gradi
 
 <script>
 var BACKEND='https://destiny-chat-production.up.railway.app';
-var EMBLEMS={hexagon:'⬡',diamond:'◆',skull:'☠',shield:'⛨',sword:'⚔',star:'✦',lightning:'⚡',infinity:'∞',target:'◎',signal:'≋'};
-var THEME_HEX={green:'#00ff41',cyan:'#00d4ff',amber:'#ffaa00',red:'#ff2a00',purple:'#cc44ff'};
-var THEME_NAME={green:'SIGNAL',cyan:'CODEC',amber:'GOLD',red:'CRIMSON',purple:'VOID'};
+var EMBLEMS={
+  hexagon:'⬡',diamond:'◆',skull:'☠',shield:'⛨',sword:'⚔',
+  star:'✦',lightning:'⚡',infinity:'∞',target:'◎',signal:'≋',
+  psi:'Ψ',omega:'Ω',delta:'Δ',phi:'Φ',prism:'◈',nexus:'⁂',origin:'⊕',apex:'▲'
+};
+var THEME_HEX={green:'#00ff41',cyan:'#00d4ff',amber:'#ffaa00',red:'#ff2a00',purple:'#cc44ff',blue:'#0088ff',pink:'#ff2288',orange:'#ff6600'};
+var THEME_NAME={green:'SIGNAL',cyan:'CODEC',amber:'GOLD',red:'CRIMSON',purple:'VOID',blue:'DEEP',pink:'NOVA',orange:'BLAZE'};
 var THEME_RGBA={
   green: function(a){return 'rgba(0,255,65,'+a+')';},
   cyan:  function(a){return 'rgba(0,212,255,'+a+')';},
   amber: function(a){return 'rgba(255,170,0,'+a+')';},
   red:   function(a){return 'rgba(255,42,0,'+a+')';},
-  purple:function(a){return 'rgba(204,68,255,'+a+')';}
+  purple:function(a){return 'rgba(204,68,255,'+a+')';},
+  blue:  function(a){return 'rgba(0,136,255,'+a+')';},
+  pink:  function(a){return 'rgba(255,34,136,'+a+')';},
+  orange:function(a){return 'rgba(255,102,0,'+a+')';}
 };
 var RANK_ORD={LEGEND:4,COMMANDER:3,AGENT:2,OPERATIVE:1};
 
@@ -518,16 +543,31 @@ function toggleCustomize(){
   btn.classList.toggle('open',open);
 }
 
-// ── Pattern CSS ──────────────────────────────────────────────────────────
-function patternCSS(pattern,theme){
-  var ra=THEME_RGBA[theme||p.theme]||THEME_RGBA.green;
-  if(pattern==='grid')
-    return 'repeating-linear-gradient(0deg,transparent,transparent 19px,'+ra('0.07')+' 19px,'+ra('0.07')+' 20px),repeating-linear-gradient(90deg,transparent,transparent 19px,'+ra('0.07')+' 19px,'+ra('0.07')+' 20px)';
-  if(pattern==='scan')
-    return 'repeating-linear-gradient(0deg,'+ra('0.06')+','+ra('0.06')+' 1px,transparent 1px,transparent 4px)';
-  if(pattern==='circuit')
-    return 'repeating-linear-gradient(45deg,transparent,transparent 10px,'+ra('0.06')+' 10px,'+ra('0.06')+' 11px),repeating-linear-gradient(-45deg,transparent,transparent 10px,'+ra('0.06')+' 10px,'+ra('0.06')+' 11px)';
-  return 'none';
+// ── Pattern apply ────────────────────────────────────────────────────────
+function applyBgPattern(el,pat,theme){
+  var ra=THEME_RGBA[theme||'green']||THEME_RGBA.green;
+  el.style.backgroundPosition='0 0';
+  el.style.backgroundSize='auto';
+  if(pat==='grid'){
+    el.style.backgroundImage='repeating-linear-gradient(0deg,transparent,transparent 19px,'+ra('0.07')+' 19px,'+ra('0.07')+' 20px),repeating-linear-gradient(90deg,transparent,transparent 19px,'+ra('0.07')+' 19px,'+ra('0.07')+' 20px)';
+  } else if(pat==='scan'){
+    el.style.backgroundImage='repeating-linear-gradient(0deg,'+ra('0.06')+','+ra('0.06')+' 1px,transparent 1px,transparent 4px)';
+  } else if(pat==='circuit'){
+    el.style.backgroundImage='repeating-linear-gradient(45deg,transparent,transparent 10px,'+ra('0.06')+' 10px,'+ra('0.06')+' 11px),repeating-linear-gradient(-45deg,transparent,transparent 10px,'+ra('0.06')+' 10px,'+ra('0.06')+' 11px)';
+  } else if(pat==='dot'){
+    el.style.backgroundImage='radial-gradient(circle,'+ra('0.32')+' 1.5px,transparent 1.5px)';
+    el.style.backgroundSize='16px 16px';
+  } else if(pat==='hex'){
+    el.style.backgroundImage='radial-gradient(circle,'+ra('0.28')+' 1.5px,transparent 1.5px),radial-gradient(circle,'+ra('0.28')+' 1.5px,transparent 1.5px)';
+    el.style.backgroundSize='20px 34px';
+    el.style.backgroundPosition='0 0, 10px 17px';
+  } else if(pat==='rain'){
+    el.style.backgroundImage='repeating-linear-gradient(90deg,transparent,transparent 9px,'+ra('0.05')+' 9px,'+ra('0.05')+' 10px)';
+  } else if(pat==='cross'){
+    el.style.backgroundImage='repeating-linear-gradient(45deg,transparent,transparent 5px,'+ra('0.07')+' 5px,'+ra('0.07')+' 6px),repeating-linear-gradient(-45deg,transparent,transparent 5px,'+ra('0.07')+' 5px,'+ra('0.07')+' 6px)';
+  } else {
+    el.style.backgroundImage='none';
+  }
 }
 
 // ── Live preview ─────────────────────────────────────────────────────────
@@ -540,7 +580,7 @@ function updatePreview(){
 
   document.getElementById('pc-bar').style.background='linear-gradient(90deg,transparent,'+th+' 30%,'+th+' 70%,transparent)';
   document.getElementById('pc-bar').style.boxShadow='0 0 10px '+ra('0.6');
-  document.getElementById('pc-pattern').style.backgroundImage=patternCSS(p.bg_pattern);
+  applyBgPattern(document.getElementById('pc-pattern'),p.bg_pattern,p.theme);
 
   document.getElementById('pc-emblem').textContent=EMBLEMS[p.emblem]||'⬡';
   document.getElementById('pc-emblem').style.color=th;
@@ -713,7 +753,7 @@ function renderCard(h,delay){
   if(isLegend)bar.style.boxShadow='0 0 8px '+ra('0.5');
 
   var pat=document.createElement('div'); pat.className='hcard-pattern';
-  pat.style.backgroundImage=patternCSS(h.bg_pattern||'none',h.theme||'green');
+  applyBgPattern(pat,h.bg_pattern||'none',h.theme||'green');
   pat.style.opacity='.35';
 
   var badgesHtml='';
@@ -777,7 +817,7 @@ function applyModalTheme(h){
   document.getElementById('modal-emblem').style.filter='drop-shadow(0 0 16px '+th+') drop-shadow(0 0 34px '+ra('0.45')+')';
   document.getElementById('modal-emblem-wrap').style.borderColor=ra('0.2');
   document.getElementById('modal-emblem-wrap').style.boxShadow='inset 0 0 30px '+ra('0.05');
-  document.getElementById('modal-pattern').style.backgroundImage=patternCSS(h.bg_pattern||'none',h.theme||'green');
+  applyBgPattern(document.getElementById('modal-pattern'),h.bg_pattern||'none',h.theme||'green');
 
   var maxTx=Math.max.apply(null,allHeroes.map(function(x){return x.total_conversations||0;}));
   if(maxTx<1)maxTx=1;
@@ -842,6 +882,21 @@ function buildShareCanvas(h){
     for(var ci=0;ci<W+H;ci+=12){
       ctx.beginPath();ctx.moveTo(ci,0);ctx.lineTo(0,ci);ctx.stroke();
       ctx.beginPath();ctx.moveTo(W-ci,0);ctx.lineTo(W,ci);ctx.stroke();
+    }
+  } else if(h.bg_pattern==='dot'){
+    ctx.fillStyle=ra('0.32');
+    for(var dy=8;dy<H;dy+=16){for(var dx=8;dx<W;dx+=16){ctx.beginPath();ctx.arc(dx,dy,1.5,0,Math.PI*2);ctx.fill();}}
+  } else if(h.bg_pattern==='hex'){
+    ctx.fillStyle=ra('0.28');
+    for(var hr=0;hr*34<H+34;hr++){for(var hc=0;hc*20<W+20;hc++){var hox=hc*20+(hr%2?10:0),hoy=hr*34;ctx.beginPath();ctx.arc(hox,hoy,1.5,0,Math.PI*2);ctx.fill();}}
+  } else if(h.bg_pattern==='rain'){
+    ctx.strokeStyle=ra('0.05'); ctx.lineWidth=1;
+    for(var rx=10;rx<W;rx+=10){ctx.beginPath();ctx.moveTo(rx,0);ctx.lineTo(rx,H);ctx.stroke();}
+  } else if(h.bg_pattern==='cross'){
+    ctx.strokeStyle=ra('0.07'); ctx.lineWidth=1;
+    for(var cr=0;cr<W+H;cr+=6){
+      ctx.beginPath();ctx.moveTo(cr,0);ctx.lineTo(0,cr);ctx.stroke();
+      ctx.beginPath();ctx.moveTo(W-cr,0);ctx.lineTo(W,cr);ctx.stroke();
     }
   }
 
