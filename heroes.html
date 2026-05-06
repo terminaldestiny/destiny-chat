@@ -117,7 +117,18 @@ body::before{content:'';position:fixed;inset:0;background:repeating-linear-gradi
 .tswatch[data-t="blue"]{background:#0088ff;}
 .tswatch[data-t="pink"]{background:#ff2288;}
 .tswatch[data-t="orange"]{background:#ff6600;}
+.tswatch[data-t="solar"]{background:#ffff00;}
+.tswatch[data-t="jade"]{background:#00ff99;}
+.tswatch[data-t="flux"]{background:#ff00cc;}
+.tswatch[data-t="warp"]{background:#9933ff;}
+.tswatch[data-t="ghost"]{background:#e0e0e0;}
+.tswatch[data-t="ember"]{background:#ff8800;}
 .t-name{font-size:9px;letter-spacing:2.5px;color:rgba(255,255,255,0.4);margin-left:2px;}
+#more-colors-btn{width:26px;height:26px;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.14);color:rgba(255,255,255,0.32);cursor:pointer;font-size:13px;line-height:1;transition:.15s;font-family:inherit;flex-shrink:0;}
+#more-colors-btn:hover{border-color:rgba(255,255,255,0.35);color:#fff;}
+#more-colors-btn.open{border-color:rgba(255,170,0,0.4);color:var(--amber);}
+#more-colors-row{display:none;margin-top:8px;gap:9px;flex-wrap:wrap;align-items:center;}
+#more-colors-row.open{display:flex;}
 #pattern-row{display:flex;gap:6px;flex-wrap:wrap;}
 .pat-opt{padding:7px 14px;border:1px solid rgba(0,255,65,0.14);font-size:8px;letter-spacing:2px;color:rgba(255,255,255,0.38);cursor:pointer;transition:.15s;}
 .pat-opt:hover{border-color:rgba(255,255,255,0.28);color:rgba(255,255,255,0.65);}
@@ -254,6 +265,13 @@ body::before{content:'';position:fixed;inset:0;background:repeating-linear-gradi
 .fx-classified{position:relative;overflow:hidden;}
 .fx-classified::after{content:'CLASSIFIED';position:absolute;top:50%;left:50%;transform:translate(-50%,-50%) rotate(-22deg);font-size:20px;font-weight:bold;letter-spacing:7px;color:rgba(255,42,0,.13);border:2px solid rgba(255,42,0,.1);padding:4px 10px;pointer-events:none;z-index:3;white-space:nowrap;}
 #preview-card.fx-classified::after{content:'CLASSIFIED';position:absolute;top:50%;left:50%;transform:translate(-50%,-50%) rotate(-22deg);font-size:20px;font-weight:bold;letter-spacing:7px;color:rgba(255,42,0,.13);border:2px solid rgba(255,42,0,.1);padding:4px 10px;pointer-events:none;z-index:3;white-space:nowrap;}
+/* Classified: redact name+tagline on wall cards, hover reveals */
+.fx-classified .hcard-name{color:transparent!important;background:rgba(5,7,5,0.97);border-radius:1px;user-select:none;transition:color .42s,background .42s;}
+.fx-classified .hcard-tagline{color:transparent!important;background:rgba(5,7,5,0.82);border-radius:1px;user-select:none;transition:color .42s,background .42s;}
+.fx-classified .dot-active{opacity:0;transition:opacity .42s;}
+.fx-classified:hover .hcard-name{color:#fff!important;background:transparent;}
+.fx-classified:hover .hcard-tagline{color:rgba(255,255,255,0.28)!important;background:transparent;}
+.fx-classified:hover .dot-active{opacity:1;}
 
 /* ── X handle in modal ─────────────────────── */
 #modal-x{margin-bottom:16px;display:none;}
@@ -526,7 +544,17 @@ body::before{content:'';position:fixed;inset:0;background:repeating-linear-gradi
           <div class="tswatch" data-t="blue"   title="DEEP"    onclick="pickTheme('blue')"></div>
           <div class="tswatch" data-t="pink"   title="NOVA"    onclick="pickTheme('pink')"></div>
           <div class="tswatch" data-t="orange" title="BLAZE"   onclick="pickTheme('orange')"></div>
+          <button id="more-colors-btn" title="MORE COLORS" onclick="toggleMoreColors()">+</button>
           <span class="t-name" id="theme-name">SIGNAL</span>
+        </div>
+        <div id="more-colors-row">
+          <div class="tswatch" data-t="solar"  title="SOLAR"   onclick="pickTheme('solar')"></div>
+          <div class="tswatch" data-t="jade"   title="JADE"    onclick="pickTheme('jade')"></div>
+          <div class="tswatch" data-t="flux"   title="FLUX"    onclick="pickTheme('flux')"></div>
+          <div class="tswatch" data-t="warp"   title="WARP"    onclick="pickTheme('warp')"></div>
+          <div class="tswatch" data-t="ghost"  title="GHOST"   onclick="pickTheme('ghost')"></div>
+          <div class="tswatch" data-t="ember"  title="EMBER"   onclick="pickTheme('ember')"></div>
+          <span class="t-name" id="theme-name-more" style="display:none;"></span>
         </div>
       </div>
       <div class="e-row">
@@ -656,8 +684,8 @@ var EMBLEMS={
   star:'✦',lightning:'⚡',infinity:'∞',target:'◎',signal:'≋',
   psi:'Ψ',omega:'Ω',delta:'Δ',phi:'Φ',prism:'◈',nexus:'⁂',origin:'⊕',apex:'▲'
 };
-var THEME_HEX={green:'#00ff41',cyan:'#00d4ff',amber:'#ffaa00',red:'#ff2a00',purple:'#cc44ff',blue:'#0088ff',pink:'#ff2288',orange:'#ff6600'};
-var THEME_NAME={green:'SIGNAL',cyan:'CODEC',amber:'GOLD',red:'CRIMSON',purple:'VOID',blue:'DEEP',pink:'NOVA',orange:'BLAZE'};
+var THEME_HEX={green:'#00ff41',cyan:'#00d4ff',amber:'#ffaa00',red:'#ff2a00',purple:'#cc44ff',blue:'#0088ff',pink:'#ff2288',orange:'#ff6600',solar:'#ffff00',jade:'#00ff99',flux:'#ff00cc',warp:'#9933ff',ghost:'#e0e0e0',ember:'#ff8800'};
+var THEME_NAME={green:'SIGNAL',cyan:'CODEC',amber:'GOLD',red:'CRIMSON',purple:'VOID',blue:'DEEP',pink:'NOVA',orange:'BLAZE',solar:'SOLAR',jade:'JADE',flux:'FLUX',warp:'WARP',ghost:'GHOST',ember:'EMBER'};
 var THEME_RGBA={
   green: function(a){return 'rgba(0,255,65,'+a+')';},
   cyan:  function(a){return 'rgba(0,212,255,'+a+')';},
@@ -666,7 +694,13 @@ var THEME_RGBA={
   purple:function(a){return 'rgba(204,68,255,'+a+')';},
   blue:  function(a){return 'rgba(0,136,255,'+a+')';},
   pink:  function(a){return 'rgba(255,34,136,'+a+')';},
-  orange:function(a){return 'rgba(255,102,0,'+a+')';}
+  orange:function(a){return 'rgba(255,102,0,'+a+')';},
+  solar: function(a){return 'rgba(255,255,0,'+a+')';},
+  jade:  function(a){return 'rgba(0,255,153,'+a+')';},
+  flux:  function(a){return 'rgba(255,0,204,'+a+')';},
+  warp:  function(a){return 'rgba(153,51,255,'+a+')';},
+  ghost: function(a){return 'rgba(224,224,224,'+a+')';},
+  ember: function(a){return 'rgba(255,136,0,'+a+')';}
 };
 var RANK_ORD={LEGEND:4,COMMANDER:3,AGENT:2,OPERATIVE:1};
 
@@ -837,6 +871,8 @@ function populateMyCard(h){
   document.querySelectorAll('.embl').forEach(function(el){el.classList.toggle('active',el.dataset.e===p.emblem);});
   document.querySelectorAll('.embl.active').forEach(function(el){el.style.borderColor=THEME_HEX[p.theme];el.style.boxShadow='0 0 10px '+cRgba(p.theme,'0.3');});
   document.querySelectorAll('.tswatch').forEach(function(el){el.classList.toggle('active',el.dataset.t===p.theme);});
+  var extraThemes=['solar','jade','flux','warp','ghost','ember'];
+  if(extraThemes.includes(p.theme)){var mr=document.getElementById('more-colors-row');if(mr&&!mr.classList.contains('open')){mr.classList.add('open');var mb=document.getElementById('more-colors-btn');if(mb){mb.classList.add('open');mb.textContent='−';}}}
   document.querySelectorAll('.pat-opt').forEach(function(el){el.classList.toggle('active',el.dataset.p===p.bg_pattern);});
   document.querySelectorAll('.fx-opt').forEach(function(el){el.classList.toggle('active',el.dataset.f===p.fx);});
   document.querySelectorAll('.bc-opt').forEach(function(el){el.classList.toggle('active',el.dataset.v===(p.show_barcode?'1':'0'));});
@@ -852,6 +888,13 @@ function pickEmblem(e){
     else{el.style.borderColor='';el.style.boxShadow='';}
   });
   updatePreview();
+}
+function toggleMoreColors(){
+  var row=document.getElementById('more-colors-row');
+  var btn=document.getElementById('more-colors-btn');
+  var open=row.classList.toggle('open');
+  btn.classList.toggle('open',open);
+  btn.textContent=open?'−':'+';
 }
 function pickTheme(t){
   p.theme=t;
