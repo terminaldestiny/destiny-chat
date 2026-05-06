@@ -1646,7 +1646,7 @@ function runBoot(){
     setTimeout(next,130+Math.random()*70);
   })();
 }
-if(sessionStorage.getItem('skip_boot')){sessionStorage.removeItem('skip_boot');setTimeout(finishBoot,0);}else{setTimeout(runBoot,200);}
+if(sessionStorage.getItem('skip_boot')){sessionStorage.removeItem('skip_boot');initBoot();bootEl.style.display='none';finishBoot();}else{setTimeout(runBoot,200);}
 
 // ── Storage ───────────────────────────────────────────────────────
 function getVid(){var id=localStorage.getItem('destiny_vid');if(!id){id=(crypto.randomUUID?crypto.randomUUID():'v'+Math.random().toString(36).slice(2)+Date.now().toString(36));localStorage.setItem('destiny_vid',id);}return id;}
