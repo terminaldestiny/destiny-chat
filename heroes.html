@@ -253,6 +253,7 @@ body::before{content:'';position:fixed;inset:0;background:repeating-linear-gradi
 }
 .fx-classified{position:relative;overflow:hidden;}
 .fx-classified::after{content:'CLASSIFIED';position:absolute;top:50%;left:50%;transform:translate(-50%,-50%) rotate(-22deg);font-size:20px;font-weight:bold;letter-spacing:7px;color:rgba(255,42,0,.13);border:2px solid rgba(255,42,0,.1);padding:4px 10px;pointer-events:none;z-index:3;white-space:nowrap;}
+#preview-card.fx-classified::after{content:'CLASSIFIED';position:absolute;top:50%;left:50%;transform:translate(-50%,-50%) rotate(-22deg);font-size:20px;font-weight:bold;letter-spacing:7px;color:rgba(255,42,0,.13);border:2px solid rgba(255,42,0,.1);padding:4px 10px;pointer-events:none;z-index:3;white-space:nowrap;}
 
 /* ── X handle in modal ─────────────────────── */
 #modal-x{margin-bottom:16px;display:none;}
@@ -672,16 +673,28 @@ var RANK_ORD={LEGEND:4,COMMANDER:3,AGENT:2,OPERATIVE:1};
 var allHeroes=[],activeHero=null,myHero=null;
 var currentSort='default',currentQuery='';
 var p={codename:'',emblem:'hexagon',theme:'green',tagline:'',bg_pattern:'none',x_handle:'',fx:'none',show_barcode:false};
-var BAR_W=[2,1,1,2,3,1,2,1,1,1,3,2,1,1,2,1,1,3,1,2,2,1,1,2,3,1,1,2,1,1,2,3,1,1,2,1,2,1,1,3,1,2,1,1,3,1,2,1];
-function buildBarcodeGradient(color){
+var CODE39={'0':[1,1,1,3,3,1,3,1,1],'1':[3,1,1,3,1,1,1,1,3],'2':[1,1,3,3,1,1,1,1,3],'3':[3,1,3,3,1,1,1,1,1],'4':[1,1,1,3,3,1,1,1,3],'5':[3,1,1,3,3,1,1,1,1],'6':[1,1,3,3,3,1,1,1,1],'7':[1,1,1,3,1,1,3,1,3],'8':[3,1,1,3,1,1,3,1,1],'9':[1,1,3,3,1,1,3,1,1],'A':[3,1,1,1,1,3,1,1,3],'B':[1,1,3,1,1,3,1,1,3],'C':[3,1,3,1,1,3,1,1,1],'D':[1,1,1,1,3,3,1,1,3],'E':[3,1,1,1,3,3,1,1,1],'F':[1,1,3,1,3,3,1,1,1],'G':[1,1,1,1,1,3,3,1,3],'H':[3,1,1,1,1,3,3,1,1],'I':[1,1,3,1,1,3,3,1,1],'J':[1,1,1,1,3,3,3,1,1],'K':[3,1,1,1,1,1,1,3,3],'L':[1,1,3,1,1,1,1,3,3],'M':[3,1,3,1,1,1,1,3,1],'N':[1,1,1,1,3,1,1,3,3],'O':[3,1,1,1,3,1,1,3,1],'P':[1,1,3,1,3,1,1,3,1],'Q':[1,1,1,1,1,1,3,3,3],'R':[3,1,1,1,1,1,3,3,1],'S':[1,1,3,1,1,1,3,3,1],'T':[1,1,1,1,3,1,3,3,1],'U':[3,3,1,1,1,1,1,1,3],'V':[1,3,3,1,1,1,1,1,3],'W':[3,3,3,1,1,1,1,1,1],'X':[1,3,1,1,3,1,1,1,3],'Y':[3,3,1,1,3,1,1,1,1],'Z':[1,3,3,1,3,1,1,1,1],'-':[1,3,1,1,1,1,3,1,3],'.':[3,3,1,1,1,1,3,1,1],' ':[1,3,3,1,1,1,3,1,1],'$':[1,3,1,3,1,3,1,1,1],'/':[1,3,1,3,1,1,1,3,1],'+':[1,3,1,1,1,3,1,3,1],'%':[1,1,1,3,1,3,1,3,1],'*':[1,3,1,1,3,1,3,1,1]};
+function encodeCode39(text){
+  var s='*'+text.toUpperCase()+'*',widths=[];
+  for(var i=0;i<s.length;i++){
+    var pat=CODE39[s[i]]||CODE39['-'];
+    widths=widths.concat(pat);
+    if(i<s.length-1)widths.push(1);
+  }
+  return widths;
+}
+function buildBarcodeGradient(color,text){
+  var widths=encodeCode39(text||'TD-000');
+  var total=widths.reduce(function(a,b){return a+b;},0);
   var stops=[],pos=0;
-  BAR_W.forEach(function(w,i){
+  widths.forEach(function(w,i){
     var c=i%2===0?color:'transparent';
-    stops.push(c+' '+pos+'px',c+' '+(pos+w)+'px');
+    var p1=(pos/total*100).toFixed(2)+'%',p2=((pos+w)/total*100).toFixed(2)+'%';
+    stops.push(c+' '+p1,c+' '+p2);
     pos+=w;
   });
-  return 'repeating-linear-gradient(90deg,'+stops.join(',')+')';
-}
+  return 'linear-gradient(90deg,'+stops.join(',')+')';}
+
 
 function getSession(){try{var s=JSON.parse(localStorage.getItem('destiny_session')||'null');return(s&&s.expires>Date.now())?s:null;}catch(e){return null;}}
 function fmtSerial(n){return 'TD-'+String(n).padStart(3,'0');}
@@ -798,9 +811,10 @@ function updatePreview(){
   var bcEl=document.getElementById('pc-barcode');
   if(p.show_barcode){
     bcEl.style.display='block';
-    document.getElementById('pc-barcode-bars').style.backgroundImage=buildBarcodeGradient(th);
+    var pcSerial=document.getElementById('pc-serial').textContent||'TD-000';
+    document.getElementById('pc-barcode-bars').style.backgroundImage=buildBarcodeGradient(th,pcSerial);
     document.getElementById('pc-barcode-bars').style.boxShadow='0 0 4px '+ra('0.3');
-    document.getElementById('pc-barcode-serial').textContent=document.getElementById('pc-serial').textContent||'TD-000';
+    document.getElementById('pc-barcode-serial').textContent=pcSerial;
     document.getElementById('pc-barcode-serial').style.color=ra('0.4');
   }else{
     bcEl.style.display='none';
@@ -1033,7 +1047,7 @@ function renderCard(h){
   if(h.show_barcode){
     var bcDiv=document.createElement('div');
     bcDiv.className='hcard-barcode';
-    bcDiv.style.backgroundImage=buildBarcodeGradient(th);
+    bcDiv.style.backgroundImage=buildBarcodeGradient(th,fmtSerial(h.serial));
     bcDiv.style.boxShadow='0 0 4px '+ra('0.25');
     body.appendChild(bcDiv);
   }
@@ -1241,10 +1255,11 @@ function buildShareCanvas(h){
   if(h.show_barcode){
     var bY2=H-70;
     ctx.fillStyle=ra('0.06');ctx.fillRect(22,bY2-2,W-44,38);
+    var bcW=encodeCode39(fmtSerial(h.serial));
+    var bcTot=bcW.reduce(function(a,b){return a+b;},0);
+    var bcScale=(W-48)/bcTot;
     var bx2=24,isB=true;
-    while(bx2<W-24){
-      BAR_W.forEach(function(bw){if(bx2>=W-24)return;if(isB){ctx.fillStyle=ra('0.8');ctx.fillRect(bx2,bY2,bw*2,28);}bx2+=bw*2;isB=!isB;});
-    }
+    bcW.forEach(function(bw){if(isB){ctx.fillStyle=ra('0.8');ctx.fillRect(bx2,bY2,bw*bcScale,28);}bx2+=bw*bcScale;isB=!isB;});
     ctx.font='7px "Courier New"';ctx.fillStyle=ra('0.45');ctx.textAlign='center';
     ctx.fillText(fmtSerial(h.serial)+'  ·  TD-FIELD-UNIT',W/2,bY2+34);ctx.textAlign='left';
   }
