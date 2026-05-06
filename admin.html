@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>DESTINY // COMMAND CENTER</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+:root{
+  --g:#00ff41;--g2:rgba(0,255,65,0.6);--g3:rgba(0,255,65,0.12);--g4:rgba(0,255,65,0.06);
+  --amber:#ffaa00;--red:#ff4136;--bg:#050705;--bg2:#080c08;--bg3:#0b120b;
+  --border:rgba(0,255,65,0.15);--border2:rgba(0,255,65,0.08);
+  --text:rgba(255,255,255,0.82);--dim:rgba(255,255,255,0.38);
+}
+html,body{height:100%;background:var(--bg);color:var(--text);font-family:'Courier New',Courier,monospace;font-size:13px;overflow-x:hidden;}
+body{min-height:100vh;}
+
+/* ── scanline overlay ── */
+body::before{content:'';position:fixed;inset:0;pointer-events:none;background:repeating-linear-gradient(to bottom,transparent 0px,transparent 3px,rgba(0,0,0,0.08) 3px,rgba(0,0,0,0.08) 4px);z-index:9999;}
+
+/* ── top bar ── */
+#topbar{display:flex;align-items:center;justify-content:space-between;padding:0 20px;height:44px;border-bottom:1px solid var(--border);background:var(--bg2);position:sticky;top:0;z-index:100;}
+#topbar-title{color:var(--g);font-size:11px;letter-spacing:3px;font-weight:700;}
+#topbar-sub{font-size:9px;letter-spacing:2px;color:var(--dim);}
+#topbar-right{display:flex;align-items:center;gap:14px;}
+#refresh-btn{background:none;border:1px solid var(--border);color:var(--g2);font-family:inherit;font-size:9px;letter-spacing:2px;padding:5px 12px;cursor:pointer;transition:.15s;}
+#refresh-btn:hover{background:var(--g3);border-color:var(--g2);}
+#last-updated{font-size:9px;color:var(--dim);letter-spacing:1px;}
+#logout-btn{background:none;border:none;color:var(--dim);font-family:inherit;font-size:9px;letter-spacing:2px;cursor:pointer;padding:4px 8px;}
+#logout-btn:hover{color:var(--red);}
+
+/* ── page container ── */
+#page{display:none;padding:24px 20px 40px;}
+#gate{display:flex;align-items:center;justify-content:center;min-height:100vh;flex-direction:column;gap:24px;padding:20px;}
+
+/* ── gate ── */
+.gate-title{color:var(--g);font-size:14px;letter-spacing:5px;text-align:center;}
+.gate-sub{font-size:9px;letter-spacing:3px;color:var(--dim);text-align:center;}
+.gate-box{border:1px solid var(--border);background:var(--bg2);padding:28px 32px;display:flex;flex-direction:column;gap:14px;width:min(360px,94vw);}
+.gate-label{font-size:9px;letter-spacing:3px;color:var(--dim);}
+#pw-input{background:var(--bg3);border:1px solid var(--border);color:var(--g);font-family:inherit;font-size:13px;padding:10px 14px;width:100%;letter-spacing:2px;outline:none;transition:.15s;}
+#pw-input:focus{border-color:var(--g2);}
+#pw-input::placeholder{color:rgba(0,255,65,0.22);}
+#gate-btn{background:none;border:1px solid var(--g2);color:var(--g);font-family:inherit;font-size:10px;letter-spacing:3px;padding:10px;cursor:pointer;transition:.15s;width:100%;}
+#gate-btn:hover{background:var(--g3);}
+#gate-error{font-size:9px;letter-spacing:2px;color:var(--red);display:none;text-align:center;}
+
+/* ── section title ── */
+.sec-title{font-size:9px;letter-spacing:4px;color:var(--dim);margin-bottom:12px;padding-bottom:8px;border-bottom:1px solid var(--border2);}
+
+/* ── stat cards ── */
+#stat-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:28px;}
+.stat-card{background:var(--bg2);border:1px solid var(--border);padding:16px 18px;display:flex;flex-direction:column;gap:6px;}
+.stat-val{font-size:28px;font-weight:700;color:var(--g);letter-spacing:-1px;line-height:1;}
+.stat-val.amber{color:var(--amber);}
+.stat-val.dim{color:var(--text);}
+.stat-lbl{font-size:8px;letter-spacing:3px;color:var(--dim);}
+.stat-sub{font-size:9px;color:var(--dim);letter-spacing:1px;margin-top:2px;}
+
+/* ── two col layout ── */
+#mid-row{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:28px;}
+
+/* ── tier bars ── */
+.tier-row{display:flex;align-items:center;gap:10px;margin-bottom:10px;}
+.tier-name{width:86px;font-size:9px;letter-spacing:2px;color:var(--dim);flex-shrink:0;}
+.tier-name.gold{color:var(--amber);}
+.tier-bar-wrap{flex:1;height:10px;background:var(--bg3);border:1px solid var(--border2);position:relative;overflow:hidden;}
+.tier-bar{height:100%;background:var(--g3);border-right:2px solid var(--g);transition:width .6s ease;}
+.tier-bar.gold{background:rgba(255,170,0,0.12);border-right-color:var(--amber);}
+.tier-count{width:32px;text-align:right;font-size:10px;color:var(--g);flex-shrink:0;}
+.tier-count.gold{color:var(--amber);}
+
+/* ── sessions box ── */
+.sess-row{display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid var(--border2);}
+.sess-row:last-child{border-bottom:none;}
+.sess-key{font-size:9px;letter-spacing:2px;color:var(--dim);}
+.sess-val{font-size:13px;color:var(--g);font-weight:700;}
+.sess-val.amber{color:var(--amber);}
+
+/* ── table ── */
+#heroes-table-wrap{overflow-x:auto;}
+table{width:100%;border-collapse:collapse;font-size:11px;}
+th{font-size:8px;letter-spacing:3px;color:var(--dim);text-align:left;padding:6px 10px;border-bottom:1px solid var(--border);white-space:nowrap;}
+td{padding:7px 10px;border-bottom:1px solid var(--border2);color:var(--text);}
+tr:hover td{background:var(--g4);}
+.rank-badge{font-size:8px;letter-spacing:2px;padding:2px 6px;border:1px solid;display:inline-block;}
+.rank-LEGEND{color:var(--amber);border-color:rgba(255,170,0,0.4);background:rgba(255,170,0,0.06);}
+.rank-COMMANDER{color:var(--amber);border-color:rgba(255,170,0,0.25);background:transparent;}
+.rank-AGENT{color:var(--g);border-color:rgba(0,255,65,0.3);background:transparent;}
+.rank-OPERATIVE{color:var(--dim);border-color:rgba(255,255,255,0.1);background:transparent;}
+.codename-cell{color:var(--g);font-weight:700;letter-spacing:1px;}
+.wallet-cell{color:var(--dim);font-size:10px;font-family:'Courier New',monospace;}
+.num-cell{color:var(--text);text-align:right;}
+.time-cell{color:var(--dim);font-size:10px;}
+
+/* ── panel ── */
+.panel{background:var(--bg2);border:1px solid var(--border);padding:18px 20px;}
+
+/* ── spinner ── */
+#loading{display:none;text-align:center;padding:60px 0;font-size:9px;letter-spacing:4px;color:var(--g);}
+@keyframes blink{0%,100%{opacity:1;}50%{opacity:0.2;}}
+#loading span{animation:blink 1.2s ease-in-out infinite;}
+
+/* ── mobile ── */
+@media(max-width:700px){
+  #stat-grid{grid-template-columns:repeat(2,1fr);}
+  #mid-row{grid-template-columns:1fr;}
+  .stat-val{font-size:22px;}
+  td,th{padding:6px 8px;}
+}
+@media(max-width:400px){
+  #stat-grid{grid-template-columns:1fr 1fr;}
+  .stat-val{font-size:20px;}
+}
+</style>
+</head>
+<body>
+
+<div id="gate">
+  <div class="gate-title">DESTINY</div>
+  <div class="gate-sub">// COMMAND CENTER ACCESS</div>
+  <div class="gate-box">
+    <div class="gate-label">ACCESS CODE</div>
+    <input id="pw-input" type="password" placeholder="············" autocomplete="off" spellcheck="false">
+    <button id="gate-btn" onclick="doAuth()">AUTHENTICATE</button>
+    <div id="gate-error">// ACCESS DENIED — INVALID CODE</div>
+  </div>
+</div>
+
+<div id="topbar" style="display:none;">
+  <div>
+    <div id="topbar-title">DESTINY // COMMAND CENTER</div>
+  </div>
+  <div id="topbar-right">
+    <div id="last-updated">// INITIALIZING</div>
+    <button id="refresh-btn" onclick="loadStats()">↺ REFRESH</button>
+    <button id="logout-btn" onclick="doLogout()">EXIT</button>
+  </div>
+</div>
+
+<div id="loading"><span>// FETCHING SIGNAL DATA...</span></div>
+
+<div id="page">
+
+  <div id="stat-grid">
+    <div class="stat-card">
+      <div class="stat-val" id="s-heroes">—</div>
+      <div class="stat-lbl">TOTAL HEROES</div>
+      <div class="stat-sub" id="s-heroes-sub"></div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-val amber" id="s-sessions">—</div>
+      <div class="stat-lbl">ACTIVE SESSIONS</div>
+      <div class="stat-sub" id="s-sessions-sub"></div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-val" id="s-msgs">—</div>
+      <div class="stat-lbl">MESSAGES TODAY</div>
+      <div class="stat-sub">IN-MEMORY SINCE BOOT</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-val dim" id="s-active">—</div>
+      <div class="stat-lbl">ACTIVE LAST 24H</div>
+      <div class="stat-sub" id="s-active-sub"></div>
+    </div>
+  </div>
+
+  <div id="mid-row">
+    <div class="panel">
+      <div class="sec-title">TIER BREAKDOWN</div>
+      <div class="tier-row">
+        <div class="tier-name gold">LEGEND</div>
+        <div class="tier-bar-wrap"><div class="tier-bar gold" id="bar-legend"></div></div>
+        <div class="tier-count gold" id="cnt-legend">0</div>
+      </div>
+      <div class="tier-row">
+        <div class="tier-name gold">COMMANDER</div>
+        <div class="tier-bar-wrap"><div class="tier-bar gold" id="bar-commander"></div></div>
+        <div class="tier-count gold" id="cnt-commander">0</div>
+      </div>
+      <div class="tier-row">
+        <div class="tier-name">AGENT</div>
+        <div class="tier-bar-wrap"><div class="tier-bar" id="bar-agent"></div></div>
+        <div class="tier-count" id="cnt-agent">0</div>
+      </div>
+      <div class="tier-row">
+        <div class="tier-name">OPERATIVE</div>
+        <div class="tier-bar-wrap"><div class="tier-bar" id="bar-operative"></div></div>
+        <div class="tier-count" id="cnt-operative">0</div>
+      </div>
+    </div>
+
+    <div class="panel">
+      <div class="sec-title">SESSIONS</div>
+      <div class="sess-row">
+        <div class="sess-key">TOTAL ACTIVE</div>
+        <div class="sess-val" id="ss-total">—</div>
+      </div>
+      <div class="sess-row">
+        <div class="sess-key">HEROES (OPERATIVE)</div>
+        <div class="sess-val" id="ss-hero">—</div>
+      </div>
+      <div class="sess-row">
+        <div class="sess-key">RECRUITS (FREE)</div>
+        <div class="sess-val amber" id="ss-recruit">—</div>
+      </div>
+      <div class="sess-row" style="margin-top:10px;">
+        <div class="sess-key">NEW HEROES TODAY</div>
+        <div class="sess-val" id="ss-new">—</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="panel">
+    <div class="sec-title">TOP HEROES BY USAGE</div>
+    <div id="heroes-table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>CODENAME</th>
+            <th>WALLET</th>
+            <th>RANK</th>
+            <th style="text-align:right;">MSGS</th>
+            <th style="text-align:right;">DAYS</th>
+            <th>LAST ACTIVE</th>
+          </tr>
+        </thead>
+        <tbody id="heroes-tbody"></tbody>
+      </table>
+    </div>
+  </div>
+
+</div>
+
+<script>
+var BACKEND='https://destiny-chat-production.up.railway.app';
+var adminPw='';
+var refreshTimer=null;
+
+var pwInput=document.getElementById('pw-input');
+pwInput.addEventListener('keydown',function(e){if(e.key==='Enter')doAuth();});
+
+function doAuth(){
+  var pw=pwInput.value.trim();
+  if(!pw)return;
+  adminPw=pw;
+  loadStats(true);
+}
+
+function doLogout(){
+  adminPw='';
+  clearInterval(refreshTimer);
+  document.getElementById('gate').style.display='flex';
+  document.getElementById('topbar').style.display='none';
+  document.getElementById('page').style.display='none';
+  document.getElementById('loading').style.display='none';
+  pwInput.value='';
+  document.getElementById('gate-error').style.display='none';
+}
+
+async function loadStats(fromAuth){
+  if(!adminPw)return;
+  document.getElementById('loading').style.display='block';
+  document.getElementById('page').style.display='none';
+  try{
+    var res=await fetch(BACKEND+'/api/admin/stats',{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({password:adminPw})
+    });
+    if(res.status===401){
+      document.getElementById('loading').style.display='none';
+      if(fromAuth){
+        document.getElementById('gate-error').style.display='block';
+      }
+      adminPw='';
+      return;
+    }
+    if(!res.ok)throw new Error('server_error');
+    var d=await res.json();
+
+    if(fromAuth){
+      document.getElementById('gate').style.display='none';
+      document.getElementById('topbar').style.display='flex';
+    }
+    document.getElementById('loading').style.display='none';
+    document.getElementById('page').style.display='block';
+    renderStats(d);
+
+    clearInterval(refreshTimer);
+    refreshTimer=setInterval(function(){loadStats(false);},30000);
+  }catch(e){
+    document.getElementById('loading').style.display='none';
+    if(fromAuth) document.getElementById('gate-error').style.display='block';
+  }
+}
+
+function timeAgo(iso){
+  if(!iso)return '—';
+  var diff=Date.now()-new Date(iso).getTime();
+  var m=Math.floor(diff/60000);
+  if(m<2)return 'JUST NOW';
+  if(m<60)return m+'m AGO';
+  var h=Math.floor(m/60);
+  if(h<24)return h+'h AGO';
+  return Math.floor(h/24)+'d AGO';
+}
+
+function renderStats(d){
+  // overview cards
+  document.getElementById('s-heroes').textContent=d.heroes_total;
+  document.getElementById('s-heroes-sub').textContent=
+    (d.tier_breakdown.legend+d.tier_breakdown.commander)+' GOLD · '+(d.tier_breakdown.agent+d.tier_breakdown.operative)+' BASE';
+  document.getElementById('s-sessions').textContent=d.sessions_active;
+  document.getElementById('s-sessions-sub').textContent=
+    d.sessions_by_tier.operative+' HEROES · '+d.sessions_by_tier.recruit+' RECRUITS';
+  document.getElementById('s-msgs').textContent=d.messages_today;
+  document.getElementById('s-active').textContent=d.recently_active_24h;
+  var pct=d.heroes_total>0?Math.round(d.recently_active_24h/d.heroes_total*100):0;
+  document.getElementById('s-active-sub').textContent=pct+'% OF ROSTER';
+
+  // tier bars
+  var tiers=d.tier_breakdown;
+  var maxT=Math.max(tiers.legend,tiers.commander,tiers.agent,tiers.operative,1);
+  ['legend','commander','agent','operative'].forEach(function(t){
+    document.getElementById('bar-'+t).style.width=Math.round(tiers[t]/maxT*100)+'%';
+    document.getElementById('cnt-'+t).textContent=tiers[t];
+  });
+
+  // sessions
+  document.getElementById('ss-total').textContent=d.sessions_active;
+  document.getElementById('ss-hero').textContent=d.sessions_by_tier.operative;
+  document.getElementById('ss-recruit').textContent=d.sessions_by_tier.recruit;
+  document.getElementById('ss-new').textContent=d.new_today;
+
+  // last updated
+  var now=new Date();
+  var hh=String(now.getHours()).padStart(2,'0');
+  var mm=String(now.getMinutes()).padStart(2,'0');
+  var ss=String(now.getSeconds()).padStart(2,'0');
+  document.getElementById('last-updated').textContent='// UPDATED '+hh+':'+mm+':'+ss;
+
+  // top heroes table
+  var tbody=document.getElementById('heroes-tbody');
+  tbody.innerHTML='';
+  (d.top_heroes||[]).forEach(function(h,i){
+    var tr=document.createElement('tr');
+    tr.innerHTML=
+      '<td style="color:var(--dim);font-size:10px;">'+(i+1)+'</td>'+
+      '<td class="codename-cell">'+esc(h.codename)+'</td>'+
+      '<td class="wallet-cell">'+esc(h.wallet)+'</td>'+
+      '<td><span class="rank-badge rank-'+h.rank+'">'+h.rank+'</span></td>'+
+      '<td class="num-cell">'+h.total_conversations+'</td>'+
+      '<td class="num-cell">'+h.days_active+'</td>'+
+      '<td class="time-cell">'+timeAgo(h.last_active_at)+'</td>';
+    tbody.appendChild(tr);
+  });
+  if(!d.top_heroes||!d.top_heroes.length){
+    var tr=document.createElement('tr');
+    tr.innerHTML='<td colspan="7" style="color:var(--dim);text-align:center;padding:20px;font-size:9px;letter-spacing:3px;">NO HEROES REGISTERED</td>';
+    tbody.appendChild(tr);
+  }
+}
+
+function esc(s){
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+</script>
+</body>
+</html>

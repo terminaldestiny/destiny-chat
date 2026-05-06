@@ -949,6 +949,93 @@ app.patch('/api/heroes/me', jsonSmall, async function(req, res) {
   }
 });
 
+// ── /api/admin/stats ──────────────────────────────────────────────────────
+app.post('/api/admin/stats', jsonSmall, async function(req, res) {
+  var body = req.body || {};
+  var pw = (body.password || '').toString();
+  var adminPw = process.env.ADMIN_PASSWORD || '';
+  if (!adminPw) return res.status(503).json({ error: 'admin_not_configured' });
+  try {
+    var match = pw.length === adminPw.length &&
+      crypto.timingSafeEqual(Buffer.from(pw, 'utf8'), Buffer.from(adminPw, 'utf8'));
+    if (!match) return res.status(401).json({ error: 'unauthorized' });
+  } catch (e) {
+    return res.status(401).json({ error: 'unauthorized' });
+  }
+  if (!supabase) return res.status(503).json({ error: 'no_supabase' });
+  try {
+    var { data: heroes, error: hErr } = await supabase
+      .from('heroes')
+      .select('wallet,codename,balance,total_conversations,days_active,joined_at,last_active_at')
+      .order('total_conversations', { ascending: false });
+    if (hErr) throw hErr;
+    var heroesList = heroes || [];
+
+    var tiers = { legend: 0, commander: 0, agent: 0, operative: 0 };
+    heroesList.forEach(function(h) {
+      var b = h.balance || 0;
+      if (b >= 10000000) tiers.legend++;
+      else if (b >= 2000000) tiers.commander++;
+      else if (b >= 500000) tiers.agent++;
+      else tiers.operative++;
+    });
+
+    var { data: sessionRows } = await supabase
+      .from('sessions')
+      .select('tier')
+      .gt('expires_at', new Date().toISOString());
+    var sessionsActive = (sessionRows || []).length;
+    var sessionsByTier = { operative: 0, recruit: 0 };
+    (sessionRows || []).forEach(function(s) {
+      if (s.tier === 'operative') sessionsByTier.operative++;
+      else sessionsByTier.recruit++;
+    });
+
+    var today = getTodayUTC();
+    var messagesToday = 0;
+    Object.keys(chatLog).forEach(function(k) {
+      if (chatLog[k].date === today) messagesToday += chatLog[k].count;
+    });
+
+    var cutoff24h = new Date(Date.now() - 86400000).toISOString();
+    var recentlyActive = heroesList.filter(function(h) {
+      return h.last_active_at && h.last_active_at > cutoff24h;
+    }).length;
+
+    var newToday = heroesList.filter(function(h) {
+      return h.joined_at && h.joined_at.startsWith(today);
+    }).length;
+
+    var topHeroes = heroesList.slice(0, 15).map(function(h) {
+      var b = h.balance || 0;
+      var rank = b >= 10000000 ? 'LEGEND' : b >= 2000000 ? 'COMMANDER' : b >= 500000 ? 'AGENT' : 'OPERATIVE';
+      return {
+        codename: h.codename || 'UNKNOWN',
+        wallet: h.wallet.slice(0, 6) + '..' + h.wallet.slice(-4),
+        total_conversations: h.total_conversations || 0,
+        days_active: h.days_active || 0,
+        rank: rank,
+        last_active_at: h.last_active_at || null
+      };
+    });
+
+    res.json({
+      heroes_total: heroesList.length,
+      tier_breakdown: tiers,
+      sessions_active: sessionsActive,
+      sessions_by_tier: sessionsByTier,
+      messages_today: messagesToday,
+      recently_active_24h: recentlyActive,
+      new_today: newToday,
+      top_heroes: topHeroes,
+      generated_at: new Date().toISOString()
+    });
+  } catch (e) {
+    console.error('admin/stats error:', e.message);
+    res.status(500).json({ error: 'server_error' });
+  }
+});
+
 var PORT = process.env.PORT || 3001;
 app.listen(PORT, function() {
   console.log('Chat server running on http://localhost:' + PORT);
