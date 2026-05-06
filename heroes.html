@@ -253,7 +253,7 @@ body::before{content:'';position:fixed;inset:0;background:repeating-linear-gradi
   85%{filter:hue-rotate(-25deg) brightness(1.25);transform:translateY(1px) scaleX(1.005);}
   86%{filter:none;transform:none;}
 }
-.fx-hologram{animation:holo-cycle 3.5s linear infinite!important;}
+.fx-hologram{animation:holo-cycle 3.5s linear infinite;}
 @keyframes holo-cycle{
   0%{border-color:rgba(0,255,65,.4);box-shadow:0 0 28px rgba(0,255,65,.12),inset 0 0 18px rgba(0,255,65,.03);}
   20%{border-color:rgba(0,212,255,.55);box-shadow:0 0 36px rgba(0,212,255,.16),inset 0 0 22px rgba(0,212,255,.05);}
@@ -807,12 +807,12 @@ function applyBgPattern(el,pat,theme){
     el.style.backgroundImage='radial-gradient(circle,'+ra('0.5')+' 2px,transparent 2px)';
     el.style.backgroundSize='15px 15px';
   } else if(pat==='hex'){
-    // Offset-row dot grid — true honeycomb arrangement
+    // Two diagonal line directions at 60° + 120° — creates diamond hex cells
     el.style.backgroundImage=
-      'radial-gradient(circle,'+ra('0.52')+' 1.8px,transparent 1.8px),'+
-      'radial-gradient(circle,'+ra('0.52')+' 1.8px,transparent 1.8px)';
-    el.style.backgroundSize='22px 13px';
-    el.style.backgroundPosition='0 0,11px 6.5px';
+      'repeating-linear-gradient(60deg,transparent,transparent 15px,'+ra('0.07')+' 15px,'+ra('0.07')+' 16px),'+
+      'repeating-linear-gradient(120deg,transparent,transparent 15px,'+ra('0.07')+' 15px,'+ra('0.07')+' 16px)';
+    el.style.backgroundSize='auto';
+    el.style.backgroundPosition='0 0';
   } else if(pat==='rain'){
     // Vertical cascade: three column opacities suggesting digital rain
     el.style.backgroundImage=
@@ -1032,6 +1032,7 @@ function revealCards(){
     setTimeout(function(){
       if(card.dataset.glitch){card.style.animation='card-in .45s ease forwards,glitch-loop 7s linear '+card.dataset.glitchDelay+'ms infinite';}
       else if(card.dataset.overdrive){card.style.animation='card-in .45s ease forwards,overdrive-loop 3.5s linear '+card.dataset.overdriveDelay+'ms infinite';}
+      else if(card.dataset.hologram){card.style.animation='card-in .45s ease forwards,holo-cycle 3.5s linear .45s infinite';}
       else{card.classList.add('reveal');}
       card.dataset.revealed='1';
     },i*45);
@@ -1042,6 +1043,7 @@ function revealCards(){
         var c=entry.target;
         if(c.dataset.glitch){c.style.animation='card-in .45s ease forwards,glitch-loop 7s linear '+c.dataset.glitchDelay+'ms infinite';}
         else if(c.dataset.overdrive){c.style.animation='card-in .45s ease forwards,overdrive-loop 3.5s linear '+c.dataset.overdriveDelay+'ms infinite';}
+        else if(c.dataset.hologram){c.style.animation='card-in .45s ease forwards,holo-cycle 3.5s linear .45s infinite';}
         else{c.classList.add('reveal');}
         c.dataset.revealed='1';
         revealObs.unobserve(c);
@@ -1072,6 +1074,9 @@ function renderCard(h){
     var oDelay=Math.floor(Math.random()*3500);
     card.dataset.overdrive='1';
     card.dataset.overdriveDelay=String(oDelay);
+  }
+  if(h.fx==='hologram'){
+    card.dataset.hologram='1';
   }
   card.dataset.serial=h.serial;
 
@@ -1257,14 +1262,13 @@ function buildShareCanvas(h){
     ctx.fillStyle=ra('0.42');
     for(var dy=7;dy<H;dy+=15){for(var dx=7;dx<W;dx+=15){ctx.beginPath();ctx.arc(dx,dy,2,0,Math.PI*2);ctx.fill();}}
   } else if(h.bg_pattern==='hex'){
-    // Offset-row honeycomb dots
-    ctx.fillStyle=ra('0.48');
-    var hsx=22,hsy=13;
-    for(var hyi=0;hyi<H+hsy;hyi+=hsy){
-      for(var hxi=0;hxi<W+hsx;hxi+=hsx){
-        var hxoff=(Math.round(hyi/hsy)%2===1)?hsx/2:0;
-        ctx.beginPath();ctx.arc(hxi+hxoff,hyi,1.8,0,Math.PI*2);ctx.fill();
-      }
+    // Diagonal line mesh at 60° + 120° — diamond hex cells
+    ctx.strokeStyle=ra('0.07'); ctx.lineWidth=1;
+    var hsp=16, hstep=hsp/Math.sin(60*Math.PI/180);
+    var hcot=Math.cos(60*Math.PI/180)/Math.sin(60*Math.PI/180); // ≈ 0.577
+    for(var hx=-W;hx<W*2;hx+=hstep){
+      ctx.beginPath();ctx.moveTo(hx-H*hcot,-H);ctx.lineTo(hx+H*2*hcot,H*2);ctx.stroke();
+      ctx.beginPath();ctx.moveTo(hx+H*hcot,-H);ctx.lineTo(hx-H*2*hcot,H*2);ctx.stroke();
     }
   } else if(h.bg_pattern==='rain'){
     // Three-opacity vertical cascade columns
