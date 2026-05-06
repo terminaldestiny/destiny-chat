@@ -66,11 +66,16 @@ body::before{content:'';position:fixed;inset:0;background:repeating-linear-gradi
 #pc-bar::after{content:'';position:absolute;top:0;left:-40%;width:40%;height:100%;background:linear-gradient(90deg,transparent,rgba(255,255,255,0.6),transparent);animation:bar-scan 2.5s ease-in-out infinite;}
 @keyframes bar-scan{0%{left:-40%;}100%{left:140%;}}
 #pc-pattern{position:absolute;inset:3px 0 0 0;pointer-events:none;}
-#pc-body{padding:18px 20px 20px;position:relative;z-index:1;}
+#pc-body{padding:12px 20px 20px;position:relative;z-index:1;}
+
+/* ── Preview card banner ──────────────────── */
+#pc-banner{height:72px;display:flex;align-items:center;justify-content:space-between;padding:0 20px;position:relative;z-index:1;border-bottom:1px solid transparent;transition:background .4s,border-color .4s;flex-shrink:0;}
+#pc-banner-left{display:flex;flex-direction:column;gap:4px;}
+#pc-banner #pc-serial-row{margin-bottom:0;gap:10px;justify-content:flex-start;}
 #pc-emblem-wrap{display:flex;align-items:center;justify-content:flex-end;margin-bottom:0;}
 @keyframes emblem-float{0%,100%{transform:translateY(0);}50%{transform:translateY(-5px);}}
 #pc-emblem{font-size:50px;line-height:1;transition:filter .4s,color .4s;animation:emblem-float 3.5s ease-in-out infinite;display:inline-block;}
-#modal-emblem{font-size:58px;line-height:1;animation:emblem-float 3.5s ease-in-out infinite;display:inline-block;transition:filter .4s,color .4s;}
+#modal-emblem{font-size:50px;line-height:1;animation:emblem-float 3.5s ease-in-out infinite;display:inline-block;transition:filter .4s,color .4s;}
 #pc-serial-row{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;}
 #pc-serial{font-size:9px;letter-spacing:2.5px;transition:color .4s;}
 #pc-scan-dot{width:6px;height:6px;border-radius:50%;background:var(--green);animation:dot-pulse 1.8s ease-in-out infinite;transition:background .4s,box-shadow .4s;}
@@ -170,7 +175,18 @@ body::before{content:'';position:fixed;inset:0;background:repeating-linear-gradi
 .hcard::after{content:'';position:absolute;bottom:5px;right:5px;width:10px;height:10px;border-bottom:1px solid var(--cc,rgba(0,255,65,0.3));border-right:1px solid var(--cc,rgba(0,255,65,0.3));pointer-events:none;transition:border-color .2s;}
 .hcard-bar{height:2px;width:100%;}
 .hcard-pattern{position:absolute;top:2px;left:0;right:0;bottom:0;pointer-events:none;}
-.hcard-body{padding:14px 15px 15px;position:relative;z-index:1;}
+.hcard-body{padding:10px 15px 15px;position:relative;z-index:1;}
+
+/* ── Card banner ──────────────────────────── */
+.hcard-banner{height:62px;display:flex;align-items:center;justify-content:space-between;padding:0 14px;position:relative;z-index:1;border-bottom:1px solid transparent;flex-shrink:0;}
+.hcard-banner-meta{display:flex;flex-direction:column;gap:5px;}
+.hcard-banner-serial{font-size:8px;letter-spacing:2.5px;}
+.hcard-banner-badges{display:flex;gap:5px;align-items:center;}
+.hcard-banner .hcard-emblem{font-size:34px!important;transition:transform .12s ease,filter .12s ease;}
+.hcard-legend .hcard-banner .hcard-emblem{font-size:44px!important;}
+.hcard-commander .hcard-banner .hcard-emblem{font-size:39px!important;}
+@keyframes banner-shimmer{0%,100%{background-position:200% center;}50%{background-position:-200% center;}}
+.hcard-legend .hcard-banner::after,.hcard-commander .hcard-banner::after{content:'';position:absolute;inset:0;background:linear-gradient(115deg,transparent 25%,rgba(255,255,255,0.025) 47%,rgba(255,255,255,0.065) 50%,rgba(255,255,255,0.025) 53%,transparent 75%);background-size:200% 100%;animation:banner-shimmer 4s ease-in-out infinite;pointer-events:none;}
 .hcard-top{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px;}
 .hcard-meta{display:flex;flex-direction:column;gap:5px;}
 .hcard-serial{font-size:9px;letter-spacing:2px;color:rgba(255,255,255,0.2);}
@@ -200,23 +216,29 @@ body::before{content:'';position:fixed;inset:0;background:repeating-linear-gradi
 /* ── Modal ─────────────────────────────────── */
 @keyframes modal-in{from{opacity:0;transform:translate(-50%,-50%) scale(0.93);}to{opacity:1;transform:translate(-50%,-50%) scale(1);}}
 #modal-backdrop{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.88);z-index:100;cursor:pointer;backdrop-filter:blur(5px);}
-#modal{display:none;position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);z-index:101;width:min(420px,94vw);max-height:92vh;background:#050705;overflow:hidden;border:1px solid rgba(0,255,65,0.2);transition:box-shadow .4s,border-color .4s;}
-#modal.on,#modal-backdrop.on{display:block;}
-#modal.on{animation:modal-in .22s ease forwards;}
+#modal{display:none;position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);z-index:101;width:min(420px,94vw);max-height:92vh;background:#050705;overflow:hidden;border:1px solid rgba(0,255,65,0.2);transition:box-shadow .4s,border-color .4s;flex-direction:column;}
+#modal.on{display:flex;animation:modal-in .22s ease forwards;}
+#modal-backdrop.on{display:block;}
+
+/* ── Modal banner ──────────────────────────── */
+#modal-banner{height:72px;display:flex;align-items:center;justify-content:space-between;padding:0 20px;position:relative;z-index:1;border-bottom:1px solid transparent;transition:background .4s,border-color .4s;flex-shrink:0;}
+#modal-banner-left{display:flex;flex-direction:column;gap:4px;}
+#modal-banner #modal-serial-row{margin-bottom:0;gap:10px;justify-content:flex-start;}
+.modal-banner-shimmer::after{content:'';position:absolute;inset:0;background:linear-gradient(115deg,transparent 25%,rgba(255,255,255,0.025) 47%,rgba(255,255,255,0.065) 50%,rgba(255,255,255,0.025) 53%,transparent 75%);background-size:200% 100%;animation:banner-shimmer 4s ease-in-out infinite;pointer-events:none;}
 #modal::before{content:'';position:absolute;top:5px;left:5px;width:16px;height:16px;border-top:1px solid var(--corner-c,rgba(0,255,65,0.4));border-left:1px solid var(--corner-c,rgba(0,255,65,0.4));pointer-events:none;z-index:5;}
 #modal::after{content:'';position:absolute;bottom:5px;right:5px;width:16px;height:16px;border-bottom:1px solid var(--corner-c,rgba(0,255,65,0.4));border-right:1px solid var(--corner-c,rgba(0,255,65,0.4));pointer-events:none;z-index:5;}
 #modal-bar{height:3px;position:relative;overflow:hidden;}
 #modal-bar::after{content:'';position:absolute;top:0;left:-40%;width:40%;height:100%;background:rgba(255,255,255,0.5);animation:bar-scan 2s ease-in-out infinite;}
 #modal-pattern{position:absolute;inset:3px 0 0 0;pointer-events:none;opacity:.4;}
-#modal-body{padding:18px 20px 20px;position:relative;z-index:1;overflow-y:auto;max-height:calc(92vh - 3px);}
-#modal-close{position:absolute;top:13px;right:16px;cursor:pointer;color:rgba(255,255,255,0.25);font-size:13px;transition:.15s;z-index:10;}
+#modal-body{padding:14px 20px 20px;position:relative;z-index:1;overflow-y:auto;flex:1;min-height:0;}
+#modal-close{position:absolute;top:10px;right:14px;cursor:pointer;color:rgba(255,255,255,0.25);font-size:13px;transition:.15s;z-index:10;}
 #modal-close:hover{color:#fff;}
 #modal-serial-row{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;}
 #modal-serial{font-size:9px;letter-spacing:2.5px;}
 #modal-you{display:none;}
 #modal-scan-dot{width:6px;height:6px;border-radius:50%;animation:dot-pulse 1.8s ease-in-out infinite;flex-shrink:0;}
-#modal-top-row{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px;}
-#modal-left{flex:1;padding-right:14px;}
+#modal-top-row{margin-bottom:10px;}
+#modal-left{}
 #modal-name{font-size:24px;font-weight:bold;letter-spacing:2px;color:#fff;margin-bottom:5px;word-break:break-word;text-shadow:0 0 30px rgba(255,255,255,0.1);}
 #modal-tagline{font-size:10px;letter-spacing:1.2px;font-style:italic;margin-bottom:12px;min-height:14px;}
 #modal-rank{display:inline-block;font-size:9px;letter-spacing:3px;padding:3px 12px;border:1px solid;transition:all .4s;}
@@ -336,7 +358,6 @@ body::before{content:'';position:fixed;inset:0;background:repeating-linear-gradi
   .feed-row{grid-template-columns:1.6em 1fr 80px 54px;}
   .fr-tx{display:none;}
   #modal{width:94vw;max-height:88vh;}
-  #modal-body{max-height:calc(88vh - 3px);}
   #modal-name{font-size:20px;}
   #modal-emblem{font-size:46px;}
   #modal-stats{gap:6px;}
@@ -368,7 +389,7 @@ body::before{content:'';position:fixed;inset:0;background:repeating-linear-gradi
 #c-count{position:absolute;top:20px;left:50%;transform:translateX(-50%);font-size:8px;letter-spacing:3px;color:rgba(0,255,65,0.2);}
 
 /* ── Signal meter ────────────────────────── */
-#signal-section{padding:14px 20px 16px;border-bottom:1px solid rgba(0,255,65,0.07);position:relative;z-index:1;}
+#signal-section{display:none;padding:14px 20px 16px;border-bottom:1px solid rgba(0,255,65,0.07);position:relative;z-index:1;}
 #signal-header{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:10px;}
 #signal-lbl{font-size:9px;letter-spacing:3px;color:rgba(0,255,65,0.28);}
 #signal-total{font-size:16px;font-weight:bold;color:rgba(255,255,255,0.68);letter-spacing:2px;}
@@ -514,12 +535,16 @@ body::before{content:'';position:fixed;inset:0;background:repeating-linear-gradi
     <div id="preview-card" onclick="if(myHero){openModal(myHero);}" title="VIEW YOUR CARD">
       <div id="pc-bar"></div>
       <div id="pc-pattern"></div>
-      <div id="pc-body">
-        <div id="pc-serial-row">
-          <div id="pc-serial"></div>
-          <div id="pc-scan-dot"></div>
+      <div id="pc-banner">
+        <div id="pc-banner-left">
+          <div id="pc-serial-row">
+            <div id="pc-serial"></div>
+            <div id="pc-scan-dot"></div>
+          </div>
         </div>
         <div id="pc-emblem-wrap"><div id="pc-emblem">⬡</div></div>
+      </div>
+      <div id="pc-body">
         <div id="pc-name"></div>
         <div id="pc-tagline"></div>
         <div style="margin-bottom:12px;">
@@ -728,20 +753,24 @@ body::before{content:'';position:fixed;inset:0;background:repeating-linear-gradi
 <div id="modal">
   <div id="modal-bar"></div>
   <div id="modal-pattern"></div>
-  <div id="modal-body">
-    <div id="modal-close" onclick="closeModal()">✕</div>
-    <div id="modal-serial-row">
-      <div id="modal-serial"></div>
-      <div id="modal-you"><span class="badge-you">● YOU</span></div>
-      <div id="modal-scan-dot"></div>
+  <div id="modal-close" onclick="closeModal()">✕</div>
+  <div id="modal-banner">
+    <div id="modal-banner-left">
+      <div id="modal-serial-row">
+        <div id="modal-serial"></div>
+        <div id="modal-you"><span class="badge-you">● YOU</span></div>
+        <div id="modal-scan-dot"></div>
+      </div>
     </div>
+    <div id="modal-emblem-wrap"><div id="modal-emblem"></div></div>
+  </div>
+  <div id="modal-body">
     <div id="modal-top-row">
       <div id="modal-left">
         <div id="modal-name"></div>
         <div id="modal-tagline"></div>
         <div style="margin-bottom:12px;"><span id="modal-rank"></span></div>
       </div>
-      <div id="modal-emblem-wrap"><div id="modal-emblem"></div></div>
     </div>
     <div id="modal-titles"></div>
     <div id="modal-divider"></div>
@@ -801,7 +830,7 @@ var THEME_RGBA={
 };
 var RANK_ORD={LEGEND:4,COMMANDER:3,AGENT:2,OPERATIVE:1};
 
-var allHeroes=[],activeHero=null,myHero=null;
+var allHeroes=[],activeHero=null,myHero=null,modalOpenTime=0;
 var currentSort='default',currentQuery='';
 var p={codename:'',emblem:'hexagon',emblem_color:'',theme:'green',tagline:'',bg_pattern:'none',x_handle:'',fx:'none',show_barcode:false};
 var CODE39={'0':[1,1,1,3,3,1,3,1,1],'1':[3,1,1,3,1,1,1,1,3],'2':[1,1,3,3,1,1,1,1,3],'3':[3,1,3,3,1,1,1,1,1],'4':[1,1,1,3,3,1,1,1,3],'5':[3,1,1,3,3,1,1,1,1],'6':[1,1,3,3,3,1,1,1,1],'7':[1,1,1,3,1,1,3,1,3],'8':[3,1,1,3,1,1,3,1,1],'9':[1,1,3,3,1,1,3,1,1],'A':[3,1,1,1,1,3,1,1,3],'B':[1,1,3,1,1,3,1,1,3],'C':[3,1,3,1,1,3,1,1,1],'D':[1,1,1,1,3,3,1,1,3],'E':[3,1,1,1,3,3,1,1,1],'F':[1,1,3,1,3,3,1,1,1],'G':[1,1,1,1,1,3,3,1,3],'H':[3,1,1,1,1,3,3,1,1],'I':[1,1,3,1,1,3,3,1,1],'J':[1,1,1,1,3,3,3,1,1],'K':[3,1,1,1,1,1,1,3,3],'L':[1,1,3,1,1,1,1,3,3],'M':[3,1,3,1,1,1,1,3,1],'N':[1,1,1,1,3,1,1,3,3],'O':[3,1,1,1,3,1,1,3,1],'P':[1,1,3,1,3,1,1,3,1],'Q':[1,1,1,1,1,1,3,3,3],'R':[3,1,1,1,1,1,3,3,1],'S':[1,1,3,1,1,1,3,3,1],'T':[1,1,1,1,3,1,3,3,1],'U':[3,3,1,1,1,1,1,1,3],'V':[1,3,3,1,1,1,1,1,3],'W':[3,3,3,1,1,1,1,1,1],'X':[1,3,1,1,3,1,1,1,3],'Y':[3,3,1,1,3,1,1,1,1],'Z':[1,3,3,1,3,1,1,1,1],'-':[1,3,1,1,1,1,3,1,3],'.':[3,3,1,1,1,1,3,1,1],' ':[1,3,3,1,1,1,3,1,1],'$':[1,3,1,3,1,3,1,1,1],'/':[1,3,1,3,1,1,1,3,1],'+':[1,3,1,1,1,3,1,3,1],'%':[1,1,1,3,1,3,1,3,1],'*':[1,3,1,1,3,1,3,1,1]};
@@ -933,6 +962,13 @@ function updatePreview(){
 
   document.getElementById('pc-bar').style.background='linear-gradient(90deg,transparent,'+th+' 30%,'+th+' 70%,transparent)';
   document.getElementById('pc-bar').style.boxShadow='0 0 10px '+ra('0.6');
+
+  var pcBanner=document.getElementById('pc-banner');
+  if(pcBanner){
+    pcBanner.style.background='linear-gradient(180deg,'+ra('0.13')+' 0%,'+ra('0.05')+' 65%,transparent 100%)';
+    pcBanner.style.borderBottomColor=ra('0.09');
+  }
+
   applyBgPattern(document.getElementById('pc-pattern'),p.bg_pattern,p.theme);
 
   var eClr=p.emblem_color?cHex(p.emblem_color):th;
@@ -1226,15 +1262,24 @@ function renderCard(h){
   if(isMe)badgesHtml+='<span class="badge-you">● YOU</span>';
   if(isNewH)badgesHtml+='<span class="badge-new">NEW</span>';
 
+  var emblFilter=isLegend
+    ?'drop-shadow(0 0 14px '+eTh(h.emblem,th)+') drop-shadow(0 0 28px '+eRa(h.emblem,ra)('0.55')+') drop-shadow(0 0 50px '+eRa(h.emblem,ra)('0.2')+')'
+    :isCommander
+      ?'drop-shadow(0 0 12px '+eTh(h.emblem,th)+') drop-shadow(0 0 22px '+eRa(h.emblem,ra)('0.45')+')'
+      :'drop-shadow(0 0 8px '+eTh(h.emblem,th)+')';
+
+  var banner=document.createElement('div'); banner.className='hcard-banner';
+  banner.style.background='linear-gradient(180deg,'+ra('0.13')+' 0%,'+ra('0.05')+' 65%,transparent 100%)';
+  banner.style.borderBottomColor=ra('0.09');
+  banner.innerHTML=
+    '<div class="hcard-banner-meta">'
+      +'<div class="hcard-banner-serial" style="color:'+ra('0.28')+'">'+fmtSerial(h.serial)+'</div>'
+      +(badgesHtml?'<div class="hcard-banner-badges">'+badgesHtml+'</div>':'')
+    +'</div>'
+    +'<div class="hcard-emblem" style="color:'+eTh(h.emblem,th)+';filter:'+emblFilter+'">'+eChr(h.emblem)+'</div>';
+
   var body=document.createElement('div'); body.className='hcard-body';
   body.innerHTML=[
-    '<div class="hcard-top">',
-      '<div class="hcard-meta">',
-        '<div class="hcard-serial">'+fmtSerial(h.serial)+'</div>',
-        badgesHtml?'<div class="hcard-badges">'+badgesHtml+'</div>':'',
-      '</div>',
-      '<div class="hcard-emblem" style="color:'+eTh(h.emblem,th)+';font-size:'+(isLegend?'36px':isCommander?'32px':'28px')+';filter:'+(isLegend?'drop-shadow(0 0 14px '+eTh(h.emblem,th)+') drop-shadow(0 0 28px '+eRa(h.emblem,ra)('0.55')+') drop-shadow(0 0 50px '+eRa(h.emblem,ra)('0.2')+')':isCommander?'drop-shadow(0 0 12px '+eTh(h.emblem,th)+') drop-shadow(0 0 22px '+eRa(h.emblem,ra)('0.45')+')':'drop-shadow(0 0 8px '+eTh(h.emblem,th)+')')+'">'+eChr(h.emblem)+'</div>',
-    '</div>',
     '<div class="hcard-name">'+(isActiveH?'<span class="dot-active" title="Active in last 24h"></span>':'')+escHtml(h.codename)+'</div>',
     h.tagline?'<div class="hcard-tagline">"'+escHtml(h.tagline)+'"</div>':'<div class="hcard-tagline"></div>',
     '<div style="margin-bottom:9px;"><span class="hcard-rank" style="color:'+th+';border-color:'+ra('0.45')+';box-shadow:0 0 8px '+ra('0.1')+'">'+h.rank+'</span></div>',
@@ -1252,7 +1297,7 @@ function renderCard(h){
     bcDiv.style.boxShadow='0 0 4px '+ra('0.25');
     body.appendChild(bcDiv);
   }
-  card.appendChild(bar); card.appendChild(pat); card.appendChild(body);
+  card.appendChild(bar); card.appendChild(pat); card.appendChild(banner); card.appendChild(body);
   return card;
 }
 
@@ -1289,6 +1334,12 @@ function applyModalTheme(h){
   modal.style.setProperty('--corner-c',ra('0.65'));
   document.getElementById('modal-bar').style.background='linear-gradient(90deg,transparent,'+th+' 30%,'+th+' 70%,transparent)';
   document.getElementById('modal-bar').style.boxShadow='0 0 12px '+ra('0.55');
+
+  var mbanner=document.getElementById('modal-banner');
+  mbanner.style.background='linear-gradient(180deg,'+ra('0.14')+' 0%,'+ra('0.05')+' 65%,transparent 100%)';
+  mbanner.style.borderBottomColor=ra('0.1');
+  mbanner.classList.toggle('modal-banner-shimmer',h.rank==='LEGEND'||h.rank==='COMMANDER');
+
   document.getElementById('modal-serial').style.color=ra('0.4');
   document.getElementById('modal-scan-dot').style.background=th;
   document.getElementById('modal-scan-dot').style.boxShadow='0 0 8px '+th;
@@ -1336,6 +1387,7 @@ function applyModalTheme(h){
 
 function openModal(h){
   activeHero=h;
+  modalOpenTime=Date.now();
   var modal=document.getElementById('modal');
   modal.classList.add('on');
   document.getElementById('modal-backdrop').classList.add('on');
@@ -1395,7 +1447,9 @@ document.addEventListener('keydown',function(e){if(e.key==='Escape')closeModal()
 (function(){
   var mx=document.getElementById('modal');
   mx.addEventListener('mousemove',function(e){
-    if(activeHero&&activeHero.fx==='glitch')return;
+    if(!activeHero)return;
+    if(activeHero.fx==='glitch')return;
+    if(Date.now()-modalOpenTime<280)return;
     var r=mx.getBoundingClientRect();
     var dx=(e.clientX-(r.left+r.width/2))/(r.width/2);
     var dy=(e.clientY-(r.top+r.height/2))/(r.height/2);
@@ -1829,6 +1883,7 @@ async function load(){
         populateMyCard(myHero);
         document.getElementById('my-section').style.display='block';
         document.getElementById('wall-div').style.display='block';
+        document.getElementById('signal-section').style.display='block';
       } else {
         document.getElementById('no-session').style.display='block';
         document.getElementById('wall-div').style.display='block';
