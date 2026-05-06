@@ -230,9 +230,9 @@ body::before{content:'';position:fixed;inset:0;background:repeating-linear-gradi
 @keyframes commander-aura{0%,100%{box-shadow:0 0 8px rgba(204,68,255,0.07);}50%{box-shadow:0 0 24px rgba(204,68,255,0.22),0 0 48px rgba(204,68,255,0.07);}}
 
 /* ── Modal ─────────────────────────────────── */
-@keyframes modal-in{from{opacity:0;transform:translate(-50%,-50%) scale(0.93);}to{opacity:1;transform:translate(-50%,-50%) scale(1);}}
+@keyframes modal-in{from{opacity:0;transform:scale(0.93);}to{opacity:1;transform:scale(1);}}
 #modal-backdrop{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.88);z-index:100;cursor:pointer;backdrop-filter:blur(5px);}
-#modal{display:none;position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);z-index:101;width:min(420px,94vw);max-height:92vh;background:#050705;overflow:hidden;border:1px solid rgba(0,255,65,0.2);transition:box-shadow .4s,border-color .4s;}
+#modal{display:none;position:fixed;top:50%;left:50%;translate:-50% -50%;z-index:101;width:min(420px,94vw);max-height:92vh;background:#050705;overflow:hidden;border:1px solid rgba(0,255,65,0.2);transition:box-shadow .4s,border-color .4s;}
 #modal.on{display:block;animation:modal-in .22s ease forwards;}
 #modal-backdrop.on{display:block;}
 
@@ -1522,6 +1522,7 @@ function openModal(h){
   activeHero=h;
   modalOpenTime=Date.now();
   var modal=document.getElementById('modal');
+  modal.style.transform='';
   modal.classList.add('on');
   document.getElementById('modal-backdrop').classList.add('on');
   applyModalTheme(h);
@@ -1586,11 +1587,11 @@ document.addEventListener('keydown',function(e){if(e.key==='Escape')closeModal()
     var r=mx.getBoundingClientRect();
     var dx=(e.clientX-(r.left+r.width/2))/(r.width/2);
     var dy=(e.clientY-(r.top+r.height/2))/(r.height/2);
-    mx.style.transform='translate(-50%,-50%) perspective(900px) rotateX('+(-dy*4)+'deg) rotateY('+(dx*4)+'deg)';
+    mx.style.transform='perspective(900px) rotateX('+(-dy*4)+'deg) rotateY('+(dx*4)+'deg)';
   },{passive:true});
   mx.addEventListener('mouseleave',function(){
     mx.style.transition='transform .5s ease';
-    mx.style.transform='translate(-50%,-50%)';
+    mx.style.transform='';
     setTimeout(function(){mx.style.transition='';},500);
   });
 })();
