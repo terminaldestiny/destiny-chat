@@ -101,6 +101,7 @@ body::before{content:'';position:fixed;inset:0;background:repeating-linear-gradi
 .pc-stat-lbl{font-size:8px;letter-spacing:1.5px;color:rgba(255,255,255,0.28);margin-bottom:3px;}
 .pc-stat-val{font-size:18px;font-weight:bold;color:rgba(255,255,255,0.85);}
 #pc-footer{display:flex;justify-content:space-between;align-items:center;padding-top:10px;transition:border-color .4s;}
+#pc-x{font-size:9px;letter-spacing:1px;}
 #pc-url{font-size:7px;letter-spacing:1.5px;color:rgba(255,255,255,0.18);}
 #pc-joined{font-size:7px;letter-spacing:1px;color:rgba(255,255,255,0.18);}
 
@@ -209,6 +210,7 @@ body::before{content:'';position:fixed;inset:0;background:repeating-linear-gradi
 .hcard-titles{display:flex;flex-wrap:wrap;gap:3px;margin-bottom:10px;min-height:16px;}
 .hcard-title{font-size:8px;letter-spacing:1px;color:var(--cyan);border:1px solid rgba(0,212,255,0.2);padding:2px 5px;}
 .hcard-stats{display:grid;grid-template-columns:1fr 1fr;gap:4px;border-top:1px solid rgba(255,255,255,0.04);padding-top:9px;}
+.hcard-x{font-size:8px;letter-spacing:1px;color:rgba(255,255,255,0.22);margin-top:7px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
 .hstat-lbl{font-size:8px;letter-spacing:1.2px;color:rgba(255,255,255,0.25);}
 .hstat-val{font-size:15px;color:rgba(255,255,255,0.75);margin-bottom:1px;}
 /* rank tiers */
@@ -347,8 +349,9 @@ body::before{content:'';position:fixed;inset:0;background:repeating-linear-gradi
 @media(max-width:600px){
   #hdr{padding:10px 14px;}
   #my-section,#filter-bar,.sec-div,#no-session{padding-left:14px;padding-right:14px;}
-  #stats-bar{flex-wrap:wrap;}
-  .stat-item{min-width:50%;border-right:none;border-bottom:1px solid rgba(0,255,65,0.07);padding:11px 14px;}
+  .stat-item{padding:9px 10px;}
+  .si-val{font-size:17px;}
+  .si-lbl{font-size:6px;letter-spacing:1.5px;}
   #grid{padding:12px 14px 40px;gap:10px;grid-template-columns:1fr;}
   #my-wrap{flex-direction:column;}
   #card-col{width:100%;}
@@ -358,7 +361,7 @@ body::before{content:'';position:fixed;inset:0;background:repeating-linear-gradi
   #edit-panel.open{display:block;}
   #filter-bar{flex-direction:column;align-items:flex-start;gap:10px;}
   #search-input{max-width:100%;width:100%;}
-  #stat-tiers{font-size:10px!important;}
+  #stat-tiers{font-size:8px!important;}
   #rank-legend{padding-left:14px;padding-right:14px;}
   #signal-section{padding:12px 14px 14px;}
   #feed-section{padding-left:14px;padding-right:14px;}
@@ -504,10 +507,6 @@ body::before{content:'';position:fixed;inset:0;background:repeating-linear-gradi
     <span class="si-lbl">HEROES REGISTERED</span>
   </div>
   <div class="stat-item">
-    <span class="si-val" id="stat-tx">—</span>
-    <span class="si-lbl">TOTAL TRANSMISSIONS</span>
-  </div>
-  <div class="stat-item">
     <span class="si-val" id="stat-active">—</span>
     <span class="si-lbl">ACTIVE PAST 24H</span>
   </div>
@@ -573,6 +572,7 @@ body::before{content:'';position:fixed;inset:0;background:repeating-linear-gradi
         </div>
         <div id="pc-footer">
           <div id="pc-url">terminaldestiny.com</div>
+          <div id="pc-x"></div>
           <div id="pc-joined"></div>
         </div>
       </div>
@@ -703,7 +703,7 @@ body::before{content:'';position:fixed;inset:0;background:repeating-linear-gradi
       </div>
       <div class="e-row">
         <div class="e-lbl">X HANDLE</div>
-        <input class="e-input" id="x-input" type="text" maxlength="16" autocomplete="off" placeholder="@YOURHANDLE" oninput="p.x_handle=this.value.replace(/^@/,'').trim();">
+        <input class="e-input" id="x-input" type="text" maxlength="16" autocomplete="off" placeholder="@YOURHANDLE" oninput="p.x_handle=this.value.replace(/^@/,'').trim();updatePreview();">
       </div>
       <button id="save-btn" onclick="saveCard()">SAVE CHANGES</button>
       <span id="save-msg">✓ SAVED</span>
@@ -978,11 +978,9 @@ function animCount(el,target){
 }
 
 function populateStats(heroes){
-  var totalTx=heroes.reduce(function(s,h){return s+(h.total_conversations||0);},0);
   var cutoff=Date.now()-86400000;
   var active=heroes.filter(function(h){return h.last_active_at&&new Date(h.last_active_at).getTime()>cutoff;}).length;
   animCount(document.getElementById('stat-heroes'),heroes.length);
-  animCount(document.getElementById('stat-tx'),totalTx);
   animCount(document.getElementById('stat-active'),active);
   var tc={LEGEND:0,COMMANDER:0,AGENT:0,OPERATIVE:0};
   heroes.forEach(function(h){if(tc[h.rank]!==undefined)tc[h.rank]++;});
@@ -1096,6 +1094,8 @@ function updatePreview(){
   document.getElementById('pc-divider').style.color=th;
   document.getElementById('pc-url').style.color=ra('0.28');
   document.getElementById('pc-footer').style.borderTopColor=ra('0.07');
+  var pcX=document.getElementById('pc-x');
+  if(pcX){pcX.textContent=p.x_handle?('𝕏 @'+p.x_handle):'';pcX.style.color=ra('0.32');}
 
   // FX
   var card=document.getElementById('preview-card');
@@ -1386,7 +1386,8 @@ function renderCard(h){
     '<div class="hcard-stats">',
       '<div><div class="hstat-val">'+(h.total_conversations||0)+'</div><div class="hstat-lbl">TRANSMISSIONS</div></div>',
       '<div><div class="hstat-val">'+(h.days_active||0)+'</div><div class="hstat-lbl">DAYS ACTIVE</div></div>',
-    '</div>'
+    '</div>',
+    (h.x_handle?'<div class="hcard-x">𝕏 @'+escHtml(h.x_handle)+'</div>':'')
   ].join('');
 
   if(h.show_barcode){
