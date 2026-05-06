@@ -360,10 +360,7 @@ body::before{content:'';position:fixed;inset:0;background:repeating-linear-gradi
   #filter-bar{flex-direction:column;align-items:flex-start;gap:10px;}
   #search-input{max-width:100%;width:100%;}
   #rank-legend{padding-left:14px;padding-right:14px;}
-  #feed-section{padding-left:14px;padding-right:14px;}
   .ptcl{display:none;}
-  .feed-row{grid-template-columns:1.6em 1fr 80px 54px;}
-  .fr-tx{display:none;}
   #modal{width:94vw;max-height:88vh;}
   #modal-body{max-height:calc(88vh - 75px);}
   #modal-name{font-size:20px;}
@@ -398,17 +395,7 @@ body::before{content:'';position:fixed;inset:0;background:repeating-linear-gradi
 
 
 /* ── Transmission feed ───────────────────── */
-#feed-section{padding:16px 20px 0;position:relative;z-index:1;}
-#feed-header{font-size:9px;letter-spacing:3px;color:rgba(0,255,65,0.28);display:flex;align-items:center;gap:10px;margin-bottom:10px;}
-#feed-live{color:rgba(0,255,65,0.5);animation:dot-pulse 2s ease-in-out infinite;font-size:8px;}
 #feed-list{display:flex;flex-direction:column;gap:1px;}
-.feed-row{display:grid;grid-template-columns:1.8em 1fr 100px 68px 52px;align-items:center;gap:8px;padding:8px 10px;border:1px solid transparent;cursor:pointer;transition:.12s;opacity:0;animation:card-in .3s ease forwards;}
-.feed-row:hover{background:rgba(0,255,65,0.022);border-color:rgba(0,255,65,0.09);}
-.fr-emblem{font-size:15px;line-height:1;text-align:center;}
-.fr-name{font-size:10px;letter-spacing:1.5px;color:rgba(255,255,255,0.7);font-weight:bold;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
-.fr-rank{font-size:8px;letter-spacing:2px;}
-.fr-time{font-size:8px;letter-spacing:1px;color:rgba(255,255,255,0.2);text-align:right;white-space:nowrap;}
-.fr-tx{font-size:8px;letter-spacing:1px;color:rgba(255,255,255,0.2);text-align:right;white-space:nowrap;}
 
 /* ── Live ticker ─────────────────────────── */
 #ticker-wrap{height:30px;overflow:hidden;border-bottom:1px solid rgba(0,255,65,0.07);position:relative;z-index:1;display:none;}
@@ -506,7 +493,7 @@ body::before{content:'';position:fixed;inset:0;background:repeating-linear-gradi
 
 <div id="my-section">
   <div id="my-lbl">YOUR FIELD CARD</div>
-  <div id="my-status">// HERO STATUS ACTIVE · CARD EDITABLE</div>
+  <div id="my-status">Your Hero Card &bull; Editable</div>
 
   <div id="my-wrap">
     <div id="card-col">
@@ -708,11 +695,6 @@ body::before{content:'';position:fixed;inset:0;background:repeating-linear-gradi
   <span class="rl-label">$DESTINY REQUIRED</span>
 </div>
 
-<div id="feed-section" style="display:none;">
-  <div id="feed-header">◈ FIELD TRANSMISSIONS <span id="feed-live">● LIVE</span></div>
-  <div id="feed-list"></div>
-</div>
-
 <div id="loading">SCANNING FIELD ROSTER</div>
 <div id="grid"></div>
 <div id="no-results">// NO HEROES FOUND</div>
@@ -853,23 +835,23 @@ function applyBannerFx(el,style,theme){
     el.style.animation='bfx-aurora 7s ease-in-out infinite alternate';
   } else if(s==='plasma'){
     el.style.backgroundImage=
-      'radial-gradient(ellipse 65% 120% at 20% 30%,'+ra('0.62')+' 0%,transparent 55%),'+
-      'radial-gradient(ellipse 55% 100% at 80% 70%,'+ra('0.48')+' 0%,transparent 50%),'+
-      'radial-gradient(ellipse 45% 90% at 55% 15%,'+ra('0.38')+' 0%,transparent 45%)';
+      'radial-gradient(ellipse 65% 120% at 20% 30%,'+ra('0.46')+' 0%,transparent 55%),'+
+      'radial-gradient(ellipse 55% 100% at 80% 70%,'+ra('0.36')+' 0%,transparent 50%),'+
+      'radial-gradient(ellipse 45% 90% at 55% 15%,'+ra('0.28')+' 0%,transparent 45%)';
     el.style.backgroundSize='200% 200%,200% 200%,180% 180%';
     el.style.backgroundPosition='0% 0%,100% 100%,50% 0%';
     el.style.animation='bfx-plasma 5s ease-in-out infinite';
   } else if(s==='inferno'){
     el.style.backgroundImage=
-      'linear-gradient(to top,rgba(255,20,0,0.74) 0%,rgba(255,90,0,0.54) 25%,rgba(255,185,0,0.3) 55%,rgba(255,220,60,0.08) 78%,transparent 92%),'+
-      'radial-gradient(ellipse 55% 90% at 25% 100%,rgba(255,45,0,0.46) 0%,transparent 55%),'+
-      'radial-gradient(ellipse 45% 80% at 75% 100%,rgba(255,110,0,0.42) 0%,transparent 50%)';
+      'linear-gradient(to top,rgba(255,20,0,0.56) 0%,rgba(255,90,0,0.4) 25%,rgba(255,185,0,0.22) 55%,rgba(255,220,60,0.06) 78%,transparent 92%),'+
+      'radial-gradient(ellipse 55% 90% at 25% 100%,rgba(255,45,0,0.34) 0%,transparent 55%),'+
+      'radial-gradient(ellipse 45% 80% at 75% 100%,rgba(255,110,0,0.3) 0%,transparent 50%)';
     el.style.backgroundSize='100% 200%,150% 150%,140% 140%';
     el.style.backgroundPosition='0% 100%,10% 100%,80% 100%';
     el.style.animation='bfx-inferno 1.8s ease-in-out infinite alternate';
   } else if(s==='prism'){
     el.style.backgroundImage=
-      'linear-gradient(90deg,rgba(255,0,80,0.5),rgba(255,90,0,0.46),rgba(255,210,0,0.4),rgba(80,255,0,0.36),rgba(0,255,190,0.44),rgba(0,120,255,0.46),rgba(120,0,255,0.5),rgba(255,0,170,0.46),rgba(255,0,80,0.5))';
+      'linear-gradient(90deg,rgba(255,0,80,0.36),rgba(255,90,0,0.34),rgba(255,210,0,0.3),rgba(80,255,0,0.26),rgba(0,255,190,0.32),rgba(0,120,255,0.34),rgba(120,0,255,0.36),rgba(255,0,170,0.34),rgba(255,0,80,0.36))';
     el.style.backgroundSize='300% 100%';
     el.style.animation='bfx-prism 3s linear infinite';
   } else if(s==='glitch'){
@@ -1801,33 +1783,6 @@ function renderConstellation(){
 
 // ── Signal meter ──────────────────────────────────────────────────────────
 
-// ── Transmission feed ─────────────────────────────────────────────────────
-function buildFeed(heroes){
-  var section=document.getElementById('feed-section');
-  var active=heroes.filter(function(h){return h.last_active_at;})
-    .sort(function(a,b){return new Date(b.last_active_at)-new Date(a.last_active_at);})
-    .slice(0,7);
-  if(!active.length){section.style.display='none';return;}
-  section.style.display='block';
-  var list=document.getElementById('feed-list');
-  list.innerHTML='';
-  active.forEach(function(h,i){
-    var color=cHex(h.theme||'green');
-    var t=relTime(h.last_active_at)||'RECENTLY';
-    var row=document.createElement('div');
-    row.className='feed-row';
-    row.style.animationDelay=(i*55)+'ms';
-    row.innerHTML=
-      '<span class="fr-emblem" style="color:'+eTh(h.emblem,color)+';filter:drop-shadow(0 0 7px '+eTh(h.emblem,color)+'">'+eChr(h.emblem)+'</span>'
-      +'<span class="fr-name">'+escHtml(h.codename)+'</span>'
-      +'<span class="fr-rank" style="color:'+color+'">'+escHtml(h.rank)+'</span>'
-      +'<span class="fr-time">'+t+'</span>'
-      +'<span class="fr-tx">'+(h.total_conversations||0)+' TX</span>';
-    row.onclick=function(){openModal(h);};
-    list.appendChild(row);
-  });
-}
-
 // ── Ticker ────────────────────────────────────────────────────────────────
 function relTime(iso){
   if(!iso)return '';
@@ -1897,7 +1852,7 @@ async function refreshHeroes(){
 
     populateStats(allHeroes);
 
-    buildFeed(allHeroes);
+
     buildTicker(allHeroes);
     if(constellationMode)renderConstellation();else renderGrid(newSerials);
   }catch(e){}
@@ -1932,7 +1887,7 @@ async function load(){
 
     populateStats(allHeroes);
 
-    buildFeed(allHeroes);
+
     buildTicker(allHeroes);
     renderGrid();
     var params=new URLSearchParams(location.search);
