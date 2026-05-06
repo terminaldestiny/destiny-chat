@@ -130,17 +130,7 @@ body::before{content:'';position:fixed;inset:0;background:repeating-linear-gradi
 .tswatch[data-t="pink"]{background:#ff2288;}
 .tswatch[data-t="orange"]{background:#ff6600;}
 .tswatch[data-t="solar"]{background:#ffff00;}
-.tswatch[data-t="jade"]{background:#00ff99;}
-.tswatch[data-t="flux"]{background:#ff00cc;}
-.tswatch[data-t="warp"]{background:#9933ff;}
-.tswatch[data-t="ghost"]{background:#e0e0e0;}
-.tswatch[data-t="ember"]{background:#ff8800;}
 .t-name{font-size:9px;letter-spacing:2.5px;color:rgba(255,255,255,0.4);margin-left:2px;}
-#more-colors-btn{width:26px;height:26px;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.14);color:rgba(255,255,255,0.32);cursor:pointer;font-size:13px;line-height:1;transition:.15s;font-family:inherit;flex-shrink:0;}
-#more-colors-btn:hover{border-color:rgba(255,255,255,0.35);color:#fff;}
-#more-colors-btn.open{border-color:rgba(255,170,0,0.4);color:var(--amber);}
-#more-colors-row{display:none;margin-top:8px;gap:9px;flex-wrap:wrap;align-items:center;}
-#more-colors-row.open{display:flex;}
 #pattern-row{display:flex;gap:6px;flex-wrap:wrap;}
 .pat-opt{padding:7px 14px;border:1px solid rgba(0,255,65,0.14);font-size:8px;letter-spacing:2px;color:rgba(255,255,255,0.38);cursor:pointer;transition:.15s;}
 .pat-opt:hover{border-color:rgba(255,255,255,0.28);color:rgba(255,255,255,0.65);}
@@ -663,17 +653,8 @@ body::before{content:'';position:fixed;inset:0;background:repeating-linear-gradi
           <div class="tswatch" data-t="blue"   title="DEEP"    onclick="pickTheme('blue')"></div>
           <div class="tswatch" data-t="pink"   title="NOVA"    onclick="pickTheme('pink')"></div>
           <div class="tswatch" data-t="orange" title="BLAZE"   onclick="pickTheme('orange')"></div>
-          <button id="more-colors-btn" title="MORE COLORS" onclick="toggleMoreColors()">+</button>
-          <span class="t-name" id="theme-name">SIGNAL</span>
-        </div>
-        <div id="more-colors-row">
           <div class="tswatch" data-t="solar"  title="SOLAR"   onclick="pickTheme('solar')"></div>
-          <div class="tswatch" data-t="jade"   title="JADE"    onclick="pickTheme('jade')"></div>
-          <div class="tswatch" data-t="flux"   title="FLUX"    onclick="pickTheme('flux')"></div>
-          <div class="tswatch" data-t="warp"   title="WARP"    onclick="pickTheme('warp')"></div>
-          <div class="tswatch" data-t="ghost"  title="GHOST"   onclick="pickTheme('ghost')"></div>
-          <div class="tswatch" data-t="ember"  title="EMBER"   onclick="pickTheme('ember')"></div>
-          <span class="t-name" id="theme-name-more" style="display:none;"></span>
+          <span class="t-name" id="theme-name">SIGNAL</span>
         </div>
       </div>
       <div class="e-row">
@@ -1156,8 +1137,6 @@ function populateMyCard(h){
   document.querySelectorAll('.tswatch').forEach(function(el){el.classList.toggle('active',el.dataset.t===p.theme);});
   document.querySelectorAll('.ec-swatch,.ec-auto').forEach(function(el){el.classList.toggle('active',el.dataset.ec===p.emblem_color);});
   document.getElementById('ec-name').textContent=p.emblem_color?(THEME_NAME[p.emblem_color]||p.emblem_color.toUpperCase()):'AUTO';
-  var extraThemes=['solar','jade','flux','warp','ghost','ember'];
-  if(extraThemes.includes(p.theme)){var mr=document.getElementById('more-colors-row');if(mr&&!mr.classList.contains('open')){mr.classList.add('open');var mb=document.getElementById('more-colors-btn');if(mb){mb.classList.add('open');mb.textContent='−';}}}
   var extraEmblems=['command','gear','bullseye','cross','crown','circlex','anchor','crescent','ringeye','semi','bars','spark'];
   if(extraEmblems.includes(p.emblem)){var me=document.getElementById('more-emblems-row');if(me&&!me.classList.contains('open')){me.classList.add('open');var meb=document.getElementById('more-emblems-btn');if(meb){meb.classList.add('open');meb.textContent='− LESS';}}}
   document.querySelectorAll('.pat-opt').forEach(function(el){el.classList.toggle('active',el.dataset.p===p.bg_pattern);});
@@ -1189,13 +1168,6 @@ function pickEmblemColor(c){
   document.querySelectorAll('.ec-swatch,.ec-auto').forEach(function(el){el.classList.toggle('active',el.dataset.ec===c);});
   document.getElementById('ec-name').textContent=c?(THEME_NAME[c]||c.toUpperCase()):'AUTO';
   updatePreview();
-}
-function toggleMoreColors(){
-  var row=document.getElementById('more-colors-row');
-  var btn=document.getElementById('more-colors-btn');
-  var open=row.classList.toggle('open');
-  btn.classList.toggle('open',open);
-  btn.textContent=open?'−':'+';
 }
 function pickTheme(t){
   p.theme=t;
