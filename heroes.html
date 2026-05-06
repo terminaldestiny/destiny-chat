@@ -286,6 +286,10 @@ body::before{content:'';position:fixed;inset:0;background:repeating-linear-gradi
   #search-input{max-width:100%;width:100%;}
   #stat-tiers{font-size:10px!important;}
   #rank-legend{padding-left:14px;padding-right:14px;}
+  #signal-section{padding:12px 14px 14px;}
+  #feed-section{padding-left:14px;padding-right:14px;}
+  .feed-row{grid-template-columns:1.6em 1fr 80px 54px;}
+  .fr-tx{display:none;}
 }
 
 /* ── Constellation mode ──────────────────── */
@@ -311,6 +315,36 @@ body::before{content:'';position:fixed;inset:0;background:repeating-linear-gradi
 .cl-item{display:flex;align-items:center;gap:7px;}
 .cl-dot{border-radius:50%;display:inline-block;flex-shrink:0;}
 #c-count{position:absolute;top:20px;left:50%;transform:translateX(-50%);font-size:8px;letter-spacing:3px;color:rgba(0,255,65,0.2);}
+
+/* ── Signal meter ────────────────────────── */
+#signal-section{padding:14px 20px 16px;border-bottom:1px solid rgba(0,255,65,0.07);position:relative;z-index:1;}
+#signal-header{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:10px;}
+#signal-lbl{font-size:8px;letter-spacing:3px;color:rgba(0,255,65,0.28);}
+#signal-total{font-size:15px;font-weight:bold;color:rgba(255,255,255,0.68);letter-spacing:2px;}
+#signal-bar-track{height:5px;background:rgba(0,255,65,0.06);position:relative;margin-bottom:8px;overflow:visible;}
+#signal-bar-fill{height:100%;width:0%;position:relative;transition:width 1.6s cubic-bezier(.4,0,.2,1);background:linear-gradient(90deg,rgba(0,255,65,0.85) 0%,rgba(0,212,255,0.95) 50%,rgba(0,255,65,0.85) 100%);background-size:200% 100%;animation:signal-shimmer 2.4s linear infinite;box-shadow:0 0 14px rgba(0,255,65,0.45),0 0 28px rgba(0,255,65,0.15);}
+#signal-bar-fill::after{content:'';position:absolute;top:-2px;right:-1px;width:3px;height:9px;background:#fff;box-shadow:0 0 8px rgba(255,255,255,0.8);opacity:.7;border-radius:1px;}
+@keyframes signal-shimmer{0%{background-position:200% center;}100%{background-position:-200% center;}}
+#signal-markers{position:relative;height:18px;}
+.sig-mark{position:absolute;transform:translateX(-50%);font-size:6px;letter-spacing:1px;color:rgba(0,255,65,0.18);text-align:center;pointer-events:none;white-space:nowrap;}
+.sig-mark::before{content:'';display:block;width:1px;height:4px;background:rgba(0,255,65,0.18);margin:0 auto 2px;}
+.sig-mark.reached{color:rgba(0,255,65,0.5);}
+.sig-mark.reached::before{background:rgba(0,255,65,0.5);}
+.sig-mark.next-target{color:rgba(0,212,255,0.45);animation:dot-pulse 2s ease-in-out infinite;}
+.sig-mark.next-target::before{background:rgba(0,212,255,0.45);}
+
+/* ── Transmission feed ───────────────────── */
+#feed-section{padding:16px 20px 0;position:relative;z-index:1;}
+#feed-header{font-size:8px;letter-spacing:3px;color:rgba(0,255,65,0.28);display:flex;align-items:center;gap:10px;margin-bottom:10px;}
+#feed-live{color:rgba(0,255,65,0.5);animation:dot-pulse 2s ease-in-out infinite;font-size:8px;}
+#feed-list{display:flex;flex-direction:column;gap:1px;}
+.feed-row{display:grid;grid-template-columns:1.8em 1fr 100px 68px 52px;align-items:center;gap:8px;padding:8px 10px;border:1px solid transparent;cursor:pointer;transition:.12s;opacity:0;animation:card-in .3s ease forwards;}
+.feed-row:hover{background:rgba(0,255,65,0.022);border-color:rgba(0,255,65,0.09);}
+.fr-emblem{font-size:15px;line-height:1;text-align:center;}
+.fr-name{font-size:9px;letter-spacing:1.5px;color:rgba(255,255,255,0.7);font-weight:bold;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.fr-rank{font-size:7px;letter-spacing:2px;}
+.fr-time{font-size:7px;letter-spacing:1px;color:rgba(255,255,255,0.2);text-align:right;white-space:nowrap;}
+.fr-tx{font-size:7px;letter-spacing:1px;color:rgba(255,255,255,0.2);text-align:right;white-space:nowrap;}
 
 /* ── Live ticker ─────────────────────────── */
 #ticker-wrap{height:30px;overflow:hidden;border-bottom:1px solid rgba(0,255,65,0.07);position:relative;z-index:1;display:none;}
@@ -379,6 +413,15 @@ body::before{content:'';position:fixed;inset:0;background:repeating-linear-gradi
     <span id="stat-tiers">—</span>
     <span class="si-lbl">TIER BREAKDOWN</span>
   </div>
+</div>
+
+<div id="signal-section">
+  <div id="signal-header">
+    <span id="signal-lbl">// COMMUNITY SIGNAL STRENGTH</span>
+    <span id="signal-total"></span>
+  </div>
+  <div id="signal-bar-track"><div id="signal-bar-fill"></div></div>
+  <div id="signal-markers"></div>
 </div>
 
 <div id="ticker-wrap"><div id="ticker-inner"></div></div>
@@ -544,6 +587,11 @@ body::before{content:'';position:fixed;inset:0;background:repeating-linear-gradi
   <span class="rl-label">$DESTINY REQUIRED</span>
 </div>
 
+<div id="feed-section" style="display:none;">
+  <div id="feed-header">◈ FIELD TRANSMISSIONS <span id="feed-live">● LIVE</span></div>
+  <div id="feed-list"></div>
+</div>
+
 <div id="loading">SCANNING FIELD ROSTER</div>
 <div id="grid"></div>
 <div id="no-results">// NO HEROES FOUND</div>
@@ -631,6 +679,7 @@ function buildBarcodeGradient(color){
 function getSession(){try{var s=JSON.parse(localStorage.getItem('destiny_session')||'null');return(s&&s.expires>Date.now())?s:null;}catch(e){return null;}}
 function fmtSerial(n){return 'TD-'+String(n).padStart(3,'0');}
 function fmtDate(iso){return new Date(iso).toLocaleDateString('en-US',{year:'numeric',month:'short',day:'numeric'});}
+function fmtPower(n){if(n>=1000000000)return(n/1000000000).toFixed(1)+'B';if(n>=1000000)return(n/1000000).toFixed(1)+'M';if(n>=1000)return Math.round(n/1000)+'K';return String(n);}
 function escHtml(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
 function cRgba(t,a){var fn=THEME_RGBA[t||'green'];return fn?fn(a):'rgba(0,255,65,'+a+')';}
 function cHex(t){return THEME_HEX[t||'green']||'#00ff41';}
@@ -1289,6 +1338,71 @@ function renderConstellation(){
   });
 }
 
+// ── Signal meter ──────────────────────────────────────────────────────────
+function buildSignalMeter(heroes){
+  var MILESTONES=[5000000,25000000,100000000,500000000,1000000000];
+  var RANK_EST={LEGEND:10000000,COMMANDER:2000000,AGENT:500000,OPERATIVE:250000};
+  var total=heroes.reduce(function(s,h){return s+(RANK_EST[h.rank]||250000);},0);
+  var max=MILESTONES[MILESTONES.length-1];
+  var nextIdx=0;
+  for(var i=0;i<MILESTONES.length;i++){if(total<MILESTONES[i]){max=MILESTONES[i];nextIdx=i;break;}}
+  var pct=Math.min(99.5,(total/max)*100);
+
+  var totalEl=document.getElementById('signal-total');
+  var displayed={v:0};
+  var t0=performance.now();
+  (function step(now){
+    var prog=Math.min((now-t0)/1400,1);
+    var ease=1-Math.pow(1-prog,3);
+    displayed.v=Math.round(total*ease);
+    totalEl.textContent=fmtPower(displayed.v)+' $DESTINY';
+    if(prog<1)requestAnimationFrame(step);
+  })(t0);
+
+  var fill=document.getElementById('signal-bar-fill');
+  fill.style.width='0%';
+  setTimeout(function(){fill.style.width=pct+'%';},120);
+
+  var markersEl=document.getElementById('signal-markers');
+  markersEl.innerHTML='';
+  MILESTONES.forEach(function(m,i){
+    if(m>max*1.01)return;
+    var mark=document.createElement('span');
+    var cls='sig-mark'+(total>=m?' reached':i===nextIdx?' next-target':'');
+    mark.className=cls;
+    mark.style.left=((m/max)*100)+'%';
+    mark.textContent=fmtPower(m);
+    markersEl.appendChild(mark);
+  });
+}
+
+// ── Transmission feed ─────────────────────────────────────────────────────
+function buildFeed(heroes){
+  var section=document.getElementById('feed-section');
+  var active=heroes.filter(function(h){return h.last_active_at;})
+    .sort(function(a,b){return new Date(b.last_active_at)-new Date(a.last_active_at);})
+    .slice(0,7);
+  if(!active.length){section.style.display='none';return;}
+  section.style.display='block';
+  var list=document.getElementById('feed-list');
+  list.innerHTML='';
+  active.forEach(function(h,i){
+    var color=cHex(h.theme||'green');
+    var t=relTime(h.last_active_at)||'RECENTLY';
+    var row=document.createElement('div');
+    row.className='feed-row';
+    row.style.animationDelay=(i*55)+'ms';
+    row.innerHTML=
+      '<span class="fr-emblem" style="color:'+color+';filter:drop-shadow(0 0 7px '+color+')">'+(EMBLEMS[h.emblem]||'⬡')+'</span>'
+      +'<span class="fr-name">'+escHtml(h.codename)+'</span>'
+      +'<span class="fr-rank" style="color:'+color+'">'+h.rank+'</span>'
+      +'<span class="fr-time">'+t+'</span>'
+      +'<span class="fr-tx">'+(h.total_conversations||0)+' TX</span>';
+    row.onclick=function(){openModal(h);};
+    list.appendChild(row);
+  });
+}
+
 // ── Ticker ────────────────────────────────────────────────────────────────
 function relTime(iso){
   if(!iso)return '';
@@ -1358,6 +1472,8 @@ async function refreshHeroes(){
     allHeroes=fresh;
     document.getElementById('hero-count').textContent='HEROES: '+allHeroes.length;
     populateStats(allHeroes);
+    buildSignalMeter(allHeroes);
+    buildFeed(allHeroes);
     buildTicker(allHeroes);
     if(constellationMode)renderConstellation();else renderGrid(newSerials);
   }catch(e){}
@@ -1391,6 +1507,8 @@ async function load(){
     document.getElementById('loading').style.display='none';
     document.getElementById('hero-count').textContent='HEROES: '+allHeroes.length;
     populateStats(allHeroes);
+    buildSignalMeter(allHeroes);
+    buildFeed(allHeroes);
     buildTicker(allHeroes);
     renderGrid();
     var params=new URLSearchParams(location.search);
