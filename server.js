@@ -241,7 +241,7 @@ async function getAllHeroes() {
       var rank = b >= 10000000 ? 'LEGEND' : b >= 2000000 ? 'COMMANDER' : b >= 500000 ? 'AGENT' : 'OPERATIVE';
       return { serial: h.serial, codename: h.codename, emblem: h.emblem, titles: h.titles,
                total_conversations: h.total_conversations, days_active: h.days_active,
-               joined_at: h.joined_at, rank, gold: b >= 2000000,
+               joined_at: h.joined_at, rank, gold: b >= 2000000, balance: b,
                theme: h.theme || 'green', tagline: h.tagline || '', bg_pattern: h.bg_pattern || 'none',
                last_active_at: h.last_active_at || null, x_handle: h.x_handle || '', fx: h.fx || 'none', show_barcode: h.show_barcode || false };
     });

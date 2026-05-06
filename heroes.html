@@ -1340,9 +1340,8 @@ function renderConstellation(){
 
 // ── Signal meter ──────────────────────────────────────────────────────────
 function buildSignalMeter(heroes){
-  var MILESTONES=[5000000,25000000,100000000,500000000,1000000000];
-  var RANK_EST={LEGEND:10000000,COMMANDER:2000000,AGENT:500000,OPERATIVE:250000};
-  var total=heroes.reduce(function(s,h){return s+(RANK_EST[h.rank]||250000);},0);
+  var MILESTONES=[50000000,100000000,500000000,1000000000,5000000000];
+  var total=heroes.reduce(function(s,h){return s+(h.balance||0);},0);
   var max=MILESTONES[MILESTONES.length-1];
   var nextIdx=0;
   for(var i=0;i<MILESTONES.length;i++){if(total<MILESTONES[i]){max=MILESTONES[i];nextIdx=i;break;}}
