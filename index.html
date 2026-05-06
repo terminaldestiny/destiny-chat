@@ -763,6 +763,20 @@
     .help-nav-btn-heroes .help-nav-lbl { color:var(--amber); }
     .help-nav-btn-heroes .help-nav-desc { color:rgba(255,170,0,0.45); }
     .help-nav-btn-heroes:hover { border-color:var(--amber);background:rgba(255,170,0,0.08);box-shadow:0 0 18px rgba(255,170,0,0.1); }
+    /* ── Menu hero roster ─────────────────────── */
+    #menu-roster{margin-bottom:16px;padding-bottom:16px;border-bottom:1px solid rgba(0,255,65,0.1);}
+    #menu-roster-hd{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;}
+    #menu-roster-lbl{font-size:9px;letter-spacing:4px;color:rgba(0,255,65,0.4);}
+    #menu-roster-all{font-size:8px;letter-spacing:2px;color:rgba(0,212,255,0.5);text-decoration:none;transition:color .15s;}
+    #menu-roster-all:hover{color:rgba(0,212,255,0.9);}
+    #menu-roster-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:6px;}
+    .mr-card{display:flex;align-items:center;gap:8px;padding:8px 9px;border:1px solid rgba(0,255,65,0.1);background:rgba(0,255,65,0.02);text-decoration:none;transition:.14s;overflow:hidden;}
+    .mr-card:hover{background:rgba(0,255,65,0.06);border-color:rgba(0,255,65,0.28);}
+    .mr-emb{font-size:20px;line-height:1;flex-shrink:0;}
+    .mr-info{flex:1;min-width:0;display:flex;flex-direction:column;gap:2px;}
+    .mr-name{font-size:9px;letter-spacing:1px;font-weight:bold;color:rgba(255,255,255,0.82);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+    .mr-rank{font-size:7px;letter-spacing:2px;}
+    .mr-loading{grid-column:1/-1;text-align:center;padding:14px 0;font-size:8px;letter-spacing:3px;color:rgba(0,255,65,0.28);}
 
     /* CA */
     #ca-badge { position:fixed;bottom:72px;right:14px;font-size:9px;text-align:right;cursor:pointer;z-index:50;user-select:none;line-height:1.6; }
@@ -1184,6 +1198,13 @@
       <span class="help-nav-lbl">✈ TELEGRAM</span>
       <span class="help-nav-desc">Community portal</span>
     </a>
+  </div>
+  <div id="menu-roster">
+    <div id="menu-roster-hd">
+      <span id="menu-roster-lbl">// HERO ROSTER</span>
+      <a id="menu-roster-all" href="heroes.html" onclick="closeHelp()">VIEW ALL →</a>
+    </div>
+    <div id="menu-roster-grid"><div class="mr-loading">// FETCHING ROSTER...</div></div>
   </div>
   <h2>// WHAT DESTINY CAN HELP WITH</h2>
   <div class="ht"><div class="ht-n">→ AI &amp; Building</div><div class="ht-d">Claude Code, Cursor, v0, Bolt — tools first, always. Ask her what to use.</div></div>
@@ -2769,8 +2790,53 @@ function fbCopy(){var ta=document.createElement('textarea');ta.value=CA;ta.style
 })();
 
 // ── Help ──────────────────────────────────────────────────────────
-function openHelp(){document.getElementById('help-ovl').classList.add('on');document.getElementById('help-backdrop').classList.add('on');}
+function openHelp(){
+  document.getElementById('help-ovl').classList.add('on');
+  document.getElementById('help-backdrop').classList.add('on');
+  loadMenuHeroes();
+}
 function closeHelp(){document.getElementById('help-ovl').classList.remove('on');document.getElementById('help-backdrop').classList.remove('on');}
+
+// ── Menu hero roster ───────────────────────────────────────────────
+var _menuHeroesLoaded=false;
+var _MENU_CLR={green:'rgba(0,255,65,0.65)',cyan:'rgba(0,212,255,0.65)',amber:'rgba(255,170,0,0.65)',red:'rgba(255,42,0,0.65)',purple:'rgba(204,68,255,0.65)',blue:'rgba(0,136,255,0.65)',pink:'rgba(255,34,136,0.65)',orange:'rgba(255,102,0,0.65)',solar:'rgba(255,240,0,0.65)',jade:'rgba(0,255,153,0.65)',flux:'rgba(255,0,204,0.65)',warp:'rgba(153,51,255,0.65)',ghost:'rgba(200,200,220,0.5)',ember:'rgba(255,136,0,0.65)'};
+var _MENU_EMB={hexagon:'⬡',diamond:'◆',skull:'☠',shield:'⛨',sword:'⚔',star:'✦',lightning:'⚡',infinity:'∞',target:'◎',signal:'≋',psi:'Ψ',omega:'Ω',delta:'Δ',phi:'Φ',prism:'◈',nexus:'⁂',origin:'⊕',apex:'▲',command:'⌘',gear:'⚙',bullseye:'◉',cross:'✙',crown:'♛',circlex:'⊗',anchor:'⚓',crescent:'☽',ringeye:'⊙',semi:'◑',bars:'≡',spark:'✺'};
+
+function loadMenuHeroes(){
+  if(_menuHeroesLoaded)return;
+  _menuHeroesLoaded=true;
+  fetch(BACKEND+'/api/heroes')
+    .then(function(r){return r.json();})
+    .then(function(d){_renderMenuHeroes(d.heroes||[]);})
+    .catch(function(){
+      var g=document.getElementById('menu-roster-grid');
+      if(g)g.innerHTML='<div class="mr-loading">// SIGNAL LOST</div>';
+    });
+}
+
+function _renderMenuHeroes(heroes){
+  var g=document.getElementById('menu-roster-grid');
+  if(!g)return;
+  if(!heroes.length){g.innerHTML='<div class="mr-loading">// NO HEROES YET</div>';return;}
+  var list=heroes.slice(0,8);
+  g.innerHTML=list.map(function(h){
+    var eb=(h.emblem||'hexagon').split('|')[0];
+    var ec=(h.emblem||'').split('|')[1];
+    var th=h.theme||'green';
+    var clr=_MENU_CLR[ec||th]||_MENU_CLR.green;
+    var emb=_MENU_EMB[eb]||'⬡';
+    var rnk=h.rank||'OPERATIVE';
+    var rnkClr=rnk==='LEGEND'?'#ffaa00':rnk==='COMMANDER'?'rgba(204,68,255,0.9)':rnk==='AGENT'?(clr):'rgba(0,255,65,0.38)';
+    var nm=(h.codename||'HERO').replace(/[&<>'"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c];});
+    return '<a href="heroes.html" class="mr-card" onclick="closeHelp()" style="border-left:2px solid '+clr+'">'+
+      '<div class="mr-emb" style="color:'+clr+';text-shadow:0 0 8px '+clr+'">'+emb+'</div>'+
+      '<div class="mr-info">'+
+        '<div class="mr-name">'+nm+'</div>'+
+        '<div class="mr-rank" style="color:'+rnkClr+'">'+rnk+'</div>'+
+      '</div>'+
+    '</a>';
+  }).join('');
+}
 </script>
 </body>
 </html>
