@@ -763,20 +763,31 @@
     .help-nav-btn-heroes .help-nav-lbl { color:var(--amber); }
     .help-nav-btn-heroes .help-nav-desc { color:rgba(255,170,0,0.45); }
     .help-nav-btn-heroes:hover { border-color:var(--amber);background:rgba(255,170,0,0.08);box-shadow:0 0 18px rgba(255,170,0,0.1); }
-    /* ── Menu hero roster ─────────────────────── */
-    #menu-roster{margin-bottom:16px;padding-bottom:16px;border-bottom:1px solid rgba(0,255,65,0.1);}
-    #menu-roster-hd{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;}
-    #menu-roster-lbl{font-size:9px;letter-spacing:4px;color:rgba(0,255,65,0.4);}
-    #menu-roster-all{font-size:8px;letter-spacing:2px;color:rgba(0,212,255,0.5);text-decoration:none;transition:color .15s;}
-    #menu-roster-all:hover{color:rgba(0,212,255,0.9);}
-    #menu-roster-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:6px;}
-    .mr-card{display:flex;align-items:center;gap:8px;padding:8px 9px;border:1px solid rgba(0,255,65,0.1);background:rgba(0,255,65,0.02);text-decoration:none;transition:.14s;overflow:hidden;}
-    .mr-card:hover{background:rgba(0,255,65,0.06);border-color:rgba(0,255,65,0.28);}
-    .mr-emb{font-size:20px;line-height:1;flex-shrink:0;}
-    .mr-info{flex:1;min-width:0;display:flex;flex-direction:column;gap:2px;}
-    .mr-name{font-size:9px;letter-spacing:1px;font-weight:bold;color:rgba(255,255,255,0.82);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
-    .mr-rank{font-size:7px;letter-spacing:2px;}
-    .mr-loading{grid-column:1/-1;text-align:center;padding:14px 0;font-size:8px;letter-spacing:3px;color:rgba(0,255,65,0.28);}
+    /* ── Menu hero card ─────────────────────── */
+    @keyframes bfx-aurora{0%{background-position:0% 50%,100% 50%,40% 50%;}33%{background-position:40% 50%,60% 50%,90% 50%;}66%{background-position:80% 50%,20% 50%,15% 50%;}100%{background-position:100% 50%,0% 50%,65% 50%;}}
+    @keyframes bfx-plasma{0%{background-position:0% 0%,100% 100%,50% 0%;}25%{background-position:100% 0%,0% 0%,100% 100%;}50%{background-position:100% 100%,0% 100%,0% 50%;}75%{background-position:0% 100%,100% 0%,50% 100%;}100%{background-position:0% 0%,100% 100%,50% 0%;}}
+    @keyframes bfx-inferno{0%{background-position:0% 100%,10% 100%,80% 100%;filter:brightness(1) saturate(1.2);}20%{background-position:0% 85%,30% 95%,55% 98%;filter:brightness(1.2) saturate(1.4);}40%{background-position:0% 90%,50% 102%,35% 95%;filter:brightness(0.88) saturate(1.1);}60%{background-position:0% 78%,20% 98%,65% 102%;filter:brightness(1.3) saturate(1.5);}80%{background-position:0% 88%,40% 96%,45% 100%;filter:brightness(1.05) saturate(1.3);}100%{background-position:0% 72%,60% 100%,30% 97%;filter:brightness(1.4) saturate(1.55);}}
+    @keyframes bfx-prism{from{background-position:0% 0%;}to{background-position:100% 0%;}}
+    @keyframes bfx-glitch{0%,7%{background-position:0 0,0 0,0 0;opacity:1;}8%{background-position:-8px 0,5px 0,0 0;opacity:1;}9%,23%{background-position:0 0,0 0,0 0;opacity:1;}24%{opacity:0.5;}25%,39%{background-position:0 0,0 0,0 0;opacity:1;}40%{background-position:5px 0,-3px 0,7px 0;opacity:1;}41%,54%{background-position:0 0,0 0,0 0;opacity:1;}55%{background-position:-7px 0,0 0,-4px 0;opacity:1;}56%,63%{opacity:0.4;}64%,100%{background-position:0 0,0 0,0 0;opacity:1;}}
+    @keyframes bfx-neon{0%,44%{opacity:0.85;filter:brightness(1.2);}45%{opacity:0.3;filter:brightness(0.5);}46%,49%{opacity:1;filter:brightness(1.9);}50%{opacity:0.2;filter:brightness(0.3);}51%,55%{opacity:1;filter:brightness(2.0);}56%,100%{opacity:0.85;filter:brightness(1.2);}}
+    @keyframes bfx-void{from{background-position:0% 50%,100% 50%,0 0,0 0,0 0,0 0,0 0;}to{background-position:100% 50%,0% 50%,0 0,0 0,0 0,0 0,0 0;}}
+    #mhc-wrap{margin-bottom:16px;padding-bottom:16px;border-bottom:1px solid rgba(0,255,65,0.1);}
+    #mhc{overflow:hidden;background:#050705;}
+    #mhc-banner{height:54px;display:flex;align-items:center;justify-content:space-between;padding:0 12px;position:relative;flex-shrink:0;border-bottom:1px solid transparent;}
+    #mhc-banner-fx{position:absolute;inset:0;pointer-events:none;z-index:0;}
+    #mhc-banner-left{display:flex;flex-direction:column;gap:3px;position:relative;z-index:1;}
+    #mhc-serial{font-size:7px;letter-spacing:2px;color:rgba(255,255,255,0.28);font-family:'Courier New',monospace;}
+    #mhc-rank-badge{font-size:7px;letter-spacing:2px;}
+    #mhc-emblem-wrap{position:relative;z-index:1;}
+    #mhc-emblem{font-size:30px;line-height:1;}
+    #mhc-body{padding:10px 12px 12px;}
+    #mhc-name{font-size:15px;font-weight:bold;letter-spacing:2px;margin-bottom:2px;}
+    #mhc-tagline{font-size:9px;font-style:italic;margin-bottom:8px;}
+    #mhc-titles{display:flex;flex-wrap:wrap;gap:4px;margin-bottom:10px;}
+    .mhc-chip{font-size:7px;letter-spacing:1.5px;padding:2px 6px;border:1px solid rgba(255,255,255,0.1);color:rgba(255,255,255,0.38);}
+    #mhc-stats{display:flex;gap:20px;padding-top:8px;border-top:1px solid rgba(255,255,255,0.06);}
+    .mhc-stat-lbl{font-size:7px;letter-spacing:2px;color:rgba(255,255,255,0.25);margin-bottom:2px;}
+    .mhc-stat-val{font-size:14px;font-weight:bold;letter-spacing:-0.5px;}
 
     /* CA */
     #ca-badge { position:fixed;bottom:72px;right:14px;font-size:9px;text-align:right;cursor:pointer;z-index:50;user-select:none;line-height:1.6; }
@@ -1199,12 +1210,23 @@
       <span class="help-nav-desc">Community portal</span>
     </a>
   </div>
-  <div id="menu-roster">
-    <div id="menu-roster-hd">
-      <span id="menu-roster-lbl">// HERO ROSTER</span>
-      <a id="menu-roster-all" href="heroes.html" onclick="closeHelp()">VIEW ALL →</a>
+  <div id="mhc-wrap" style="display:none;">
+    <div id="mhc">
+      <div id="mhc-banner">
+        <div id="mhc-banner-fx"></div>
+        <div id="mhc-banner-left">
+          <div id="mhc-serial"></div>
+          <div id="mhc-rank-badge"></div>
+        </div>
+        <div id="mhc-emblem-wrap"><div id="mhc-emblem">⬡</div></div>
+      </div>
+      <div id="mhc-body">
+        <div id="mhc-name"></div>
+        <div id="mhc-tagline"></div>
+        <div id="mhc-titles"></div>
+        <div id="mhc-stats"></div>
+      </div>
     </div>
-    <div id="menu-roster-grid"><div class="mr-loading">// FETCHING ROSTER...</div></div>
   </div>
   <h2>// WHAT DESTINY CAN HELP WITH</h2>
   <div class="ht"><div class="ht-n">→ AI &amp; Building</div><div class="ht-d">Claude Code, Cursor, v0, Bolt — tools first, always. Ask her what to use.</div></div>
@@ -2793,49 +2815,182 @@ function fbCopy(){var ta=document.createElement('textarea');ta.value=CA;ta.style
 function openHelp(){
   document.getElementById('help-ovl').classList.add('on');
   document.getElementById('help-backdrop').classList.add('on');
-  loadMenuHeroes();
+  loadMenuHeroCard();
 }
 function closeHelp(){document.getElementById('help-ovl').classList.remove('on');document.getElementById('help-backdrop').classList.remove('on');}
 
-// ── Menu hero roster ───────────────────────────────────────────────
-var _menuHeroesLoaded=false;
-var _MENU_CLR={green:'rgba(0,255,65,0.65)',cyan:'rgba(0,212,255,0.65)',amber:'rgba(255,170,0,0.65)',red:'rgba(255,42,0,0.65)',purple:'rgba(204,68,255,0.65)',blue:'rgba(0,136,255,0.65)',pink:'rgba(255,34,136,0.65)',orange:'rgba(255,102,0,0.65)',solar:'rgba(255,240,0,0.65)',jade:'rgba(0,255,153,0.65)',flux:'rgba(255,0,204,0.65)',warp:'rgba(153,51,255,0.65)',ghost:'rgba(200,200,220,0.5)',ember:'rgba(255,136,0,0.65)'};
-var _MENU_EMB={hexagon:'⬡',diamond:'◆',skull:'☠',shield:'⛨',sword:'⚔',star:'✦',lightning:'⚡',infinity:'∞',target:'◎',signal:'≋',psi:'Ψ',omega:'Ω',delta:'Δ',phi:'Φ',prism:'◈',nexus:'⁂',origin:'⊕',apex:'▲',command:'⌘',gear:'⚙',bullseye:'◉',cross:'✙',crown:'♛',circlex:'⊗',anchor:'⚓',crescent:'☽',ringeye:'⊙',semi:'◑',bars:'≡',spark:'✺'};
+// ── Menu hero card ─────────────────────────────────────────────────
+var _MC_RGBA={
+  green: function(a){return 'rgba(0,255,65,'+a+')';},
+  cyan:  function(a){return 'rgba(0,212,255,'+a+')';},
+  amber: function(a){return 'rgba(255,170,0,'+a+')';},
+  red:   function(a){return 'rgba(255,42,0,'+a+')';},
+  purple:function(a){return 'rgba(204,68,255,'+a+')';},
+  blue:  function(a){return 'rgba(0,136,255,'+a+')';},
+  pink:  function(a){return 'rgba(255,34,136,'+a+')';},
+  orange:function(a){return 'rgba(255,102,0,'+a+')';},
+  solar: function(a){return 'rgba(255,255,0,'+a+')';},
+  jade:  function(a){return 'rgba(0,255,153,'+a+')';},
+  flux:  function(a){return 'rgba(255,0,204,'+a+')';},
+  warp:  function(a){return 'rgba(153,51,255,'+a+')';},
+  ghost: function(a){return 'rgba(224,224,224,'+a+')';},
+  ember: function(a){return 'rgba(255,136,0,'+a+')';}
+};
+var _MC_HEX={green:'#00ff41',cyan:'#00d4ff',amber:'#ffaa00',red:'#ff2a00',purple:'#cc44ff',blue:'#0088ff',pink:'#ff2288',orange:'#ff6600',solar:'#ffff00',jade:'#00ff99',flux:'#ff00cc',warp:'#9933ff',ghost:'#e0e0e0',ember:'#ff8800'};
+var _MC_ADJ={
+  green: ['rgba(0,200,130,0.38)','rgba(0,160,240,0.28)'],
+  cyan:  ['rgba(0,255,140,0.38)','rgba(40,80,255,0.28)'],
+  amber: ['rgba(255,70,0,0.42)','rgba(255,215,0,0.28)'],
+  red:   ['rgba(255,100,0,0.42)','rgba(200,0,80,0.28)'],
+  purple:['rgba(80,0,255,0.38)','rgba(255,0,130,0.28)'],
+  blue:  ['rgba(0,180,255,0.38)','rgba(80,0,200,0.28)'],
+  pink:  ['rgba(200,0,255,0.38)','rgba(255,80,0,0.28)'],
+  orange:['rgba(255,185,0,0.38)','rgba(255,25,0,0.28)'],
+  solar: ['rgba(255,175,0,0.42)','rgba(255,75,0,0.28)'],
+  jade:  ['rgba(0,210,200,0.38)','rgba(0,255,80,0.28)'],
+  flux:  ['rgba(0,180,255,0.35)','rgba(255,0,160,0.32)'],
+  warp:  ['rgba(200,0,255,0.38)','rgba(0,80,255,0.28)'],
+  ghost: ['rgba(180,180,255,0.3)','rgba(160,220,255,0.22)'],
+  ember: ['rgba(255,40,0,0.42)','rgba(255,210,0,0.3)']
+};
+var _MC_EMB={hexagon:'⬡',diamond:'◆',skull:'☠',shield:'⛨',sword:'⚔',star:'✦',lightning:'⚡',infinity:'∞',target:'◎',signal:'≋',psi:'Ψ',omega:'Ω',delta:'Δ',phi:'Φ',prism:'◈',nexus:'⁂',origin:'⊕',apex:'▲',command:'⌘',gear:'⚙',bullseye:'◉',cross:'✙',crown:'♛',circlex:'⊗',anchor:'⚓',crescent:'☽',ringeye:'⊙',semi:'◑',bars:'≡',spark:'✺'};
 
-function loadMenuHeroes(){
-  if(_menuHeroesLoaded)return;
-  _menuHeroesLoaded=true;
-  fetch(BACKEND+'/api/heroes')
-    .then(function(r){return r.json();})
-    .then(function(d){_renderMenuHeroes(d.heroes||[]);})
-    .catch(function(){
-      var g=document.getElementById('menu-roster-grid');
-      if(g)g.innerHTML='<div class="mr-loading">// SIGNAL LOST</div>';
-    });
+function _applyBannerFxMC(el,style,theme){
+  var ra=_MC_RGBA[theme||'green']||_MC_RGBA.green;
+  if(!el)return;
+  el.style.backgroundImage='none';el.style.backgroundSize='auto';
+  el.style.backgroundPosition='0 0';el.style.animation='';
+  el.style.opacity='';el.style.filter='';
+  var s=style||'clean';
+  if(s==='aurora'){
+    var adj=_MC_ADJ[theme||'green']||_MC_ADJ.green;
+    el.style.backgroundImage=
+      'radial-gradient(ellipse 60% 120% at 20% 50%,'+ra('0.58')+' 0%,transparent 65%),'+
+      'radial-gradient(ellipse 50% 100% at 80% 50%,'+adj[0]+' 0%,transparent 60%),'+
+      'radial-gradient(ellipse 45% 90% at 55% 50%,'+adj[1]+' 0%,transparent 55%)';
+    el.style.backgroundSize='300% 200%,270% 200%,230% 200%';
+    el.style.backgroundPosition='0% 50%,100% 50%,40% 50%';
+    el.style.animation='bfx-aurora 7s ease-in-out infinite alternate';
+  } else if(s==='plasma'){
+    el.style.backgroundImage=
+      'radial-gradient(ellipse 65% 120% at 20% 30%,'+ra('0.78')+' 0%,transparent 55%),'+
+      'radial-gradient(ellipse 55% 100% at 80% 70%,'+ra('0.62')+' 0%,transparent 50%),'+
+      'radial-gradient(ellipse 45% 90% at 55% 15%,'+ra('0.5')+' 0%,transparent 45%)';
+    el.style.backgroundSize='200% 200%,200% 200%,180% 180%';
+    el.style.backgroundPosition='0% 0%,100% 100%,50% 0%';
+    el.style.animation='bfx-plasma 5s ease-in-out infinite';
+  } else if(s==='inferno'){
+    el.style.backgroundImage=
+      'linear-gradient(to top,rgba(255,20,0,0.92) 0%,rgba(255,90,0,0.68) 25%,rgba(255,185,0,0.38) 55%,rgba(255,220,60,0.1) 78%,transparent 92%),'+
+      'radial-gradient(ellipse 55% 90% at 25% 100%,rgba(255,45,0,0.58) 0%,transparent 55%),'+
+      'radial-gradient(ellipse 45% 80% at 75% 100%,rgba(255,110,0,0.52) 0%,transparent 50%)';
+    el.style.backgroundSize='100% 200%,150% 150%,140% 140%';
+    el.style.backgroundPosition='0% 100%,10% 100%,80% 100%';
+    el.style.animation='bfx-inferno 1.8s ease-in-out infinite alternate';
+  } else if(s==='prism'){
+    el.style.backgroundImage=
+      'linear-gradient(90deg,rgba(255,0,80,0.65),rgba(255,90,0,0.6),rgba(255,210,0,0.5),rgba(80,255,0,0.45),rgba(0,255,190,0.55),rgba(0,120,255,0.6),rgba(120,0,255,0.65),rgba(255,0,170,0.6),rgba(255,0,80,0.65))';
+    el.style.backgroundSize='300% 100%';
+    el.style.animation='bfx-prism 3s linear infinite';
+  } else if(s==='glitch'){
+    el.style.backgroundImage=
+      'linear-gradient(transparent 36%,'+ra('0.78')+' 36%,'+ra('0.78')+' 40%,transparent 40%),'+
+      'linear-gradient(transparent 60%,rgba(255,0,100,0.58) 60%,rgba(255,0,100,0.58) 63%,transparent 63%),'+
+      'linear-gradient(transparent 20%,rgba(0,210,255,0.52) 20%,rgba(0,210,255,0.52) 23%,transparent 23%)';
+    el.style.animation='bfx-glitch 2s linear infinite';
+  } else if(s==='neon'){
+    el.style.backgroundImage=
+      'linear-gradient(transparent 38%,'+ra('0.06')+' 44%,'+ra('0.58')+' 48.5%,'+ra('1.0')+' 50%,'+ra('0.58')+' 51.5%,'+ra('0.06')+' 57%,transparent 63%),'+
+      'radial-gradient(ellipse 90% 55% at 50% 50%,'+ra('0.08')+' 0%,transparent 75%)';
+    el.style.animation='bfx-neon 3s linear infinite';
+  } else if(s==='void'){
+    el.style.backgroundImage=
+      'radial-gradient(ellipse 65% 160% at 22% 50%,'+ra('0.24')+' 0%,transparent 62%),'+
+      'radial-gradient(ellipse 45% 120% at 80% 50%,'+ra('0.14')+' 0%,transparent 58%),'+
+      'radial-gradient(circle at 15% 30%,rgba(255,255,255,0.7) 0,rgba(255,255,255,0.7) 1px,transparent 1px),'+
+      'radial-gradient(circle at 78% 22%,rgba(255,255,255,0.6) 0,rgba(255,255,255,0.6) 1px,transparent 1px),'+
+      'radial-gradient(circle at 45% 68%,rgba(255,255,255,0.55) 0,rgba(255,255,255,0.55) 1.5px,transparent 1.5px),'+
+      'radial-gradient(circle at 88% 55%,rgba(255,255,255,0.75) 0,rgba(255,255,255,0.75) 1px,transparent 1px),'+
+      'radial-gradient(circle at 60% 38%,rgba(255,255,255,0.85) 0,rgba(255,255,255,0.85) 1px,transparent 1px)';
+    el.style.backgroundSize='300% 200%,250% 200%,100% 100%,100% 100%,100% 100%,100% 100%,100% 100%';
+    el.style.backgroundPosition='0% 50%,100% 50%,0 0,0 0,0 0,0 0,0 0';
+    el.style.animation='bfx-void 10s ease-in-out infinite alternate';
+  }
 }
 
-function _renderMenuHeroes(heroes){
-  var g=document.getElementById('menu-roster-grid');
-  if(!g)return;
-  if(!heroes.length){g.innerHTML='<div class="mr-loading">// NO HEROES YET</div>';return;}
-  var list=heroes.slice(0,8);
-  g.innerHTML=list.map(function(h){
-    var eb=(h.emblem||'hexagon').split('|')[0];
-    var ec=(h.emblem||'').split('|')[1];
-    var th=h.theme||'green';
-    var clr=_MENU_CLR[ec||th]||_MENU_CLR.green;
-    var emb=_MENU_EMB[eb]||'⬡';
-    var rnk=h.rank||'OPERATIVE';
-    var rnkClr=rnk==='LEGEND'?'#ffaa00':rnk==='COMMANDER'?'rgba(204,68,255,0.9)':rnk==='AGENT'?(clr):'rgba(0,255,65,0.38)';
-    var nm=(h.codename||'HERO').replace(/[&<>'"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c];});
-    return '<a href="heroes.html" class="mr-card" onclick="closeHelp()" style="border-left:2px solid '+clr+'">'+
-      '<div class="mr-emb" style="color:'+clr+';text-shadow:0 0 8px '+clr+'">'+emb+'</div>'+
-      '<div class="mr-info">'+
-        '<div class="mr-name">'+nm+'</div>'+
-        '<div class="mr-rank" style="color:'+rnkClr+'">'+rnk+'</div>'+
-      '</div>'+
-    '</a>';
-  }).join('');
+var _mcLoaded=false;
+function loadMenuHeroCard(){
+  if(getTier()!=='operative')return;
+  if(_mcLoaded)return;
+  _mcLoaded=true;
+  var st=getSessionToken();
+  if(!st)return;
+  fetch(BACKEND+'/api/heroes/me',{
+    method:'POST',
+    headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({sessionToken:st})
+  })
+  .then(function(r){return r.json();})
+  .then(function(h){if(h&&h.serial)_renderMenuHeroCard(h);})
+  .catch(function(){});
+}
+
+function _renderMenuHeroCard(h){
+  var th=h.theme||'green';
+  var ra=_MC_RGBA[th]||_MC_RGBA.green;
+  var hex=_MC_HEX[th]||'#00ff41';
+  var eb=(h.emblem||'hexagon').split('|')[0];
+  var ec=(h.emblem||'').split('|')[1];
+  var eRa=ec?(_MC_RGBA[ec]||_MC_RGBA.green):ra;
+  var eHex=ec?(_MC_HEX[ec]||hex):hex;
+  var emb=_MC_EMB[eb]||'⬡';
+  var rnk=h.rank||'OPERATIVE';
+  var rnkClr=rnk==='LEGEND'?'#ffaa00':rnk==='COMMANDER'?'rgba(204,68,255,0.9)':rnk==='AGENT'?hex:ra('0.55');
+  var bg=h.bg_pattern||'none';
+  var banPts=bg.split('|');
+  var banStyle=banPts[1]||'clean';
+
+  var card=document.getElementById('mhc');
+  var banner=document.getElementById('mhc-banner');
+  var fx=document.getElementById('mhc-banner-fx');
+
+  if(card)card.style.border='1px solid '+ra('0.22');
+  if(banner)banner.style.borderBottom='1px solid '+ra('0.18');
+  _applyBannerFxMC(fx,banStyle,th);
+
+  var serial=document.getElementById('mhc-serial');
+  var rankBadge=document.getElementById('mhc-rank-badge');
+  var emblEl=document.getElementById('mhc-emblem');
+  if(serial)serial.textContent='TD-'+String(h.serial).padStart(3,'0');
+  if(rankBadge){rankBadge.textContent=rnk;rankBadge.style.color=rnkClr;}
+  if(emblEl){emblEl.textContent=emb;emblEl.style.color=eHex;emblEl.style.textShadow='0 0 10px '+eRa('0.7');}
+
+  var nameEl=document.getElementById('mhc-name');
+  var tagEl=document.getElementById('mhc-tagline');
+  var titlesEl=document.getElementById('mhc-titles');
+  var statsEl=document.getElementById('mhc-stats');
+  if(nameEl){nameEl.textContent=h.codename||'HERO';nameEl.style.color=hex;}
+  if(tagEl){tagEl.textContent=h.tagline||'';tagEl.style.color=ra('0.45');}
+  if(titlesEl){
+    var titles=[];
+    if(h.title_1)titles.push(h.title_1);
+    if(h.title_2)titles.push(h.title_2);
+    if(h.title_3)titles.push(h.title_3);
+    titlesEl.innerHTML=titles.map(function(t){
+      return '<div class="mhc-chip">'+t.replace(/[&<>'"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c];})+'</div>';
+    }).join('');
+  }
+  if(statsEl){
+    var pow=h.token_balance||0;
+    var pwStr=pow>=1000000000?(pow/1000000000).toFixed(1)+'B':pow>=1000000?(pow/1000000).toFixed(1)+'M':pow>=1000?Math.round(pow/1000)+'K':String(pow);
+    var msgs=h.message_count||0;
+    statsEl.innerHTML=
+      '<div class="mhc-stat"><div class="mhc-stat-lbl">POWER</div><div class="mhc-stat-val" style="color:'+hex+'">'+pwStr+'</div></div>'+
+      '<div class="mhc-stat"><div class="mhc-stat-lbl">TRANSMISSIONS</div><div class="mhc-stat-val" style="color:'+hex+'">'+msgs+'</div></div>';
+  }
+
+  var wrap=document.getElementById('mhc-wrap');
+  if(wrap)wrap.style.display='block';
 }
 </script>
 </body>
