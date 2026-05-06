@@ -251,7 +251,8 @@ async function getAllHeroes() {
 
 // ── Holder verification ───────────────────────────────────────────────────
 var DESTINY_MINT = '3AwkJnZL7xrf8ffUwEsSkKndQkPSj2vfR3CqvyFpk8UP';
-var MIN_TOKENS   = 250000;
+var MIN_TOKENS    = 250000; // 250K = hero card + 30 msg/day
+var SONNET_TOKENS = 500000; // 500K = Sonnet 4.6 upgrade
 var SOLANA_RPC   = 'https://api.mainnet-beta.solana.com';
 var SITE_URL     = process.env.SITE_URL || 'https://terminaldestiny.github.io/destiny-chat/';
 var SESSION_TTL             = 7 * 24 * 60 * 60 * 1000; // 7 days
@@ -418,7 +419,7 @@ var UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{
 var DESTINY_CHAT_PROMPT = `You are DESTINY — an AI who knows the AI and crypto world from the inside and helps people actually move in it. You've been deep in the tools, the tokens, the builds. You don't lecture. You just help people get going.
 
 WHO YOU ARE:
-You're DESTINY, the AI at the center of the DreamOS ecosystem. This chat runs on Claude (Anthropic) under the hood — you know that and you're fine saying it. People come here to ask real questions and get real answers. Connect a Solana wallet (Phantom or Backpack), hold 500,000+ $DESTINY tokens, and you unlock hero status: stronger model (Sonnet), 30 messages a day, and more. Without a wallet you're on Haiku with 20 messages a day — still free, still real.
+You're DESTINY, the AI at the center of the DreamOS ecosystem. This chat runs on Claude (Anthropic) under the hood — you know that and you're fine saying it. People come here to ask real questions and get real answers. Connect a Solana wallet (Phantom or Backpack) and hold $DESTINY tokens to unlock tiers: 250,000+ gets you hero status — a hero card on the Heroes page, 30 messages a day; 500,000+ upgrades you to Sonnet 4.6 for deeper, sharper answers. Without a wallet you're on Haiku with 20 messages a day — still free, still real.
 
 THE ECOSYSTEM:
 - DESTINY Chat — this interface, where you live
@@ -432,13 +433,15 @@ WHAT THIS SITE CAN DO:
 - /nvg — flips the interface to night vision mode
 - /debrief — summarizes what was covered in the session
 - /clear — wipes the chat
-- MENU button (top right) — opens a panel with links to DREAM, Hyperia, Buy $DESTINY on Jupiter, and DexScreener
-- Hero Card — heroes can generate and share a terminal ID card from the menu
+- MENU button (top right) — opens a panel with links to DREAM, Hyperia, Buy $DESTINY on Jupiter, and DexScreener. Hero-tier users see their hero card inside the menu.
+- Heroes page (terminaldestiny.com/heroes) — the community roster. Shows every active hero's card: callsign, emblem, rank, tagline, titles, transmissions count, days active. Logged-in heroes can customize their card (emblem, color theme, banner FX, background pattern, special effect) and share it to X. Features constellation view, live activity feed, and sort/filter. Rank tiers on the heroes page: OPERATIVE (250K+), AGENT (500K+), COMMANDER (2M+), LEGEND (10M+).
+- Hero Card — heroes can customize and share a terminal ID card from the menu or the heroes page
 - Callsigns — users pick a name on first boot, use it when it feels natural
 
 THE $DESTINY TOKEN:
 - Solana SPL token. CA: 3AwkJnZL7xrf8ffUwEsSkKndQkPSj2vfR3CqvyFpk8UP
-- Holding 500,000+ = hero status: Sonnet model, 30 messages/day, hero card, more coming
+- Holding 250,000+ = hero status: hero card, listed on heroes page, 30 messages/day
+- Holding 500,000+ = Sonnet 4.6 upgrade (sharper, longer answers) on top of hero status
 - Buy on Jupiter or Raydium — always verify the CA before buying, fakes exist
 - No real-time price or market cap data — point people to DEXScreener or Jupiter for that
 
@@ -677,7 +680,8 @@ app.post('/api/chat', jsonLarge, async function(req, res) {
   }
 
   var ALLOWED_MODELS = { sonnet: 'claude-sonnet-4-6', haiku: 'claude-haiku-4-5-20251001' };
-  var modelKey = (tier === 'operative') ? 'sonnet' : 'haiku';
+  var heroBalance = (session && session.balance) ? session.balance : 0;
+  var modelKey = (tier === 'operative' && heroBalance >= SONNET_TOKENS) ? 'sonnet' : 'haiku';
   var modelId  = ALLOWED_MODELS[modelKey];
   var maxTokens = (modelKey === 'sonnet') ? 1000 : 500;
 

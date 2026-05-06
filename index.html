@@ -1281,11 +1281,17 @@ function applyTierUI(tier,balance){
   if(eBtn) eBtn.style.display=(sess&&sess.emailAuth)?'none':'inline-flex';
   if(tier==='operative'){
     badge.textContent='OPERATIVE';badge.style.display='inline-block';
-    mBtn.textContent='⬡ SONNET';
-    mBtn.style.borderColor='rgba(0,212,255,0.6)';mBtn.style.color='var(--cyan)';
-    ACTIVE_MODEL='sonnet';
     aBtn.classList.add('on');
     DAILY_LIMIT=30;
+    if((balance||0)>=500000){
+      mBtn.textContent='⬡ SONNET';
+      mBtn.style.borderColor='rgba(0,212,255,0.6)';mBtn.style.color='var(--cyan)';
+      ACTIVE_MODEL='sonnet';
+    } else {
+      mBtn.textContent='⬡ HAIKU';
+      mBtn.style.borderColor='rgba(0,255,65,0.35)';mBtn.style.color='var(--green)';
+      ACTIVE_MODEL='haiku';
+    }
   } else {
     badge.style.display='none';
     mBtn.textContent='⬡ SONNET 🔒';mBtn.style.borderColor='';mBtn.style.color='';
@@ -1630,6 +1636,7 @@ function finishBoot(){
   setTimeout(function(){
     bootEl.classList.add('out');uiEl.classList.add('on');
     setTimeout(function(){bootEl.style.display='none';},1000);
+    prefetchHeroCard();
     document.getElementById('input-pfx').textContent='> '+(CALLSIGN||'HERO')+':';
     playSound('boot-up');
     // session state already applied at script load time (before boot)
@@ -2389,10 +2396,10 @@ function handleCommand(raw){
         '/dream           coming soon',
         '/clear           wipe feed and memory',
         '──────────────────────────────',
-        '// UNLOCK HERO TIER',
-        'hold 500,000+ $DESTINY · connect wallet · verify on-chain',
-        'CA: 3AwkJnZL7xrf8ffUwEsSkKndQkPSj2vfR3CqvyFpk8UP',
-        'heroes get sonnet 4.6 + 30 msg/day · recruits get haiku + 20/day'
+        '// TIERS',
+        '250K $DESTINY → hero card + 30 msg/day (haiku)',
+        '500K $DESTINY → sonnet 4.6 upgrade',
+        'CA: 3AwkJnZL7xrf8ffUwEsSkKndQkPSj2vfR3CqvyFpk8UP'
       ]);break;
     case '/mute':
       _muted=!_muted;
@@ -2431,7 +2438,7 @@ function handleCommand(raw){
           '// HERO PROFILE',
           'CALLSIGN  :  '+(CALLSIGN||'UNSET'),
           'TIER      :  '+tier.toUpperCase(),
-          'MODEL     :  '+(tier==='operative'?'SONNET 4.6':'HAIKU 4.5'),
+          'MODEL     :  '+((tier==='operative'&&(sess&&(sess.balance||0)>=500000))?'SONNET 4.6':'HAIKU 4.5'),
           'MSGS LEFT :  '+rem+' / '+(tier==='operative'?'30':'20')+' TODAY',
           'WALLET    :  '+(sess?wallet.slice(0,8)+'...'+wallet.slice(-4):'UNLINKED'),
           'HOLDING   :  '+(sess?bal+' $DESTINY':'—'),
@@ -2497,10 +2504,14 @@ function handleCommand(raw){
     case '/upgrade':
       (function(){
         var tier=getTier();
-        if(tier==='operative'){
-          addCmd(['// UPGRADE STATUS','TIER      :  HERO · FULLY UNLOCKED','MODEL     :  SONNET 4.6 · ACTIVE','LIMIT     :  30 MESSAGES / DAY','MEMORY    :  PERSISTENT ACROSS DEVICES  ·  COMING SOON','NEXT TIER :  APEX (5M+ $DESTINY)  ·  COMING SOON']);
+        var sess=getSession();
+        var bal=sess?(sess.balance||0):0;
+        if(tier==='operative'&&bal>=500000){
+          addCmd(['// UPGRADE STATUS','TIER      :  HERO · FULLY UNLOCKED','MODEL     :  SONNET 4.6 · ACTIVE','LIMIT     :  30 MESSAGES / DAY','HOLDING   :  '+bal.toLocaleString()+' $DESTINY']);
+        } else if(tier==='operative'){
+          addCmd(['// UPGRADE PATH  ·  HERO → SONNET TIER','CURRENT   :  HAIKU 4.5  ·  30 MSG/DAY','UNLOCK    :  HOLD 500,000+ $DESTINY','BENEFIT   :  SONNET 4.6 · DEEPER ANSWERS','HOLDING   :  '+bal.toLocaleString()+' $DESTINY  ·  NEED '+(500000-bal).toLocaleString()+' MORE','CA        :  3AwkJnZL7xrf8ffUwEsSkKndQkPSj2vfR3CqvyFpk8UP']);
         } else {
-          addCmd(['// UPGRADE PATH  ·  RECRUIT → HERO','CURRENT   :  HAIKU 4.5  ·  20 MSG/DAY','UNLOCK    :  HOLD 500,000+ $DESTINY','BENEFIT   :  SONNET 4.6 · 30 MSG/DAY · HERO CARD','HOW       :  BUY ON JUPITER → CONNECT WALLET → VERIFY','CA        :  3AwkJnZL7xrf8ffUwEsSkKndQkPSj2vfR3CqvyFpk8UP']);
+          addCmd(['// UPGRADE PATH  ·  RECRUIT → HERO','CURRENT   :  HAIKU 4.5  ·  20 MSG/DAY','TIER 1    :  HOLD 250,000+ $DESTINY → HERO CARD + 30 MSG/DAY','TIER 2    :  HOLD 500,000+ $DESTINY → SONNET 4.6 UPGRADE','HOW       :  BUY ON JUPITER → CONNECT WALLET → VERIFY','CA        :  3AwkJnZL7xrf8ffUwEsSkKndQkPSj2vfR3CqvyFpk8UP']);
         }
       })();break;
     case '/bounty':
@@ -2919,10 +2930,29 @@ function _applyBannerFxMC(el,style,theme){
 }
 
 var _mcLoaded=false;
+var _mcData=null;
+var _mcPromise=null;
+
+function prefetchHeroCard(){
+  if(getTier()!=='operative')return;
+  var st=getSessionToken();
+  if(!st)return;
+  _mcPromise=fetch(BACKEND+'/api/heroes/me',{
+    method:'POST',
+    headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({sessionToken:st})
+  })
+  .then(function(r){return r.json();})
+  .then(function(h){_mcData=(h&&h.serial)?h:null;return _mcData;})
+  .catch(function(){return null;});
+}
+
 function loadMenuHeroCard(){
   if(_mcLoaded)return;
   _mcLoaded=true;
   if(getTier()!=='operative'){_renderMenuHeroCardLocked();return;}
+  if(_mcData){_mcData.serial?_renderMenuHeroCard(_mcData):_renderMenuHeroCardLocked();return;}
+  if(_mcPromise){_mcPromise.then(function(h){h?_renderMenuHeroCard(h):_renderMenuHeroCardLocked();});return;}
   var st=getSessionToken();
   if(!st){_renderMenuHeroCardLocked();return;}
   fetch(BACKEND+'/api/heroes/me',{
