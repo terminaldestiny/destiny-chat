@@ -22,7 +22,7 @@ body::before{content:'';position:fixed;inset:0;background:repeating-linear-gradi
 #back-link{color:rgba(0,255,65,0.5);text-decoration:none;font-size:9px;letter-spacing:2px;border:1px solid rgba(0,255,65,0.16);padding:6px 12px;transition:.15s;white-space:nowrap;}
 #back-link:hover{color:var(--green);border-color:var(--green);}
 #hdr-title{font-size:13px;letter-spacing:7px;color:var(--amber);font-weight:bold;text-shadow:0 0 20px rgba(255,170,0,0.5);}
-#hero-count{margin-left:auto;font-size:9px;letter-spacing:2px;color:rgba(0,255,65,0.35);white-space:nowrap;}
+#sync-dot{margin-left:auto;}
 
 /* ── Stats strip ───────────────────────────── */
 #stats-bar{display:flex;border-bottom:1px solid rgba(0,255,65,0.07);position:relative;z-index:1;}
@@ -184,8 +184,8 @@ body::before{content:'';position:fixed;inset:0;background:repeating-linear-gradi
 .hcard-banner .hcard-emblem{font-size:34px!important;transition:transform .12s ease,filter .12s ease;position:relative;z-index:1;}
 .hcard-legend .hcard-banner .hcard-emblem{font-size:44px!important;}
 .hcard-commander .hcard-banner .hcard-emblem{font-size:39px!important;}
-@keyframes banner-shimmer{0%,100%{background-position:200% center;}50%{background-position:-200% center;}}
-.hcard-legend .hcard-banner::after,.hcard-commander .hcard-banner::after{content:'';position:absolute;inset:0;background:linear-gradient(115deg,transparent 25%,rgba(255,255,255,0.025) 47%,rgba(255,255,255,0.065) 50%,rgba(255,255,255,0.025) 53%,transparent 75%);background-size:200% 100%;animation:banner-shimmer 4s ease-in-out infinite;pointer-events:none;z-index:2;}
+@keyframes banner-shimmer{0%,15%{transform:translateX(0);}85%,100%{transform:translateX(267%);}}
+.hcard-legend .hcard-banner::after,.hcard-commander .hcard-banner::after{content:'';position:absolute;top:0;bottom:0;left:-60%;width:60%;background:linear-gradient(115deg,transparent 20%,rgba(255,255,255,0.022) 45%,rgba(255,255,255,0.06) 50%,rgba(255,255,255,0.022) 55%,transparent 80%);animation:banner-shimmer 4s ease-in-out infinite;pointer-events:none;z-index:2;will-change:transform;}
 /* ── Banner FX animations ─────────────────── */
 @keyframes bfx-aurora{0%{background-position:0% 50%,100% 50%,40% 50%;}33%{background-position:40% 50%,60% 50%,90% 50%;}66%{background-position:80% 50%,20% 50%,15% 50%;}100%{background-position:100% 50%,0% 50%,65% 50%;}}
 @keyframes bfx-plasma{0%{background-position:0% 0%,100% 100%,50% 0%;}25%{background-position:100% 0%,0% 0%,100% 100%;}50%{background-position:100% 100%,0% 100%,0% 50%;}75%{background-position:0% 100%,100% 0%,50% 100%;}100%{background-position:0% 0%,100% 100%,50% 0%;}}
@@ -233,7 +233,7 @@ body::before{content:'';position:fixed;inset:0;background:repeating-linear-gradi
 #modal-banner-left{display:flex;flex-direction:column;gap:4px;position:relative;z-index:1;}
 #modal-banner #modal-serial-row{margin-bottom:0;gap:10px;justify-content:flex-start;}
 #modal-banner-fx{position:absolute;inset:0;pointer-events:none;z-index:0;}
-.modal-banner-shimmer::after{content:'';position:absolute;inset:0;background:linear-gradient(115deg,transparent 25%,rgba(255,255,255,0.025) 47%,rgba(255,255,255,0.065) 50%,rgba(255,255,255,0.025) 53%,transparent 75%);background-size:200% 100%;animation:banner-shimmer 4s ease-in-out infinite;pointer-events:none;}
+.modal-banner-shimmer::after{content:'';position:absolute;top:0;bottom:0;left:-60%;width:60%;background:linear-gradient(115deg,transparent 20%,rgba(255,255,255,0.022) 45%,rgba(255,255,255,0.06) 50%,rgba(255,255,255,0.022) 55%,transparent 80%);animation:banner-shimmer 4s ease-in-out infinite;pointer-events:none;will-change:transform;}
 #modal::before{content:'';position:absolute;top:5px;left:5px;width:16px;height:16px;border-top:1px solid var(--corner-c,rgba(0,255,65,0.4));border-left:1px solid var(--corner-c,rgba(0,255,65,0.4));pointer-events:none;z-index:5;}
 #modal::after{content:'';position:absolute;bottom:5px;right:5px;width:16px;height:16px;border-bottom:1px solid var(--corner-c,rgba(0,255,65,0.4));border-right:1px solid var(--corner-c,rgba(0,255,65,0.4));pointer-events:none;z-index:5;}
 #modal-bar{height:3px;position:relative;overflow:hidden;}
@@ -361,7 +361,6 @@ body::before{content:'';position:fixed;inset:0;background:repeating-linear-gradi
   #edit-panel.open{display:block;}
   #filter-bar{flex-direction:column;align-items:flex-start;gap:10px;}
   #search-input{max-width:100%;width:100%;}
-  #stat-tiers{font-size:8px!important;}
   #rank-legend{padding-left:14px;padding-right:14px;}
   #signal-section{padding:12px 14px 14px;}
   #feed-section{padding-left:14px;padding-right:14px;}
@@ -497,7 +496,6 @@ body::before{content:'';position:fixed;inset:0;background:repeating-linear-gradi
 <div id="hdr">
   <a href="/" id="back-link" onclick="sessionStorage.setItem('skip_boot','1')">← TERMINAL</a>
   <div id="hdr-title">◆ HEROES</div>
-  <div id="hero-count"></div>
   <div id="sync-dot">⟳ SYNCING</div>
 </div>
 
@@ -511,8 +509,8 @@ body::before{content:'';position:fixed;inset:0;background:repeating-linear-gradi
     <span class="si-lbl">ACTIVE PAST 24H</span>
   </div>
   <div class="stat-item">
-    <span id="stat-tiers">—</span>
-    <span class="si-lbl">TIER BREAKDOWN</span>
+    <span class="si-val" id="stat-tx">—</span>
+    <span class="si-lbl">TRANSMISSIONS SENT</span>
   </div>
 </div>
 
@@ -980,16 +978,10 @@ function animCount(el,target){
 function populateStats(heroes){
   var cutoff=Date.now()-86400000;
   var active=heroes.filter(function(h){return h.last_active_at&&new Date(h.last_active_at).getTime()>cutoff;}).length;
+  var totalTx=heroes.reduce(function(s,h){return s+(h.total_conversations||0);},0);
   animCount(document.getElementById('stat-heroes'),heroes.length);
   animCount(document.getElementById('stat-active'),active);
-  var tc={LEGEND:0,COMMANDER:0,AGENT:0,OPERATIVE:0};
-  heroes.forEach(function(h){if(tc[h.rank]!==undefined)tc[h.rank]++;});
-  var parts=[];
-  if(tc.LEGEND)parts.push('<span style="color:#ffaa00">'+tc.LEGEND+' LGD</span>');
-  if(tc.COMMANDER)parts.push('<span style="color:#cc44ff">'+tc.COMMANDER+' CMD</span>');
-  if(tc.AGENT)parts.push('<span style="color:#00d4ff">'+tc.AGENT+' AGT</span>');
-  if(tc.OPERATIVE)parts.push('<span style="color:#00ff41">'+tc.OPERATIVE+' OPR</span>');
-  document.getElementById('stat-tiers').innerHTML=parts.length?parts.join('<span style="color:rgba(255,255,255,0.18)"> · </span>'):'—';
+  animCount(document.getElementById('stat-tx'),totalTx);
 }
 
 // ── Mobile toggle ────────────────────────────────────────────────────────
@@ -1965,7 +1957,7 @@ async function refreshHeroes(){
     var newSerials=new Set();
     fresh.forEach(function(h){if(!prevSerials.has(h.serial))newSerials.add(h.serial);});
     allHeroes=fresh;
-    document.getElementById('hero-count').textContent='HEROES: '+allHeroes.length;
+
     populateStats(allHeroes);
     buildSignalMeter(allHeroes);
     buildFeed(allHeroes);
@@ -2001,7 +1993,7 @@ async function load(){
     var data=await fetch(BACKEND+'/api/heroes').then(function(r){return r.json();});
     allHeroes=data.heroes||[];
     document.getElementById('loading').style.display='none';
-    document.getElementById('hero-count').textContent='HEROES: '+allHeroes.length;
+
     populateStats(allHeroes);
     buildSignalMeter(allHeroes);
     buildFeed(allHeroes);
