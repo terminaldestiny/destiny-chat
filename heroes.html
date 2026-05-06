@@ -148,9 +148,8 @@ body::before{content:'';position:fixed;inset:0;background:repeating-linear-gradi
 
 /* ── Community grid ────────────────────────── */
 #grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(255px,1fr));gap:12px;padding:16px 20px 50px;position:relative;z-index:1;}
-.hcard{background:#050705;border:1px solid rgba(0,255,65,0.14);cursor:pointer;transition:transform .18s,box-shadow .18s,border-color .18s;position:relative;overflow:hidden;opacity:0;animation:card-in .4s ease forwards;}
+.hcard{background:#050705;border:1px solid rgba(0,255,65,0.14);cursor:pointer;transition:box-shadow .18s,border-color .18s;position:relative;overflow:hidden;opacity:0;animation:card-in .4s ease forwards;will-change:transform;}
 @keyframes card-in{from{opacity:0;transform:translateY(12px);}to{opacity:1;transform:translateY(0);}}
-.hcard:hover{transform:translateY(-4px);}
 .hcard::before{content:'';position:absolute;top:5px;left:5px;width:10px;height:10px;border-top:1px solid var(--cc,rgba(0,255,65,0.3));border-left:1px solid var(--cc,rgba(0,255,65,0.3));pointer-events:none;transition:border-color .2s;}
 .hcard::after{content:'';position:absolute;bottom:5px;right:5px;width:10px;height:10px;border-bottom:1px solid var(--cc,rgba(0,255,65,0.3));border-right:1px solid var(--cc,rgba(0,255,65,0.3));pointer-events:none;transition:border-color .2s;}
 .hcard-bar{height:2px;width:100%;}
@@ -163,7 +162,7 @@ body::before{content:'';position:fixed;inset:0;background:repeating-linear-gradi
 .badge-new{font-size:6px;letter-spacing:2px;color:var(--green);border:1px solid rgba(0,255,65,0.38);padding:1px 6px;animation:new-pulse 1.5s ease-in-out infinite;}
 @keyframes new-pulse{0%,100%{opacity:.55;}50%{opacity:1;box-shadow:0 0 6px rgba(0,255,65,0.3);}}
 .badge-you{font-size:6px;letter-spacing:2px;color:var(--amber);border:1px solid rgba(255,170,0,0.45);padding:1px 6px;}
-.hcard-emblem{font-size:28px;line-height:1;}
+.hcard-emblem{font-size:28px;line-height:1;display:inline-block;transition:transform .12s ease,filter .12s ease;}
 .hcard-name{font-size:15px;font-weight:bold;letter-spacing:1.5px;color:#fff;margin-bottom:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
 .hcard-name .dot-active{display:inline-block;width:5px;height:5px;border-radius:50%;background:var(--green);animation:dot-pulse 2s ease-in-out infinite;margin-right:5px;vertical-align:middle;position:relative;top:-1px;}
 .hcard-tagline{font-size:8px;letter-spacing:1px;color:rgba(255,255,255,0.28);font-style:italic;margin-bottom:9px;min-height:12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
@@ -288,6 +287,30 @@ body::before{content:'';position:fixed;inset:0;background:repeating-linear-gradi
   #stat-tiers{font-size:10px!important;}
   #rank-legend{padding-left:14px;padding-right:14px;}
 }
+
+/* ── Constellation mode ──────────────────── */
+#constellation-btn{background:none;border:1px solid rgba(0,255,65,0.18);color:rgba(0,255,65,0.38);font-family:inherit;font-size:8px;letter-spacing:2px;padding:8px 16px;cursor:pointer;transition:.15s;white-space:nowrap;}
+#constellation-btn:hover{border-color:rgba(0,255,65,0.5);color:var(--green);}
+#constellation-btn.active{color:var(--amber);border-color:rgba(255,170,0,0.45);background:rgba(255,170,0,0.03);}
+#constellation{display:none;position:relative;width:100%;min-height:82vh;overflow:hidden;background:radial-gradient(ellipse at 50% 45%,rgba(0,255,65,0.018) 0%,#020402 68%);padding-bottom:60px;}
+.c-bg-star{position:absolute;width:1px;height:1px;border-radius:50%;background:#fff;pointer-events:none;animation:c-twinkle 3s ease-in-out infinite;}
+.c-star{position:absolute;cursor:pointer;z-index:2;}
+.c-halo{position:absolute;border-radius:50%;filter:blur(8px);opacity:.14;pointer-events:none;animation:c-twinkle 3s ease-in-out infinite reverse;}
+.c-dot{position:absolute;border-radius:50%;animation:c-twinkle 3s ease-in-out infinite;transition:transform .15s,box-shadow .15s;}
+.c-star:hover .c-dot{transform:scale(1.8)!important;}
+.c-star:hover .c-halo{opacity:.35!important;}
+@keyframes c-twinkle{0%,100%{opacity:.65;transform:scale(1);}50%{opacity:1;transform:scale(1.35);}}
+#c-tooltip{position:absolute;background:rgba(4,6,4,0.96);border:1px solid rgba(0,255,65,0.18);padding:13px 16px;width:172px;pointer-events:none;display:none;z-index:20;backdrop-filter:blur(8px);}
+#c-tooltip::before{content:'';position:absolute;top:5px;left:5px;width:8px;height:8px;border-top:1px solid var(--tc,rgba(0,255,65,0.4));border-left:1px solid var(--tc,rgba(0,255,65,0.4));}
+#c-tooltip::after{content:'';position:absolute;bottom:5px;right:5px;width:8px;height:8px;border-bottom:1px solid var(--tc,rgba(0,255,65,0.4));border-right:1px solid var(--tc,rgba(0,255,65,0.4));}
+.ct-emblem{font-size:26px;line-height:1;margin-bottom:7px;}
+.ct-name{font-size:11px;font-weight:bold;letter-spacing:2px;color:#fff;margin-bottom:4px;word-break:break-all;}
+.ct-rank{font-size:7px;letter-spacing:2.5px;margin-bottom:4px;}
+.ct-stat{font-size:7px;letter-spacing:1.2px;color:rgba(255,255,255,0.28);}
+#c-legend{position:absolute;bottom:18px;right:20px;display:flex;flex-direction:column;gap:5px;font-size:7px;letter-spacing:1.5px;color:rgba(255,255,255,0.2);}
+.cl-item{display:flex;align-items:center;gap:7px;}
+.cl-dot{border-radius:50%;display:inline-block;flex-shrink:0;}
+#c-count{position:absolute;top:20px;left:50%;transform:translateX(-50%);font-size:8px;letter-spacing:3px;color:rgba(0,255,65,0.2);}
 
 /* ── Live ticker ─────────────────────────── */
 #ticker-wrap{height:30px;overflow:hidden;border-bottom:1px solid rgba(0,255,65,0.07);position:relative;z-index:1;display:none;}
@@ -506,6 +529,7 @@ body::before{content:'';position:fixed;inset:0;background:repeating-linear-gradi
     <button class="s-tab" data-sort="new"     onclick="setSort('new')">NEWEST</button>
   </div>
   <input type="text" id="search-input" placeholder="SEARCH CALLSIGN..." autocomplete="off" oninput="onSearch(this.value)">
+  <button id="constellation-btn" onclick="toggleConstellation()">⬡ CONSTELLATION</button>
 </div>
 
 <div id="rank-legend">
@@ -523,6 +547,17 @@ body::before{content:'';position:fixed;inset:0;background:repeating-linear-gradi
 <div id="loading">SCANNING FIELD ROSTER</div>
 <div id="grid"></div>
 <div id="no-results">// NO HEROES FOUND</div>
+
+<div id="constellation">
+  <div id="c-count"></div>
+  <div id="c-tooltip"></div>
+  <div id="c-legend">
+    <div class="cl-item"><span class="cl-dot" style="width:18px;height:18px;background:#ffaa00;box-shadow:0 0 8px #ffaa00;"></span>LEGEND</div>
+    <div class="cl-item"><span class="cl-dot" style="width:14px;height:14px;background:#cc44ff;box-shadow:0 0 6px #cc44ff;"></span>COMMANDER</div>
+    <div class="cl-item"><span class="cl-dot" style="width:10px;height:10px;background:#00d4ff;box-shadow:0 0 5px #00d4ff;"></span>AGENT</div>
+    <div class="cl-item"><span class="cl-dot" style="width:7px;height:7px;background:#00ff41;box-shadow:0 0 4px #00ff41;"></span>OPERATIVE</div>
+  </div>
+</div>
 
 <div id="modal-backdrop" onclick="closeModal()"></div>
 <div id="modal">
@@ -854,14 +889,27 @@ function renderCard(h,delay){
   card.dataset.serial=h.serial;
 
   card.addEventListener('mouseenter',function(){
-    card.style.boxShadow='0 8px 32px '+ra('0.14');
-    card.style.borderColor=ra('0.45');
-    card.style.setProperty('--cc',ra('0.65'));
+    card.style.boxShadow='0 14px 40px '+ra('0.18')+', 0 4px 12px '+ra('0.1');
+    card.style.borderColor=ra('0.55');
+    card.style.setProperty('--cc',ra('0.75'));
+  });
+  card.addEventListener('mousemove',function(e){
+    var r=card.getBoundingClientRect();
+    var dx=(e.clientX-(r.left+r.width/2))/(r.width/2);
+    var dy=(e.clientY-(r.top+r.height/2))/(r.height/2);
+    card.style.transform='perspective(700px) rotateX('+(-dy*9)+'deg) rotateY('+(dx*9)+'deg) translateY(-6px) scale(1.015)';
+    var embl=card.querySelector('.hcard-emblem');
+    if(embl){embl.style.transform='scale(1.18) translateY(-3px)';embl.style.filter='drop-shadow(0 0 18px '+th+') drop-shadow(0 0 36px '+ra('0.65')+')';}
   });
   card.addEventListener('mouseleave',function(){
+    card.style.transition='transform .45s ease,box-shadow .18s,border-color .18s';
+    card.style.transform='';
     card.style.boxShadow=isLegend?'0 0 20px rgba(255,170,0,0.06)':'none';
     card.style.borderColor=ra(isLegend?'0.32':'0.18');
     card.style.setProperty('--cc',ra('0.35'));
+    var embl=card.querySelector('.hcard-emblem');
+    if(embl){embl.style.transform='';embl.style.filter='';}
+    setTimeout(function(){card.style.transition='box-shadow .18s,border-color .18s';},450);
   });
   card.onclick=function(){openModal(h);};
 
@@ -1160,6 +1208,87 @@ function doShare(canvas,h){
 function shareMyCard(){if(myHero)doShare(buildShareCanvas(myHero),myHero);}
 function shareModalCard(){if(activeHero)doShare(buildShareCanvas(activeHero),activeHero);}
 
+// ── Constellation ────────────────────────────────────────────────────────
+var constellationMode=false;
+function toggleConstellation(){
+  constellationMode=!constellationMode;
+  document.getElementById('constellation-btn').classList.toggle('active',constellationMode);
+  document.getElementById('grid').style.display=constellationMode?'none':'';
+  document.getElementById('no-results').style.display='none';
+  document.getElementById('constellation').style.display=constellationMode?'block':'none';
+  if(constellationMode)renderConstellation();
+}
+
+function renderConstellation(){
+  var container=document.getElementById('constellation');
+  // clear existing stars (keep tooltip, legend, count)
+  Array.from(container.children).forEach(function(el){
+    if(!['c-tooltip','c-legend','c-count'].includes(el.id))el.remove();
+  });
+  var heroes=allHeroes;
+  document.getElementById('c-count').textContent=heroes.length+' HEROES IN THE FIELD';
+
+  var goldenAngle=2.39996;
+  var total=Math.max(heroes.length,1);
+  var rankSz={LEGEND:9,COMMANDER:6.5,AGENT:4.5,OPERATIVE:3};
+
+  // background ambient stars
+  for(var s=0;s<90;s++){
+    var bg=document.createElement('div');
+    bg.className='c-bg-star';
+    bg.style.cssText='left:'+(Math.random()*100)+'%;top:'+(Math.random()*100)+'%;opacity:'+(Math.random()*0.25+0.04).toFixed(2)+';animation-delay:'+(Math.random()*5).toFixed(1)+'s;animation-duration:'+(2+Math.random()*3).toFixed(1)+'s;';
+    container.insertBefore(bg,container.firstChild);
+  }
+
+  // hero stars
+  heroes.forEach(function(h,i){
+    var r=Math.sqrt((i+1)/total)*40;
+    var theta=(i+1)*goldenAngle;
+    var x=Math.max(4,Math.min(96,50+r*Math.cos(theta)));
+    var y=Math.max(6,Math.min(90,50+r*Math.sin(theta)*0.62));
+    var sz=rankSz[h.rank]||3.5;
+    var color=cHex(h.theme||'green');
+    var dur=(2.2+(i%7)*0.45).toFixed(1);
+
+    var star=document.createElement('div');
+    star.className='c-star';
+    star.style.cssText='left:'+x+'%;top:'+y+'%;';
+
+    var halo=document.createElement('div');
+    halo.className='c-halo';
+    halo.style.cssText='width:'+(sz*5)+'px;height:'+(sz*5)+'px;margin-left:'+-(sz*2.5)+'px;margin-top:'+-(sz*2.5)+'px;background:'+color+';animation-duration:'+dur+'s;';
+
+    var dot=document.createElement('div');
+    dot.className='c-dot';
+    dot.style.cssText='width:'+(sz*2)+'px;height:'+(sz*2)+'px;margin-left:'+(-sz)+'px;margin-top:'+(-sz)+'px;background:'+color+';box-shadow:0 0 '+(sz*3)+'px '+color+',0 0 '+(sz*6)+'px '+cRgba(h.theme||'green','0.4')+';animation-duration:'+dur+'s;';
+
+    star.appendChild(halo);
+    star.appendChild(dot);
+
+    star.addEventListener('mouseenter',function(e){
+      var tip=document.getElementById('c-tooltip');
+      var conR=container.getBoundingClientRect();
+      var sR=star.getBoundingClientRect();
+      var tx=sR.left-conR.left+sR.width/2-86;
+      var ty=sR.top-conR.top-130;
+      if(ty<0)ty=sR.top-conR.top+sR.height+10;
+      tx=Math.max(8,Math.min(tx,conR.width-182));
+      tip.style.cssText='display:block;left:'+tx+'px;top:'+ty+'px;';
+      tip.style.setProperty('--tc',color);
+      tip.innerHTML='<div class="ct-emblem" style="color:'+color+';filter:drop-shadow(0 0 10px '+color+')">'+(EMBLEMS[h.emblem]||'⬡')+'</div>'
+        +'<div class="ct-name">'+escHtml(h.codename)+'</div>'
+        +'<div class="ct-rank" style="color:'+color+'">'+h.rank+'</div>'
+        +'<div class="ct-stat">'+(h.total_conversations||0)+' TX &nbsp;·&nbsp; '+(h.days_active||0)+' DAYS</div>';
+    });
+    star.addEventListener('mouseleave',function(){
+      document.getElementById('c-tooltip').style.display='none';
+    });
+    star.addEventListener('click',function(){openModal(h);});
+
+    container.appendChild(star);
+  });
+}
+
 // ── Ticker ────────────────────────────────────────────────────────────────
 function relTime(iso){
   if(!iso)return '';
@@ -1230,7 +1359,7 @@ async function refreshHeroes(){
     document.getElementById('hero-count').textContent='HEROES: '+allHeroes.length;
     populateStats(allHeroes);
     buildTicker(allHeroes);
-    renderGrid(newSerials);
+    if(constellationMode)renderConstellation();else renderGrid(newSerials);
   }catch(e){}
   setTimeout(function(){dot.classList.remove('on');},800);
 }
