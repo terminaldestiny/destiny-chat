@@ -181,7 +181,7 @@ async function sendMagicLinkEmail(to, token) {
 
 // ── Hero registry ─────────────────────────────────────────────────────────
 var BUILDER_RE = /\b(build|deploy|code|app|project|develop|launch|ship|create|program|api|backend|frontend|database|startup|product)\b/i;
-var VALID_EMBLEMS   = ['hexagon','diamond','skull','shield','sword','signal','star','lightning','infinity','target','psi','omega','delta','phi','prism','nexus','origin','apex'];
+var VALID_EMBLEMS   = ['hexagon','diamond','skull','shield','sword','signal','star','lightning','infinity','target','psi','omega','delta','phi','prism','nexus','origin','apex','command','gear','bullseye','cross','crown','circlex','anchor','crescent','ringeye','semi','bars','spark'];
 var VALID_THEMES    = ['green','cyan','amber','red','purple','blue','pink','orange','solar','jade','flux','warp','ghost','ember'];
 var VALID_PATTERNS  = ['none','grid','scan','circuit','dot','hex','rain','cross'];
 var VALID_FX        = ['none','glitch','hologram','classified','overdrive'];
@@ -905,7 +905,9 @@ app.patch('/api/heroes/me', jsonSmall, async function(req, res) {
   if (!supabase) return res.status(503).json({ error: 'no_supabase' });
   var updates = {};
   if (body.emblem !== undefined) {
-    if (!VALID_EMBLEMS.includes(body.emblem)) return res.status(400).json({ error: 'invalid_emblem' });
+    var embParts = body.emblem.toString().split('|');
+    if (!VALID_EMBLEMS.includes(embParts[0])) return res.status(400).json({ error: 'invalid_emblem' });
+    if (embParts[1] && !VALID_THEMES.includes(embParts[1])) return res.status(400).json({ error: 'invalid_emblem_color' });
     updates.emblem = body.emblem;
   }
   if (body.codename !== undefined) {

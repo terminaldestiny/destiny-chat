@@ -417,6 +417,27 @@ body::before{content:'';position:fixed;inset:0;background:repeating-linear-gradi
 .rl-sep{color:rgba(255,255,255,0.1);margin:0 8px;}
 .rl-label{color:rgba(255,255,255,0.1);font-size:7px;letter-spacing:1px;}
 
+/* ── More emblems ────────────────────────── */
+#more-emblems-btn{height:52px;background:rgba(0,255,65,0.04);border:1px dashed rgba(0,255,65,0.16);color:rgba(255,255,255,0.25);cursor:pointer;font-family:inherit;font-size:9px;letter-spacing:1.5px;transition:.15s;}
+#more-emblems-btn:hover{border-color:rgba(255,255,255,0.28);color:rgba(255,255,255,0.65);}
+#more-emblems-btn.open{border-color:rgba(255,170,0,0.4);color:var(--amber);background:rgba(255,170,0,0.03);}
+#more-emblems-row{display:none;grid-template-columns:repeat(6,1fr);gap:6px;margin-top:6px;}
+#more-emblems-row.open{display:grid;}
+
+/* ── Emblem color ─────────────────────────── */
+#ec-row{display:flex;gap:6px;flex-wrap:wrap;align-items:center;margin-top:8px;}
+#ec-label{font-size:8px;letter-spacing:2px;color:rgba(255,255,255,0.22);margin-right:2px;flex-shrink:0;}
+.ec-swatch{width:20px;height:20px;border:1.5px solid transparent;cursor:pointer;transition:all .15s;clip-path:polygon(50% 0%,100% 25%,100% 75%,50% 100%,0% 75%,0% 25%);flex-shrink:0;}
+.ec-swatch:hover{transform:scale(1.2);}
+.ec-swatch.active{transform:scale(1.22);filter:drop-shadow(0 0 6px currentColor);}
+.ec-auto{height:20px;padding:0 7px;background:rgba(255,255,255,0.04);border:1.5px dashed rgba(255,255,255,0.22);color:rgba(255,255,255,0.3);cursor:pointer;font-family:inherit;font-size:7px;letter-spacing:2px;transition:.15s;flex-shrink:0;}
+.ec-auto:hover{border-color:rgba(255,255,255,0.5);color:rgba(255,255,255,0.7);}
+.ec-auto.active{border-color:rgba(255,255,255,0.55);color:#fff;background:rgba(255,255,255,0.06);}
+#ec-name{font-size:8px;letter-spacing:2px;color:rgba(255,255,255,0.32);margin-left:2px;}
+
+/* ── Preview card clickable ───────────────── */
+#preview-card{cursor:pointer;}
+
 /* ── Ghost card ──────────────────────────── */
 .hcard-ghost{border-style:dashed!important;border-color:rgba(0,255,65,0.08)!important;}
 .hcard-ghost:hover{border-color:rgba(0,255,65,0.2)!important;box-shadow:0 4px 24px rgba(0,255,65,0.04)!important;transform:translateY(-4px);}
@@ -440,7 +461,7 @@ body::before{content:'';position:fixed;inset:0;background:repeating-linear-gradi
 <div class="ptcl" style="--x:94%;--dur:32s;--delay:10s"></div>
 
 <div id="hdr">
-  <a href="/" id="back-link">← TERMINAL</a>
+  <a href="/" id="back-link" onclick="sessionStorage.setItem('skip_boot','1')">← TERMINAL</a>
   <div id="hdr-title">◆ HEROES</div>
   <div id="hero-count"></div>
   <div id="sync-dot">⟳ SYNCING</div>
@@ -489,7 +510,7 @@ body::before{content:'';position:fixed;inset:0;background:repeating-linear-gradi
 
   <div id="my-wrap">
     <div id="card-col">
-    <div id="preview-card">
+    <div id="preview-card" onclick="if(myHero){openModal(myHero);}" title="VIEW YOUR CARD">
       <div id="pc-bar"></div>
       <div id="pc-pattern"></div>
       <div id="pc-body">
@@ -555,6 +576,40 @@ body::before{content:'';position:fixed;inset:0;background:repeating-linear-gradi
           <div class="embl" data-e="nexus"     title="NEXUS"     onclick="pickEmblem('nexus')">⁂</div>
           <div class="embl" data-e="origin"    title="ORIGIN"    onclick="pickEmblem('origin')">⊕</div>
           <div class="embl" data-e="apex"      title="APEX"      onclick="pickEmblem('apex')">▲</div>
+          <button id="more-emblems-btn" onclick="toggleMoreEmblems()">+ MORE</button>
+        </div>
+        <div id="more-emblems-row">
+          <div class="embl" data-e="command"  title="COMMAND"  onclick="pickEmblem('command')">⌘</div>
+          <div class="embl" data-e="gear"     title="GEAR"     onclick="pickEmblem('gear')">⚙</div>
+          <div class="embl" data-e="bullseye" title="BULLSEYE" onclick="pickEmblem('bullseye')">◉</div>
+          <div class="embl" data-e="cross"    title="CROSS"    onclick="pickEmblem('cross')">✙</div>
+          <div class="embl" data-e="crown"    title="CROWN"    onclick="pickEmblem('crown')">♛</div>
+          <div class="embl" data-e="circlex"  title="VOID-X"   onclick="pickEmblem('circlex')">⊗</div>
+          <div class="embl" data-e="anchor"   title="ANCHOR"   onclick="pickEmblem('anchor')">⚓</div>
+          <div class="embl" data-e="crescent" title="CRESCENT" onclick="pickEmblem('crescent')">☽</div>
+          <div class="embl" data-e="ringeye"  title="RING-EYE" onclick="pickEmblem('ringeye')">⊙</div>
+          <div class="embl" data-e="semi"     title="HALF"     onclick="pickEmblem('semi')">◑</div>
+          <div class="embl" data-e="bars"     title="BARS"     onclick="pickEmblem('bars')">≡</div>
+          <div class="embl" data-e="spark"    title="SPARK"    onclick="pickEmblem('spark')">✺</div>
+        </div>
+        <div id="ec-row">
+          <span id="ec-label">TINT</span>
+          <button class="ec-auto active" data-ec="" onclick="pickEmblemColor('')" title="MATCH THEME">AUTO</button>
+          <div class="ec-swatch" data-ec="green"  onclick="pickEmblemColor('green')"  style="background:#00ff41"></div>
+          <div class="ec-swatch" data-ec="cyan"   onclick="pickEmblemColor('cyan')"   style="background:#00d4ff"></div>
+          <div class="ec-swatch" data-ec="amber"  onclick="pickEmblemColor('amber')"  style="background:#ffaa00"></div>
+          <div class="ec-swatch" data-ec="red"    onclick="pickEmblemColor('red')"    style="background:#ff2a00"></div>
+          <div class="ec-swatch" data-ec="purple" onclick="pickEmblemColor('purple')" style="background:#cc44ff"></div>
+          <div class="ec-swatch" data-ec="blue"   onclick="pickEmblemColor('blue')"   style="background:#0088ff"></div>
+          <div class="ec-swatch" data-ec="pink"   onclick="pickEmblemColor('pink')"   style="background:#ff2288"></div>
+          <div class="ec-swatch" data-ec="orange" onclick="pickEmblemColor('orange')" style="background:#ff6600"></div>
+          <div class="ec-swatch" data-ec="solar"  onclick="pickEmblemColor('solar')"  style="background:#ffff00"></div>
+          <div class="ec-swatch" data-ec="jade"   onclick="pickEmblemColor('jade')"   style="background:#00ff99"></div>
+          <div class="ec-swatch" data-ec="flux"   onclick="pickEmblemColor('flux')"   style="background:#ff00cc"></div>
+          <div class="ec-swatch" data-ec="warp"   onclick="pickEmblemColor('warp')"   style="background:#9933ff"></div>
+          <div class="ec-swatch" data-ec="ghost"  onclick="pickEmblemColor('ghost')"  style="background:#e0e0e0"></div>
+          <div class="ec-swatch" data-ec="ember"  onclick="pickEmblemColor('ember')"  style="background:#ff8800"></div>
+          <span id="ec-name">AUTO</span>
         </div>
       </div>
       <div class="e-row">
@@ -718,8 +773,13 @@ var BACKEND='https://destiny-chat-production.up.railway.app';
 var EMBLEMS={
   hexagon:'⬡',diamond:'◆',skull:'☠',shield:'⛨',sword:'⚔',
   star:'✦',lightning:'⚡',infinity:'∞',target:'◎',signal:'≋',
-  psi:'Ψ',omega:'Ω',delta:'Δ',phi:'Φ',prism:'◈',nexus:'⁂',origin:'⊕',apex:'▲'
+  psi:'Ψ',omega:'Ω',delta:'Δ',phi:'Φ',prism:'◈',nexus:'⁂',origin:'⊕',apex:'▲',
+  command:'⌘',gear:'⚙',bullseye:'◉',cross:'✙',crown:'♛',circlex:'⊗',
+  anchor:'⚓',crescent:'☽',ringeye:'⊙',semi:'◑',bars:'≡',spark:'✺'
 };
+function eChr(raw){return EMBLEMS[(raw||'hexagon').split('|')[0]]||'⬡';}
+function eTh(raw,th){var c=(raw||'').split('|')[1];return c?cHex(c):th;}
+function eRa(raw,ra){var c=(raw||'').split('|')[1];return c?(THEME_RGBA[c]||THEME_RGBA.green):ra;}
 var THEME_HEX={green:'#00ff41',cyan:'#00d4ff',amber:'#ffaa00',red:'#ff2a00',purple:'#cc44ff',blue:'#0088ff',pink:'#ff2288',orange:'#ff6600',solar:'#ffff00',jade:'#00ff99',flux:'#ff00cc',warp:'#9933ff',ghost:'#e0e0e0',ember:'#ff8800'};
 var THEME_NAME={green:'SIGNAL',cyan:'CODEC',amber:'GOLD',red:'CRIMSON',purple:'VOID',blue:'DEEP',pink:'NOVA',orange:'BLAZE',solar:'SOLAR',jade:'JADE',flux:'FLUX',warp:'WARP',ghost:'GHOST',ember:'EMBER'};
 var THEME_RGBA={
@@ -742,7 +802,7 @@ var RANK_ORD={LEGEND:4,COMMANDER:3,AGENT:2,OPERATIVE:1};
 
 var allHeroes=[],activeHero=null,myHero=null;
 var currentSort='default',currentQuery='';
-var p={codename:'',emblem:'hexagon',theme:'green',tagline:'',bg_pattern:'none',x_handle:'',fx:'none',show_barcode:false};
+var p={codename:'',emblem:'hexagon',emblem_color:'',theme:'green',tagline:'',bg_pattern:'none',x_handle:'',fx:'none',show_barcode:false};
 var CODE39={'0':[1,1,1,3,3,1,3,1,1],'1':[3,1,1,3,1,1,1,1,3],'2':[1,1,3,3,1,1,1,1,3],'3':[3,1,3,3,1,1,1,1,1],'4':[1,1,1,3,3,1,1,1,3],'5':[3,1,1,3,3,1,1,1,1],'6':[1,1,3,3,3,1,1,1,1],'7':[1,1,1,3,1,1,3,1,3],'8':[3,1,1,3,1,1,3,1,1],'9':[1,1,3,3,1,1,3,1,1],'A':[3,1,1,1,1,3,1,1,3],'B':[1,1,3,1,1,3,1,1,3],'C':[3,1,3,1,1,3,1,1,1],'D':[1,1,1,1,3,3,1,1,3],'E':[3,1,1,1,3,3,1,1,1],'F':[1,1,3,1,3,3,1,1,1],'G':[1,1,1,1,1,3,3,1,3],'H':[3,1,1,1,1,3,3,1,1],'I':[1,1,3,1,1,3,3,1,1],'J':[1,1,1,1,3,3,3,1,1],'K':[3,1,1,1,1,1,1,3,3],'L':[1,1,3,1,1,1,1,3,3],'M':[3,1,3,1,1,1,1,3,1],'N':[1,1,1,1,3,1,1,3,3],'O':[3,1,1,1,3,1,1,3,1],'P':[1,1,3,1,3,1,1,3,1],'Q':[1,1,1,1,1,1,3,3,3],'R':[3,1,1,1,1,1,3,3,1],'S':[1,1,3,1,1,1,3,3,1],'T':[1,1,1,1,3,1,3,3,1],'U':[3,3,1,1,1,1,1,1,3],'V':[1,3,3,1,1,1,1,1,3],'W':[3,3,3,1,1,1,1,1,1],'X':[1,3,1,1,3,1,1,1,3],'Y':[3,3,1,1,3,1,1,1,1],'Z':[1,3,3,1,3,1,1,1,1],'-':[1,3,1,1,1,1,3,1,3],'.':[3,3,1,1,1,1,3,1,1],' ':[1,3,3,1,1,1,3,1,1],'$':[1,3,1,3,1,3,1,1,1],'/':[1,3,1,3,1,1,1,3,1],'+':[1,3,1,1,1,3,1,3,1],'%':[1,1,1,3,1,3,1,3,1],'*':[1,3,1,1,3,1,3,1,1]};
 function encodeCode39(text){
   var s='*'+text.toUpperCase()+'*',widths=[];
@@ -874,9 +934,11 @@ function updatePreview(){
   document.getElementById('pc-bar').style.boxShadow='0 0 10px '+ra('0.6');
   applyBgPattern(document.getElementById('pc-pattern'),p.bg_pattern,p.theme);
 
+  var eClr=p.emblem_color?cHex(p.emblem_color):th;
+  var eRgba=p.emblem_color?(THEME_RGBA[p.emblem_color]||THEME_RGBA.green):ra;
   document.getElementById('pc-emblem').textContent=EMBLEMS[p.emblem]||'⬡';
-  document.getElementById('pc-emblem').style.color=th;
-  document.getElementById('pc-emblem').style.filter='drop-shadow(0 0 10px '+th+') drop-shadow(0 0 22px '+th+') drop-shadow(0 0 48px '+ra('0.5')+')';
+  document.getElementById('pc-emblem').style.color=eClr;
+  document.getElementById('pc-emblem').style.filter='drop-shadow(0 0 10px '+eClr+') drop-shadow(0 0 22px '+eClr+') drop-shadow(0 0 48px '+eRgba('0.5')+')';
 
   document.getElementById('pc-serial').style.color=ra('0.4');
   document.getElementById('pc-scan-dot').style.background=th;
@@ -919,7 +981,8 @@ function updatePreview(){
 }
 
 function populateMyCard(h){
-  p.codename=h.codename; p.emblem=h.emblem||'hexagon';
+  var rawEmbl=h.emblem||'hexagon'; var eParts=rawEmbl.split('|');
+  p.codename=h.codename; p.emblem=eParts[0]||'hexagon'; p.emblem_color=eParts[1]||'';
   p.theme=h.theme||'green'; p.tagline=h.tagline||''; p.bg_pattern=h.bg_pattern||'none'; p.x_handle=h.x_handle||''; p.fx=h.fx||'none'; p.show_barcode=h.show_barcode||false;
   document.getElementById('codename-input').value=h.codename;
   document.getElementById('tagline-input').value=h.tagline||'';
@@ -934,8 +997,12 @@ function populateMyCard(h){
   document.querySelectorAll('.embl').forEach(function(el){el.classList.toggle('active',el.dataset.e===p.emblem);});
   document.querySelectorAll('.embl.active').forEach(function(el){el.style.borderColor=THEME_HEX[p.theme];el.style.boxShadow='0 0 10px '+cRgba(p.theme,'0.3');});
   document.querySelectorAll('.tswatch').forEach(function(el){el.classList.toggle('active',el.dataset.t===p.theme);});
+  document.querySelectorAll('.ec-swatch,.ec-auto').forEach(function(el){el.classList.toggle('active',el.dataset.ec===p.emblem_color);});
+  document.getElementById('ec-name').textContent=p.emblem_color?(THEME_NAME[p.emblem_color]||p.emblem_color.toUpperCase()):'AUTO';
   var extraThemes=['solar','jade','flux','warp','ghost','ember'];
   if(extraThemes.includes(p.theme)){var mr=document.getElementById('more-colors-row');if(mr&&!mr.classList.contains('open')){mr.classList.add('open');var mb=document.getElementById('more-colors-btn');if(mb){mb.classList.add('open');mb.textContent='−';}}}
+  var extraEmblems=['command','gear','bullseye','cross','crown','circlex','anchor','crescent','ringeye','semi','bars','spark'];
+  if(extraEmblems.includes(p.emblem)){var me=document.getElementById('more-emblems-row');if(me&&!me.classList.contains('open')){me.classList.add('open');var meb=document.getElementById('more-emblems-btn');if(meb){meb.classList.add('open');meb.textContent='− LESS';}}}
   document.querySelectorAll('.pat-opt').forEach(function(el){el.classList.toggle('active',el.dataset.p===p.bg_pattern);});
   document.querySelectorAll('.fx-opt').forEach(function(el){el.classList.toggle('active',el.dataset.f===p.fx);});
   document.querySelectorAll('.bc-opt').forEach(function(el){el.classList.toggle('active',el.dataset.v===(p.show_barcode?'1':'0'));});
@@ -950,6 +1017,19 @@ function pickEmblem(e){
     if(el.dataset.e===e){el.style.borderColor=THEME_HEX[p.theme];el.style.boxShadow='0 0 10px '+cRgba(p.theme,'0.3');}
     else{el.style.borderColor='';el.style.boxShadow='';}
   });
+  updatePreview();
+}
+function toggleMoreEmblems(){
+  var row=document.getElementById('more-emblems-row');
+  var btn=document.getElementById('more-emblems-btn');
+  var open=row.classList.toggle('open');
+  btn.classList.toggle('open',open);
+  btn.textContent=open?'− LESS':'+ MORE';
+}
+function pickEmblemColor(c){
+  p.emblem_color=c;
+  document.querySelectorAll('.ec-swatch,.ec-auto').forEach(function(el){el.classList.toggle('active',el.dataset.ec===c);});
+  document.getElementById('ec-name').textContent=c?(THEME_NAME[c]||c.toUpperCase()):'AUTO';
   updatePreview();
 }
 function toggleMoreColors(){
@@ -996,15 +1076,16 @@ async function saveCard(){
   try{
     var r=await fetch(BACKEND+'/api/heroes/me',{
       method:'PATCH',headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({sessionToken:sess.sessionToken,codename:cn,emblem:p.emblem,theme:p.theme,tagline:p.tagline,bg_pattern:p.bg_pattern,x_handle:p.x_handle,fx:p.fx,show_barcode:p.show_barcode})
+      body:JSON.stringify({sessionToken:sess.sessionToken,codename:cn,emblem:p.emblem+(p.emblem_color?'|'+p.emblem_color:''),theme:p.theme,tagline:p.tagline,bg_pattern:p.bg_pattern,x_handle:p.x_handle,fx:p.fx,show_barcode:p.show_barcode})
     });
     if(r.ok){
-      myHero.codename=cn; myHero.emblem=p.emblem; myHero.theme=p.theme;
+      var savedEmbl=p.emblem+(p.emblem_color?'|'+p.emblem_color:'');
+      myHero.codename=cn; myHero.emblem=savedEmbl; myHero.theme=p.theme;
       myHero.tagline=p.tagline; myHero.bg_pattern=p.bg_pattern; myHero.x_handle=p.x_handle; myHero.fx=p.fx; myHero.show_barcode=p.show_barcode;
       var idx=-1;
       for(var i=0;i<allHeroes.length;i++){if(allHeroes[i].serial===myHero.serial){idx=i;break;}}
       if(idx!==-1){
-        allHeroes[idx].codename=cn; allHeroes[idx].emblem=p.emblem;
+        allHeroes[idx].codename=cn; allHeroes[idx].emblem=savedEmbl;
         allHeroes[idx].theme=p.theme; allHeroes[idx].tagline=p.tagline;
         allHeroes[idx].bg_pattern=p.bg_pattern; allHeroes[idx].x_handle=p.x_handle; allHeroes[idx].fx=p.fx; allHeroes[idx].show_barcode=p.show_barcode;
         renderGrid();
@@ -1116,7 +1197,8 @@ function renderCard(h){
     var dy=(e.clientY-(r.top+r.height/2))/(r.height/2);
     card.style.transform='perspective(700px) rotateX('+(-dy*9)+'deg) rotateY('+(dx*9)+'deg) translateY(-6px) scale(1.015)';
     var embl=card.querySelector('.hcard-emblem');
-    if(embl){embl.style.transform='scale(1.18) translateY(-3px)';embl.style.filter='drop-shadow(0 0 18px '+th+') drop-shadow(0 0 36px '+ra('0.65')+')';}
+    var eT2=eTh(h.emblem,th);var eR2=eRa(h.emblem,ra);
+    if(embl){embl.style.transform='scale(1.18) translateY(-3px)';embl.style.filter='drop-shadow(0 0 18px '+eT2+') drop-shadow(0 0 36px '+eR2('0.65')+')';}
   });
   card.addEventListener('mouseleave',function(){
     card.style.transition='transform .45s ease,box-shadow .4s,border-color .18s';
@@ -1150,7 +1232,7 @@ function renderCard(h){
         '<div class="hcard-serial">'+fmtSerial(h.serial)+'</div>',
         badgesHtml?'<div class="hcard-badges">'+badgesHtml+'</div>':'',
       '</div>',
-      '<div class="hcard-emblem" style="color:'+th+';font-size:'+(isLegend?'36px':isCommander?'32px':'28px')+';filter:'+(isLegend?'drop-shadow(0 0 14px '+th+') drop-shadow(0 0 28px '+ra('0.55')+') drop-shadow(0 0 50px '+ra('0.2')+')':isCommander?'drop-shadow(0 0 12px '+th+') drop-shadow(0 0 22px '+ra('0.45')+')':'drop-shadow(0 0 8px '+th+')')+'">'+( EMBLEMS[h.emblem]||'⬡')+'</div>',
+      '<div class="hcard-emblem" style="color:'+eTh(h.emblem,th)+';font-size:'+(isLegend?'36px':isCommander?'32px':'28px')+';filter:'+(isLegend?'drop-shadow(0 0 14px '+eTh(h.emblem,th)+') drop-shadow(0 0 28px '+eRa(h.emblem,ra)('0.55')+') drop-shadow(0 0 50px '+eRa(h.emblem,ra)('0.2')+')':isCommander?'drop-shadow(0 0 12px '+eTh(h.emblem,th)+') drop-shadow(0 0 22px '+eRa(h.emblem,ra)('0.45')+')':'drop-shadow(0 0 8px '+eTh(h.emblem,th)+')')+'">'+eChr(h.emblem)+'</div>',
     '</div>',
     '<div class="hcard-name">'+(isActiveH?'<span class="dot-active" title="Active in last 24h"></span>':'')+escHtml(h.codename)+'</div>',
     h.tagline?'<div class="hcard-tagline">"'+escHtml(h.tagline)+'"</div>':'<div class="hcard-tagline"></div>',
@@ -1213,8 +1295,8 @@ function applyModalTheme(h){
   document.getElementById('modal-rank').style.borderColor=ra('0.45');
   document.getElementById('modal-rank').style.color=th;
   document.getElementById('modal-rank').style.boxShadow='0 0 10px '+ra('0.12')+', inset 0 0 10px '+ra('0.04');
-  document.getElementById('modal-emblem').style.color=th;
-  document.getElementById('modal-emblem').style.filter='drop-shadow(0 0 16px '+th+') drop-shadow(0 0 36px '+ra('0.5')+') drop-shadow(0 0 60px '+ra('0.22')+')';
+  document.getElementById('modal-emblem').style.color=eTh(h.emblem,th);
+  document.getElementById('modal-emblem').style.filter='drop-shadow(0 0 16px '+eTh(h.emblem,th)+') drop-shadow(0 0 36px '+eRa(h.emblem,ra)('0.5')+') drop-shadow(0 0 60px '+eRa(h.emblem,ra)('0.22')+')';
   document.getElementById('modal-divider').style.background=ra('0.12');
   document.getElementById('modal-divider').style.boxShadow='0 0 8px '+ra('0.1');
   document.getElementById('modal-divider').style.color=th;
@@ -1263,7 +1345,7 @@ function openModal(h){
   document.getElementById('modal-name').textContent=h.codename;
   document.getElementById('modal-tagline').textContent=h.tagline?'"'+h.tagline+'"':'';
   document.getElementById('modal-rank').textContent=h.rank;
-  document.getElementById('modal-emblem').textContent=EMBLEMS[h.emblem]||'⬡';
+  document.getElementById('modal-emblem').textContent=eChr(h.emblem);
   document.getElementById('modal-titles').innerHTML=(h.titles||[]).map(function(t){return '<span class="modal-chip">'+escHtml(t)+'</span>';}).join('');
   document.getElementById('ms-tx').textContent=h.total_conversations||0;
   document.getElementById('ms-days').textContent=h.days_active||0;
@@ -1297,6 +1379,8 @@ function closeModal(){
   var modal=document.getElementById('modal');
   modal.classList.remove('on');
   modal.style.animation='';
+  modal.style.transform='';
+  modal.style.transition='';
   var co=document.getElementById('modal-classified-overlay');
   if(co)co.remove();
   document.getElementById('modal-backdrop').classList.remove('on');
@@ -1399,8 +1483,9 @@ function buildShareCanvas(h){
   ctx.beginPath();ctx.arc(W-24,24,4,0,Math.PI*2);
   ctx.fillStyle=th; ctx.shadowColor=th; ctx.shadowBlur=8; ctx.fill(); ctx.shadowBlur=0;
 
-  ctx.font='72px "Courier New"'; ctx.fillStyle=th; ctx.shadowColor=th; ctx.shadowBlur=28;
-  ctx.textAlign='right'; ctx.fillText(EMBLEMS[h.emblem]||'⬡',W-20,90); ctx.shadowBlur=0; ctx.textAlign='left';
+  var eClrC=eTh(h.emblem,th);
+  ctx.font='72px "Courier New"'; ctx.fillStyle=eClrC; ctx.shadowColor=eClrC; ctx.shadowBlur=28;
+  ctx.textAlign='right'; ctx.fillText(eChr(h.emblem),W-20,90); ctx.shadowBlur=0; ctx.textAlign='left';
 
   var ns=28; ctx.font='bold '+ns+'px "Courier New"';
   while(ctx.measureText(h.codename.toUpperCase()).width>W-150&&ns>14){ns-=2;ctx.font='bold '+ns+'px "Courier New"';}
@@ -1578,7 +1663,7 @@ function renderConstellation(){
       tx=Math.max(8,Math.min(tx,conR.width-182));
       tip.style.cssText='display:block;left:'+tx+'px;top:'+ty+'px;';
       tip.style.setProperty('--tc',color);
-      tip.innerHTML='<div class="ct-emblem" style="color:'+color+';filter:drop-shadow(0 0 10px '+color+')">'+(EMBLEMS[h.emblem]||'⬡')+'</div>'
+      tip.innerHTML='<div class="ct-emblem" style="color:'+eTh(h.emblem,color)+';filter:drop-shadow(0 0 10px '+eTh(h.emblem,color)+'">'+eChr(h.emblem)+'</div>'
         +'<div class="ct-name">'+escHtml(h.codename)+'</div>'
         +'<div class="ct-rank" style="color:'+color+'">'+h.rank+'</div>'
         +'<div class="ct-stat">'+(h.total_conversations||0)+' TX &nbsp;·&nbsp; '+(h.days_active||0)+' DAYS</div>';
@@ -1646,7 +1731,7 @@ function buildFeed(heroes){
     row.className='feed-row';
     row.style.animationDelay=(i*55)+'ms';
     row.innerHTML=
-      '<span class="fr-emblem" style="color:'+color+';filter:drop-shadow(0 0 7px '+color+')">'+(EMBLEMS[h.emblem]||'⬡')+'</span>'
+      '<span class="fr-emblem" style="color:'+eTh(h.emblem,color)+';filter:drop-shadow(0 0 7px '+eTh(h.emblem,color)+'">'+eChr(h.emblem)+'</span>'
       +'<span class="fr-name">'+escHtml(h.codename)+'</span>'
       +'<span class="fr-rank" style="color:'+color+'">'+h.rank+'</span>'
       +'<span class="fr-time">'+t+'</span>'
@@ -1676,7 +1761,7 @@ function buildTicker(heroes){
   var items=sorted.map(function(h){
     var t=relTime(h.last_active_at);
     return '<span class="tick-item">'
-      +'<span style="font-size:12px;line-height:1;color:'+cHex(h.theme||'green')+'">'+( EMBLEMS[h.emblem]||'⬡')+'</span>'
+      +'<span style="font-size:12px;line-height:1;color:'+eTh(h.emblem,cHex(h.theme||'green'))+'">'+eChr(h.emblem)+'</span>'
       +'<span class="tick-name">'+escHtml(h.codename)+'</span>'
       +'<span class="tick-div">·</span>'
       +'<span class="tick-'+h.rank+'">'+h.rank+'</span>'
