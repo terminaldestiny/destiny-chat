@@ -18,6 +18,14 @@ app.use(function(req, res, next) {
   res.setHeader('X-XSS-Protection', '1; mode=block');
   res.setHeader('Referrer-Policy', 'strict-origin-when-cross-origin');
   res.setHeader('Permissions-Policy', 'geolocation=(), microphone=(), camera=()');
+  res.setHeader('Content-Security-Policy',
+    "default-src 'none'; " +
+    "script-src 'self' 'unsafe-inline'; " +
+    "style-src 'self' 'unsafe-inline'; " +
+    "img-src 'self' data: blob:; " +
+    "connect-src 'self' https://destiny-chat-production.up.railway.app https://api.mainnet-beta.solana.com; " +
+    "media-src 'self'; " +
+    "frame-ancestors 'none'");
   next();
 });
 
@@ -125,15 +133,17 @@ async function createMagicToken(email) {
 async function consumeMagicToken(token) {
   if (!supabase) return null;
   try {
+    // Atomic consume: update only if unused+unexpired, return email only on success.
+    // Prevents TOCTOU double-redemption from simultaneous requests.
     var { data, error } = await supabase
       .from('magic_tokens')
-      .select('*')
+      .update({ used: true })
       .eq('token', token)
       .eq('used', false)
       .gt('expires_at', new Date().toISOString())
+      .select('email')
       .single();
     if (error || !data) return null;
-    await supabase.from('magic_tokens').update({ used: true }).eq('id', data.id);
     return data.email;
   } catch (e) { console.error('consumeMagicToken:', e.message); return null; }
 }
@@ -264,6 +274,7 @@ var challengeLog     = new Map();
 var verifyLog        = new Map(); // H2: rate limit magic-verify
 var magicSendLog     = new Map();
 var scanLog          = new Map(); // rate limit /api/scan
+var adminLog         = new Map(); // rate limit /api/admin/stats
 
 // L2: use Object.create(null) to prevent prototype pollution
 var chatLog = Object.create(null);
@@ -276,6 +287,7 @@ setInterval(function() {
   verifyLog.forEach(function(ts, k)         { if (!ts.length || ts[ts.length-1] < now - 60000) verifyLog.delete(k); });
   magicSendLog.forEach(function(ts, k)      { if (!ts.length || ts[ts.length-1] < now - 3600000) magicSendLog.delete(k); });
   scanLog.forEach(function(ts, k)           { if (!ts.length || ts[ts.length-1] < now - 60000) scanLog.delete(k); });
+  adminLog.forEach(function(ts, k)          { if (!ts.length || ts[ts.length-1] < now - 60000) adminLog.delete(k); });
   var today = getTodayUTC();
   Object.keys(chatLog).forEach(function(k) { if (chatLog[k].date !== today) delete chatLog[k]; });
   if (supabase) {
@@ -376,6 +388,17 @@ function checkScanLimit(ip) {
   if (ts.length >= 30) return false;
   ts.push(now);
   scanLog.set(ip, ts);
+  return true;
+}
+
+// rate limit for /api/admin/stats (5 attempts/min per IP — H1)
+function checkAdminLimit(ip) {
+  var now = Date.now(), ago = now - 60000;
+  var ts = adminLog.get(ip) || [];
+  while (ts.length && ts[0] < ago) ts.shift();
+  if (ts.length >= 5) return false;
+  ts.push(now);
+  adminLog.set(ip, ts);
   return true;
 }
 
@@ -788,7 +811,8 @@ app.post('/api/auth/link-email', jsonSmall, async function(req, res) {
   try {
     var existing = await getUserByEmail(email);
     if (existing && existing.wallet !== session.wallet) {
-      return res.status(409).json({ error: 'email_taken' });
+      // M4: return generic 200 to avoid email enumeration — don't reveal the address is taken
+      return res.json({ ok: true });
     }
 
     if (!checkMagicSendLimit(email)) {
@@ -801,7 +825,7 @@ app.post('/api/auth/link-email', jsonSmall, async function(req, res) {
     res.json({ ok: true });
   } catch (e) {
     console.error('link-email error:', e.message);
-    res.status(500).json({ error: e.message || 'server_error' });
+    res.status(500).json({ error: 'server_error' });
   }
 });
 
@@ -955,6 +979,8 @@ app.patch('/api/heroes/me', jsonSmall, async function(req, res) {
 
 // ── /api/admin/stats ──────────────────────────────────────────────────────
 app.post('/api/admin/stats', jsonSmall, async function(req, res) {
+  var ip = req.ip || 'unknown';
+  if (!checkAdminLimit(ip)) return res.status(429).json({ error: 'rate_limited' });
   var body = req.body || {};
   var pw = (body.password || '').toString();
   var adminPw = process.env.ADMIN_PASSWORD || '';

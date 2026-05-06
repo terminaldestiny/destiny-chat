@@ -1380,7 +1380,7 @@ function renderCard(h){
   body.innerHTML=[
     '<div class="hcard-name">'+(isActiveH?'<span class="dot-active" title="Active in last 24h"></span>':'')+escHtml(h.codename)+'</div>',
     h.tagline?'<div class="hcard-tagline">"'+escHtml(h.tagline)+'"</div>':'<div class="hcard-tagline"></div>',
-    '<div style="margin-bottom:9px;"><span class="hcard-rank" style="color:'+th+';border-color:'+ra('0.45')+';box-shadow:0 0 8px '+ra('0.1')+'">'+h.rank+'</span></div>',
+    '<div style="margin-bottom:9px;"><span class="hcard-rank" style="color:'+th+';border-color:'+ra('0.45')+';box-shadow:0 0 8px '+ra('0.1')+'">'+escHtml(h.rank)+'</span></div>',
     '<div class="hcard-titles">'+((h.titles||[]).map(function(t){return '<span class="hcard-title">'+escHtml(t)+'</span>';})).join('')+'</div>',
     '<div class="hcard-stats">',
       '<div><div class="hstat-val">'+(h.total_conversations||0)+'</div><div class="hstat-lbl">TRANSMISSIONS</div></div>',
@@ -1821,7 +1821,7 @@ function renderConstellation(){
       tip.style.setProperty('--tc',color);
       tip.innerHTML='<div class="ct-emblem" style="color:'+eTh(h.emblem,color)+';filter:drop-shadow(0 0 10px '+eTh(h.emblem,color)+'">'+eChr(h.emblem)+'</div>'
         +'<div class="ct-name">'+escHtml(h.codename)+'</div>'
-        +'<div class="ct-rank" style="color:'+color+'">'+h.rank+'</div>'
+        +'<div class="ct-rank" style="color:'+color+'">'+escHtml(h.rank)+'</div>'
         +'<div class="ct-stat">'+(h.total_conversations||0)+' TX &nbsp;·&nbsp; '+(h.days_active||0)+' DAYS</div>';
     });
     star.addEventListener('mouseleave',function(){
@@ -1889,7 +1889,7 @@ function buildFeed(heroes){
     row.innerHTML=
       '<span class="fr-emblem" style="color:'+eTh(h.emblem,color)+';filter:drop-shadow(0 0 7px '+eTh(h.emblem,color)+'">'+eChr(h.emblem)+'</span>'
       +'<span class="fr-name">'+escHtml(h.codename)+'</span>'
-      +'<span class="fr-rank" style="color:'+color+'">'+h.rank+'</span>'
+      +'<span class="fr-rank" style="color:'+color+'">'+escHtml(h.rank)+'</span>'
       +'<span class="fr-time">'+t+'</span>'
       +'<span class="fr-tx">'+(h.total_conversations||0)+' TX</span>';
     row.onclick=function(){openModal(h);};
@@ -1920,7 +1920,7 @@ function buildTicker(heroes){
       +'<span style="font-size:12px;line-height:1;color:'+eTh(h.emblem,cHex(h.theme||'green'))+'">'+eChr(h.emblem)+'</span>'
       +'<span class="tick-name">'+escHtml(h.codename)+'</span>'
       +'<span class="tick-div">·</span>'
-      +'<span class="tick-'+h.rank+'">'+h.rank+'</span>'
+      +'<span class="tick-'+((['LEGEND','COMMANDER','AGENT','OPERATIVE'].includes(h.rank)?h.rank:'OPERATIVE'))+'">'+escHtml(h.rank)+'</span>'
       +'<span class="tick-div">·</span>'
       +'<span>'+(h.total_conversations||0)+' TX</span>'
       +(t?'<span class="tick-div">·</span><span class="tick-time">'+t+'</span>':'')
