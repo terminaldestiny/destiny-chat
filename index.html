@@ -2920,19 +2920,44 @@ function _applyBannerFxMC(el,style,theme){
 
 var _mcLoaded=false;
 function loadMenuHeroCard(){
-  if(getTier()!=='operative')return;
   if(_mcLoaded)return;
   _mcLoaded=true;
+  if(getTier()!=='operative'){_renderMenuHeroCardLocked();return;}
   var st=getSessionToken();
-  if(!st)return;
+  if(!st){_renderMenuHeroCardLocked();return;}
   fetch(BACKEND+'/api/heroes/me',{
     method:'POST',
     headers:{'Content-Type':'application/json'},
     body:JSON.stringify({sessionToken:st})
   })
   .then(function(r){return r.json();})
-  .then(function(h){if(h&&h.serial)_renderMenuHeroCard(h);})
-  .catch(function(){});
+  .then(function(h){if(h&&h.serial)_renderMenuHeroCard(h);else _renderMenuHeroCardLocked();})
+  .catch(function(){_renderMenuHeroCardLocked();});
+}
+
+function _renderMenuHeroCardLocked(){
+  var card=document.getElementById('mhc');
+  var banner=document.getElementById('mhc-banner');
+  var fx=document.getElementById('mhc-banner-fx');
+  if(card)card.style.border='1px solid rgba(0,255,65,0.08)';
+  if(banner)banner.style.borderBottom='1px solid rgba(0,255,65,0.06)';
+  _applyBannerFxMC(fx,'void','green');
+  var serial=document.getElementById('mhc-serial');
+  var rankBadge=document.getElementById('mhc-rank-badge');
+  var emblEl=document.getElementById('mhc-emblem');
+  if(serial)serial.textContent='TD-???';
+  if(rankBadge){rankBadge.textContent='CLASSIFIED';rankBadge.style.color='rgba(255,255,255,0.18)';}
+  if(emblEl){emblEl.textContent='⬡';emblEl.style.color='rgba(0,255,65,0.1)';emblEl.style.textShadow='none';}
+  var nameEl=document.getElementById('mhc-name');
+  var tagEl=document.getElementById('mhc-tagline');
+  var titlesEl=document.getElementById('mhc-titles');
+  var statsEl=document.getElementById('mhc-stats');
+  if(nameEl){nameEl.textContent='// CLASSIFIED';nameEl.style.color='rgba(255,255,255,0.12)';}
+  if(tagEl){tagEl.textContent='Hold 500,000+ $DESTINY to unlock your hero card';tagEl.style.color='rgba(0,255,65,0.35)';}
+  if(titlesEl)titlesEl.innerHTML='';
+  if(statsEl)statsEl.innerHTML='';
+  var wrap=document.getElementById('mhc-wrap');
+  if(wrap)wrap.style.display='block';
 }
 
 function _renderMenuHeroCard(h){
@@ -2947,13 +2972,11 @@ function _renderMenuHeroCard(h){
   var rnk=h.rank||'OPERATIVE';
   var rnkClr=rnk==='LEGEND'?'#ffaa00':rnk==='COMMANDER'?'rgba(204,68,255,0.9)':rnk==='AGENT'?hex:ra('0.55');
   var bg=h.bg_pattern||'none';
-  var banPts=bg.split('|');
-  var banStyle=banPts[1]||'clean';
+  var banStyle=bg.split('|')[1]||'clean';
 
   var card=document.getElementById('mhc');
   var banner=document.getElementById('mhc-banner');
   var fx=document.getElementById('mhc-banner-fx');
-
   if(card)card.style.border='1px solid '+ra('0.22');
   if(banner)banner.style.borderBottom='1px solid '+ra('0.18');
   _applyBannerFxMC(fx,banStyle,th);
@@ -2972,21 +2995,17 @@ function _renderMenuHeroCard(h){
   if(nameEl){nameEl.textContent=h.codename||'HERO';nameEl.style.color=hex;}
   if(tagEl){tagEl.textContent=h.tagline||'';tagEl.style.color=ra('0.45');}
   if(titlesEl){
-    var titles=[];
-    if(h.title_1)titles.push(h.title_1);
-    if(h.title_2)titles.push(h.title_2);
-    if(h.title_3)titles.push(h.title_3);
+    var titles=Array.isArray(h.titles)?h.titles.filter(Boolean):[];
     titlesEl.innerHTML=titles.map(function(t){
-      return '<div class="mhc-chip">'+t.replace(/[&<>'"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c];})+'</div>';
+      return '<div class="mhc-chip">'+String(t).replace(/[&<>'"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c];})+'</div>';
     }).join('');
   }
   if(statsEl){
-    var pow=h.token_balance||0;
-    var pwStr=pow>=1000000000?(pow/1000000000).toFixed(1)+'B':pow>=1000000?(pow/1000000).toFixed(1)+'M':pow>=1000?Math.round(pow/1000)+'K':String(pow);
-    var msgs=h.message_count||0;
+    var tx=h.total_conversations||0;
+    var days=h.days_active||0;
     statsEl.innerHTML=
-      '<div class="mhc-stat"><div class="mhc-stat-lbl">POWER</div><div class="mhc-stat-val" style="color:'+hex+'">'+pwStr+'</div></div>'+
-      '<div class="mhc-stat"><div class="mhc-stat-lbl">TRANSMISSIONS</div><div class="mhc-stat-val" style="color:'+hex+'">'+msgs+'</div></div>';
+      '<div class="mhc-stat"><div class="mhc-stat-lbl">TRANSMISSIONS</div><div class="mhc-stat-val" style="color:'+hex+'">'+tx+'</div></div>'+
+      '<div class="mhc-stat"><div class="mhc-stat-lbl">DAYS ACTIVE</div><div class="mhc-stat-val" style="color:'+hex+'">'+days+'</div></div>';
   }
 
   var wrap=document.getElementById('mhc-wrap');
