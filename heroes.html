@@ -53,10 +53,13 @@ body::before{content:'';position:fixed;inset:0;background:repeating-linear-gradi
 #card-col{display:flex;flex-direction:column;gap:0;flex-shrink:0;width:300px;}
 
 /* ── Customize toggle ──────────────────────── */
+#customize-toggle{display:none;}
+@media(max-width:600px){
 #customize-toggle{width:100%;background:rgba(0,255,65,0.07);border:1px solid rgba(0,255,65,0.45);border-top:none;color:var(--green);font-family:inherit;font-size:12px;letter-spacing:3px;padding:15px 18px;cursor:pointer;transition:.15s;display:flex;align-items:center;justify-content:space-between;text-shadow:0 0 14px rgba(0,255,65,0.4);}
 #customize-toggle:hover{background:rgba(0,255,65,0.13);box-shadow:0 0 18px rgba(0,255,65,0.08);border-color:var(--green);}
 #customize-toggle .ct-icon{font-size:18px;transition:transform .25s;opacity:.8;}
 #customize-toggle.open .ct-icon{transform:rotate(180deg);}
+}
 
 /* ── Card + panel layout ───────────────────── */
 #my-wrap{display:flex;gap:30px;align-items:flex-start;flex-wrap:wrap;}
@@ -117,12 +120,14 @@ body::before{content:'';position:fixed;inset:0;background:repeating-linear-gradi
 
 /* ── Edit panel ────────────────────────────── */
 #edit-panel{flex:1;min-width:260px;padding:18px;border:1px solid rgba(0,255,65,0.08);background:rgba(0,0,0,0.22);}
-.cs-section{border-bottom:1px solid rgba(0,255,65,0.06);}
-.cs-hdr{width:100%;display:flex;justify-content:space-between;align-items:center;background:none;border:none;padding:11px 0;cursor:pointer;font-family:inherit;font-size:10px;letter-spacing:3px;color:rgba(255,255,255,0.38);text-align:left;transition:color .15s;}
+.cs-section{border-bottom:1px solid rgba(0,255,65,0.08);}
+.cs-hdr{width:100%;display:flex;justify-content:space-between;align-items:center;background:none;border:none;padding:11px 0;cursor:pointer;font-family:inherit;font-size:10px;letter-spacing:3px;color:rgba(255,255,255,0.38);text-align:left;transition:color .15s,background .15s,padding .15s;}
 .cs-hdr:hover{color:rgba(255,255,255,0.72);}
-.cs-arrow{font-size:11px;color:rgba(0,255,65,0.45);transition:transform .22s;}
-.cs-section.closed .cs-arrow{transform:rotate(-90deg);}
-.cs-body{overflow:hidden;transition:max-height .24s ease;padding-bottom:4px;}
+.cs-section.closed .cs-hdr{color:rgba(255,255,255,0.62);background:rgba(0,255,65,0.05);border-radius:3px;padding:11px 10px;border-left:2px solid rgba(0,255,65,0.35);}
+.cs-section.closed .cs-hdr:hover{color:rgba(255,255,255,0.88);background:rgba(0,255,65,0.09);}
+.cs-arrow{font-size:12px;color:rgba(0,255,65,0.55);transition:transform .22s,color .15s;}
+.cs-section.closed .cs-arrow{transform:rotate(-90deg);color:rgba(0,255,65,0.85);}
+.cs-body{overflow:hidden;transition:max-height .24s ease;}
 .e-lbl{font-size:11px;letter-spacing:3px;color:rgba(0,255,65,0.35);margin-bottom:4px;}
 .e-row{margin-bottom:13px;}
 .e-pair{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:13px;}
@@ -133,6 +138,7 @@ body::before{content:'';position:fixed;inset:0;background:repeating-linear-gradi
 #tagline-input::placeholder{color:rgba(255,255,255,0.15);}
 #emblem-grid{display:grid;grid-template-columns:repeat(6,1fr);gap:5px;}
 .embl{height:48px;border:1px solid rgba(0,255,65,0.14);background:rgba(0,0,0,0.4);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:24px;transition:border-color .15s,background .15s,box-shadow .15s;user-select:none;position:relative;}
+.embl svg,#pc-emblem svg,#modal-emblem svg,.hcard-emblem svg{width:.85em;height:.85em;fill:currentColor;display:block;}
 .embl:hover{border-color:rgba(255,255,255,0.3);background:rgba(255,255,255,0.05);}
 .embl.active{transform:scale(1.06);}
 #theme-row{display:flex;gap:9px;align-items:center;flex-wrap:wrap;}
@@ -598,9 +604,11 @@ body::before{content:'';position:fixed;inset:0;background:repeating-linear-gradi
         <div class="cs-body" style="max-height:none">
           <div class="e-row">
             <div id="emblem-grid">
+              <div class="embl" data-e="sol"       title="SOLANA"    onclick="pickEmblem('sol')"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 21" width=".85em" height=".85em" fill="currentColor"><polygon points="0,3 24,0 24,4 0,7"/><polygon points="0,10 24,7 24,11 0,14"/><polygon points="0,17 24,14 24,18 0,21"/></svg></div>
+              <div class="embl" data-e="eliza"     title="ELIZA"     onclick="pickEmblem('eliza')"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 18 22" width=".85em" height=".85em" fill="currentColor"><rect x="0" y="0" width="4" height="22"/><rect x="4" y="0" width="14" height="4"/><rect x="4" y="9" width="10" height="4"/><rect x="4" y="18" width="14" height="4"/></svg></div>
+              <div class="embl" data-e="pgirl"     title="PIXEL GIRL" onclick="pickEmblem('pgirl')"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 13 16" width=".85em" height=".85em" fill="currentColor"><rect x="3" y="0" width="6" height="1"/><rect x="2" y="1" width="8" height="1"/><rect x="1" y="2" width="9" height="1"/><rect x="1" y="3" width="2" height="1"/><rect x="9" y="3" width="2" height="1"/><rect x="3" y="3" width="6" height="1"/><rect x="1" y="4" width="2" height="7"/><rect x="10" y="4" width="2" height="5"/><rect x="3" y="4" width="2" height="1"/><rect x="8" y="4" width="2" height="1"/><rect x="3" y="5" width="7" height="1"/><rect x="3" y="6" width="1" height="3"/><rect x="5" y="6" width="1" height="3"/><rect x="7" y="6" width="1" height="3"/><rect x="9" y="6" width="1" height="3"/><rect x="3" y="9" width="7" height="1"/><rect x="3" y="10" width="6" height="1"/><rect x="4" y="11" width="4" height="1"/><rect x="5" y="12" width="3" height="1"/><rect x="5" y="13" width="2" height="1"/><rect x="4" y="14" width="4" height="2"/></svg></div>
               <div class="embl" data-e="hexagon"   title="HEXAGON"   onclick="pickEmblem('hexagon')">⬡</div>
               <div class="embl" data-e="diamond"   title="DIAMOND"   onclick="pickEmblem('diamond')">◆</div>
-              <div class="embl" data-e="skull"     title="SKULL"     onclick="pickEmblem('skull')">☠</div>
               <div class="embl" data-e="shield"    title="SHIELD"    onclick="pickEmblem('shield')">⛨</div>
               <div class="embl" data-e="sword"     title="SWORD"     onclick="pickEmblem('sword')">⚔</div>
               <div class="embl" data-e="star"      title="STAR"      onclick="pickEmblem('star')">✦</div>
@@ -622,11 +630,9 @@ body::before{content:'';position:fixed;inset:0;background:repeating-linear-gradi
               <div class="embl" data-e="cross"     title="CROSS"     onclick="pickEmblem('cross')">✙</div>
               <div class="embl" data-e="crown"     title="CROWN"     onclick="pickEmblem('crown')">♛</div>
               <div class="embl" data-e="circlex"   title="VOID-X"    onclick="pickEmblem('circlex')">⊗</div>
-              <div class="embl" data-e="anchor"    title="ANCHOR"    onclick="pickEmblem('anchor')">⚓</div>
               <div class="embl" data-e="crescent"  title="CRESCENT"  onclick="pickEmblem('crescent')">☽</div>
               <div class="embl" data-e="ringeye"   title="RING-EYE"  onclick="pickEmblem('ringeye')">⊙</div>
               <div class="embl" data-e="semi"      title="HALF"      onclick="pickEmblem('semi')">◑</div>
-              <div class="embl" data-e="bars"      title="BARS"      onclick="pickEmblem('bars')">≡</div>
               <div class="embl" data-e="spark"     title="SPARK"     onclick="pickEmblem('spark')">✺</div>
             </div>
             <div id="ec-row">
@@ -649,6 +655,7 @@ body::before{content:'';position:fixed;inset:0;background:repeating-linear-gradi
       <div class="cs-section closed">
         <button class="cs-hdr" onclick="toggleSection(this)"><span>CARD STYLE</span><span class="cs-arrow">▾</span></button>
         <div class="cs-body" style="max-height:0">
+          <div style="padding-bottom:10px">
           <div class="e-pair">
             <div class="e-row">
               <div class="e-lbl">BACKGROUND</div>
@@ -678,6 +685,7 @@ body::before{content:'';position:fixed;inset:0;background:repeating-linear-gradi
               </div>
             </div>
           </div>
+          </div>
         </div>
       </div>
 
@@ -685,6 +693,7 @@ body::before{content:'';position:fixed;inset:0;background:repeating-linear-gradi
       <div class="cs-section closed">
         <button class="cs-hdr" onclick="toggleSection(this)"><span>EFFECTS &amp; DETAILS</span><span class="cs-arrow">▾</span></button>
         <div class="cs-body" style="max-height:0">
+          <div style="padding-bottom:10px">
           <div class="e-row">
             <div class="e-lbl">SPECIAL EFFECT</div>
             <div id="fx-grid">
@@ -707,6 +716,7 @@ body::before{content:'';position:fixed;inset:0;background:repeating-linear-gradi
               <div class="e-lbl">X HANDLE</div>
               <input class="e-input" id="x-input" type="text" maxlength="16" autocomplete="off" placeholder="@YOURHANDLE" oninput="p.x_handle=this.value.replace(/^@/,'').trim();updatePreview();">
             </div>
+          </div>
           </div>
         </div>
       </div>
@@ -811,13 +821,19 @@ body::before{content:'';position:fixed;inset:0;background:repeating-linear-gradi
 <script>
 var BACKEND='https://destiny-chat-production.up.railway.app';
 var EMBLEMS={
-  hexagon:'⬡',diamond:'◆',skull:'☠',shield:'⛨',sword:'⚔',
+  hexagon:'⬡',diamond:'◆',shield:'⛨',sword:'⚔',
   star:'✦',lightning:'⚡',infinity:'∞',target:'◎',signal:'≋',
   psi:'Ψ',omega:'Ω',delta:'Δ',phi:'Φ',prism:'◈',nexus:'⁂',origin:'⊕',apex:'▲',
   command:'⌘',gear:'⚙',bullseye:'◉',cross:'✙',crown:'♛',circlex:'⊗',
-  anchor:'⚓',crescent:'☽',ringeye:'⊙',semi:'◑',bars:'≡',spark:'✺'
+  crescent:'☽',ringeye:'⊙',semi:'◑',spark:'✺'
 };
-function eChr(raw){return EMBLEMS[(raw||'hexagon').split('|')[0]]||'⬡';}
+var SVG_EMBLEMS={
+  sol:'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 21" width="1em" height="1em" fill="currentColor"><polygon points="0,3 24,0 24,4 0,7"/><polygon points="0,10 24,7 24,11 0,14"/><polygon points="0,17 24,14 24,18 0,21"/></svg>',
+  eliza:'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 18 22" width="1em" height="1em" fill="currentColor"><rect x="0" y="0" width="4" height="22"/><rect x="4" y="0" width="14" height="4"/><rect x="4" y="9" width="10" height="4"/><rect x="4" y="18" width="14" height="4"/></svg>',
+  pgirl:'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 13 16" fill="currentColor"><rect x="3" y="0" width="6" height="1"/><rect x="2" y="1" width="8" height="1"/><rect x="1" y="2" width="9" height="1"/><rect x="1" y="3" width="2" height="1"/><rect x="9" y="3" width="2" height="1"/><rect x="3" y="3" width="6" height="1"/><rect x="1" y="4" width="2" height="7"/><rect x="10" y="4" width="2" height="5"/><rect x="3" y="4" width="2" height="1"/><rect x="8" y="4" width="2" height="1"/><rect x="3" y="5" width="7" height="1"/><rect x="3" y="6" width="1" height="3"/><rect x="5" y="6" width="1" height="3"/><rect x="7" y="6" width="1" height="3"/><rect x="9" y="6" width="1" height="3"/><rect x="3" y="9" width="7" height="1"/><rect x="3" y="10" width="6" height="1"/><rect x="4" y="11" width="4" height="1"/><rect x="5" y="12" width="3" height="1"/><rect x="5" y="13" width="2" height="1"/><rect x="4" y="14" width="4" height="2"/></svg>'
+};
+function eChr(raw){var k=(raw||'hexagon').split('|')[0];return SVG_EMBLEMS[k]||EMBLEMS[k]||'⬡';}
+function eChrCanvas(raw){var k=(raw||'hexagon').split('|')[0];return SVG_EMBLEMS[k]?'◈':EMBLEMS[k]||'⬡';}
 function eTh(raw,th){var c=(raw||'').split('|')[1];return c?cHex(c):th;}
 function eRa(raw,ra){var c=(raw||'').split('|')[1];return c?(THEME_RGBA[c]||THEME_RGBA.green):ra;}
 var BADGE={
@@ -1082,7 +1098,7 @@ function updatePreview(){
   var eClr=p.emblem_color?cHex(p.emblem_color):th;
   var eRgba=p.emblem_color?(THEME_RGBA[p.emblem_color]||THEME_RGBA.green):ra;
   var pe=document.getElementById('pc-emblem');
-  pe.textContent=EMBLEMS[p.emblem]||'⬡';
+  pe.innerHTML=eChr(p.emblem);
   pe.style.color=eClr;
   pe.style.setProperty('--eg1',eClr);
   pe.style.setProperty('--eg2',eRgba('0.72'));
@@ -1542,7 +1558,7 @@ function openModal(h){
   document.getElementById('modal-name').textContent=h.codename;
   document.getElementById('modal-tagline').textContent=h.tagline?'"'+h.tagline+'"':'';
   document.getElementById('modal-rank').textContent=h.rank;
-  document.getElementById('modal-emblem').textContent=eChr(h.emblem);
+  document.getElementById('modal-emblem').innerHTML=eChr(h.emblem);
   document.getElementById('modal-titles').innerHTML=(h.titles||[]).map(bdgHtml).join('');
   document.getElementById('ms-tx').textContent=h.total_conversations||0;
   document.getElementById('ms-days').textContent=h.days_active||0;
@@ -1684,7 +1700,7 @@ function buildShareCanvas(h){
 
   var eClrC=eTh(h.emblem,th);
   ctx.font='72px "Courier New"'; ctx.fillStyle=eClrC; ctx.shadowColor=eClrC; ctx.shadowBlur=28;
-  ctx.textAlign='right'; ctx.fillText(eChr(h.emblem),W-20,90); ctx.shadowBlur=0; ctx.textAlign='left';
+  ctx.textAlign='right'; ctx.fillText(eChrCanvas(h.emblem),W-20,90); ctx.shadowBlur=0; ctx.textAlign='left';
 
   var ns=28; ctx.font='bold '+ns+'px "Courier New"';
   while(ctx.measureText(h.codename.toUpperCase()).width>W-150&&ns>14){ns-=2;ctx.font='bold '+ns+'px "Courier New"';}
