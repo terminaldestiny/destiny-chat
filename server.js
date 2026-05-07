@@ -193,7 +193,7 @@ async function sendMagicLinkEmail(to, token) {
 var BUILDER_RE = /\b(build|deploy|code|app|project|develop|launch|ship|create|program|api|backend|frontend|database|startup|product)\b/i;
 var VALID_EMBLEMS   = ['hexagon','diamond','skull','shield','sword','signal','star','lightning','infinity','target','psi','omega','delta','phi','prism','nexus','origin','apex','command','gear','bullseye','cross','crown','circlex','anchor','crescent','ringeye','semi','bars','spark'];
 var VALID_THEMES    = ['green','cyan','amber','red','purple','blue','pink','orange','solar','jade','flux','warp','ghost','ember'];
-var VALID_PATTERNS  = ['none','grid','scan','circuit','dot','hex','rain','cross'];
+var VALID_PATTERNS  = ['none','grid','scan','circuit','dot','hex','rain','cross','pulse'];
 var VALID_BANNERS   = ['clean','aurora','plasma','inferno','prism','glitch','neon','void'];
 var VALID_FX        = ['none','glitch','hologram','classified','overdrive'];
 var VALID_ROLES     = ['','BUILDER','TRADER','DEGEN','FOUNDER','SCOUT','SHADOW','GHOST','PILOT'];
@@ -230,6 +230,9 @@ async function updateHeroActivity(wallet, message, hour) {
     var titles = hero.titles || [];
     if (hour >= 0 && hour < 5 && !titles.includes('NIGHT OWL')) titles.push('NIGHT OWL');
     if (BUILDER_RE.test(message) && !titles.includes('FIRST BUILDER')) titles.push('FIRST BUILDER');
+    if ((hero.total_conversations || 0) + 1 >= 100 && !titles.includes('CENTURION')) titles.push('CENTURION');
+    if (activeDates.length >= 30 && !titles.includes('PHANTOM')) titles.push('PHANTOM');
+    if ((hero.balance || 0) >= 10000000 && !titles.includes('SOVEREIGN')) titles.push('SOVEREIGN');
     await supabase.from('heroes').update({
       total_conversations: (hero.total_conversations || 0) + 1,
       active_dates: activeDates,

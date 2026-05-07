@@ -620,6 +620,7 @@ body::before{content:'';position:fixed;inset:0;background:repeating-linear-gradi
             <div class="pat-opt" data-p="hex"     onclick="pickPattern('hex')">HEX</div>
             <div class="pat-opt" data-p="rain"    onclick="pickPattern('rain')">RAIN</div>
             <div class="pat-opt" data-p="cross"   onclick="pickPattern('cross')">RINGS</div>
+            <div class="pat-opt" data-p="pulse"   onclick="pickPattern('pulse')">PULSE</div>
           </div>
         </div>
         <div class="e-row">
@@ -772,7 +773,10 @@ function eRa(raw,ra){var c=(raw||'').split('|')[1];return c?(THEME_RGBA[c]||THEM
 var BADGE={
   'NIGHT OWL':      {icon:'🦉', tip:'NIGHT OWL — transmitted between midnight and 5AM'},
   'FIRST BUILDER':  {icon:'🔧', tip:'FIRST BUILDER — asked about building or shipping'},
-  'EARLY OPERATIVE':{icon:'🛡', tip:'EARLY OPERATIVE — joined during the founding window'}
+  'EARLY OPERATIVE':{icon:'🛡', tip:'EARLY OPERATIVE — joined during the founding window'},
+  'CENTURION':      {icon:'🎖', tip:'CENTURION — 100+ transmissions sent'},
+  'PHANTOM':        {icon:'🌑', tip:'PHANTOM — active on 30+ different days'},
+  'SOVEREIGN':      {icon:'👑', tip:'SOVEREIGN — holds 10M+ $DESTINY'}
 };
 function bdgHtml(t){var b=BADGE[t];return '<span class="bdg" title="'+(b?b.tip:t)+'">'+(b?b.icon:'◈')+'</span>';}
 var RANK_HEX={LEGEND:'#ffaa00',COMMANDER:'#cc44ff',AGENT:'#00d4ff',OPERATIVE:'#00ff41'};
@@ -996,6 +1000,10 @@ function applyBgPattern(el,pat,theme){
       'radial-gradient(circle at 0 100%,transparent 8px,'+ra('0.07')+' 8px,'+ra('0.07')+' 9px,transparent 9px),'+
       'radial-gradient(circle at 100% 100%,transparent 8px,'+ra('0.07')+' 8px,'+ra('0.07')+' 9px,transparent 9px)';
     el.style.backgroundSize='20px 20px';
+  } else if(pat==='pulse'){
+    el.style.backgroundImage=
+      'radial-gradient(circle at center,transparent 15px,'+ra('0.09')+' 15px,'+ra('0.09')+' 16px,transparent 16px,transparent 30px,'+ra('0.055')+' 30px,'+ra('0.055')+' 31px,transparent 31px,transparent 45px,'+ra('0.025')+' 45px,'+ra('0.025')+' 46px,transparent 46px)';
+    el.style.backgroundSize='64px 64px';
   } else {
     el.style.backgroundImage='none';
   }
