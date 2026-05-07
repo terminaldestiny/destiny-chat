@@ -138,7 +138,6 @@ body::before{content:'';position:fixed;inset:0;background:repeating-linear-gradi
 #tagline-input::placeholder{color:rgba(255,255,255,0.15);}
 #emblem-grid{display:grid;grid-template-columns:repeat(6,1fr);gap:5px;}
 .embl{height:48px;border:1px solid rgba(0,255,65,0.14);background:rgba(0,0,0,0.4);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:24px;transition:border-color .15s,background .15s,box-shadow .15s;user-select:none;position:relative;}
-.embl svg,#pc-emblem svg,#modal-emblem svg,.hcard-emblem svg{width:.85em;height:.85em;fill:currentColor;display:block;}
 .embl:hover{border-color:rgba(255,255,255,0.3);background:rgba(255,255,255,0.05);}
 .embl.active{transform:scale(1.06);}
 #theme-row{display:flex;gap:9px;align-items:center;flex-wrap:wrap;}
@@ -604,11 +603,9 @@ body::before{content:'';position:fixed;inset:0;background:repeating-linear-gradi
         <div class="cs-body" style="max-height:none">
           <div class="e-row">
             <div id="emblem-grid">
-              <div class="embl" data-e="sol"       title="SOLANA"    onclick="pickEmblem('sol')"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 21" width=".85em" height=".85em" fill="currentColor"><polygon points="0,3 24,0 24,4 0,7"/><polygon points="0,10 24,7 24,11 0,14"/><polygon points="0,17 24,14 24,18 0,21"/></svg></div>
-              <div class="embl" data-e="eliza"     title="ELIZA"     onclick="pickEmblem('eliza')"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 18 22" width=".85em" height=".85em" fill="currentColor"><rect x="0" y="0" width="4" height="22"/><rect x="4" y="0" width="14" height="4"/><rect x="4" y="9" width="10" height="4"/><rect x="4" y="18" width="14" height="4"/></svg></div>
-              <div class="embl" data-e="pgirl"     title="PIXEL GIRL" onclick="pickEmblem('pgirl')"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 13 16" width=".85em" height=".85em" fill="currentColor"><rect x="3" y="0" width="6" height="1"/><rect x="2" y="1" width="8" height="1"/><rect x="1" y="2" width="9" height="1"/><rect x="1" y="3" width="2" height="1"/><rect x="9" y="3" width="2" height="1"/><rect x="3" y="3" width="6" height="1"/><rect x="1" y="4" width="2" height="7"/><rect x="10" y="4" width="2" height="5"/><rect x="3" y="4" width="2" height="1"/><rect x="8" y="4" width="2" height="1"/><rect x="3" y="5" width="7" height="1"/><rect x="3" y="6" width="1" height="3"/><rect x="5" y="6" width="1" height="3"/><rect x="7" y="6" width="1" height="3"/><rect x="9" y="6" width="1" height="3"/><rect x="3" y="9" width="7" height="1"/><rect x="3" y="10" width="6" height="1"/><rect x="4" y="11" width="4" height="1"/><rect x="5" y="12" width="3" height="1"/><rect x="5" y="13" width="2" height="1"/><rect x="4" y="14" width="4" height="2"/></svg></div>
               <div class="embl" data-e="hexagon"   title="HEXAGON"   onclick="pickEmblem('hexagon')">⬡</div>
               <div class="embl" data-e="diamond"   title="DIAMOND"   onclick="pickEmblem('diamond')">◆</div>
+              <div class="embl" data-e="skull"     title="SKULL"     onclick="pickEmblem('skull')">☠</div>
               <div class="embl" data-e="shield"    title="SHIELD"    onclick="pickEmblem('shield')">⛨</div>
               <div class="embl" data-e="sword"     title="SWORD"     onclick="pickEmblem('sword')">⚔</div>
               <div class="embl" data-e="star"      title="STAR"      onclick="pickEmblem('star')">✦</div>
@@ -630,9 +627,11 @@ body::before{content:'';position:fixed;inset:0;background:repeating-linear-gradi
               <div class="embl" data-e="cross"     title="CROSS"     onclick="pickEmblem('cross')">✙</div>
               <div class="embl" data-e="crown"     title="CROWN"     onclick="pickEmblem('crown')">♛</div>
               <div class="embl" data-e="circlex"   title="VOID-X"    onclick="pickEmblem('circlex')">⊗</div>
+              <div class="embl" data-e="anchor"    title="ANCHOR"    onclick="pickEmblem('anchor')">⚓</div>
               <div class="embl" data-e="crescent"  title="CRESCENT"  onclick="pickEmblem('crescent')">☽</div>
               <div class="embl" data-e="ringeye"   title="RING-EYE"  onclick="pickEmblem('ringeye')">⊙</div>
               <div class="embl" data-e="semi"      title="HALF"      onclick="pickEmblem('semi')">◑</div>
+              <div class="embl" data-e="bars"      title="BARS"      onclick="pickEmblem('bars')">≡</div>
               <div class="embl" data-e="spark"     title="SPARK"     onclick="pickEmblem('spark')">✺</div>
             </div>
             <div id="ec-row">
@@ -821,19 +820,13 @@ body::before{content:'';position:fixed;inset:0;background:repeating-linear-gradi
 <script>
 var BACKEND='https://destiny-chat-production.up.railway.app';
 var EMBLEMS={
-  hexagon:'⬡',diamond:'◆',shield:'⛨',sword:'⚔',
+  hexagon:'⬡',diamond:'◆',skull:'☠',shield:'⛨',sword:'⚔',
   star:'✦',lightning:'⚡',infinity:'∞',target:'◎',signal:'≋',
   psi:'Ψ',omega:'Ω',delta:'Δ',phi:'Φ',prism:'◈',nexus:'⁂',origin:'⊕',apex:'▲',
   command:'⌘',gear:'⚙',bullseye:'◉',cross:'✙',crown:'♛',circlex:'⊗',
-  crescent:'☽',ringeye:'⊙',semi:'◑',spark:'✺'
+  anchor:'⚓',crescent:'☽',ringeye:'⊙',semi:'◑',bars:'≡',spark:'✺'
 };
-var SVG_EMBLEMS={
-  sol:'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 21" width="1em" height="1em" fill="currentColor"><polygon points="0,3 24,0 24,4 0,7"/><polygon points="0,10 24,7 24,11 0,14"/><polygon points="0,17 24,14 24,18 0,21"/></svg>',
-  eliza:'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 18 22" width="1em" height="1em" fill="currentColor"><rect x="0" y="0" width="4" height="22"/><rect x="4" y="0" width="14" height="4"/><rect x="4" y="9" width="10" height="4"/><rect x="4" y="18" width="14" height="4"/></svg>',
-  pgirl:'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 13 16" fill="currentColor"><rect x="3" y="0" width="6" height="1"/><rect x="2" y="1" width="8" height="1"/><rect x="1" y="2" width="9" height="1"/><rect x="1" y="3" width="2" height="1"/><rect x="9" y="3" width="2" height="1"/><rect x="3" y="3" width="6" height="1"/><rect x="1" y="4" width="2" height="7"/><rect x="10" y="4" width="2" height="5"/><rect x="3" y="4" width="2" height="1"/><rect x="8" y="4" width="2" height="1"/><rect x="3" y="5" width="7" height="1"/><rect x="3" y="6" width="1" height="3"/><rect x="5" y="6" width="1" height="3"/><rect x="7" y="6" width="1" height="3"/><rect x="9" y="6" width="1" height="3"/><rect x="3" y="9" width="7" height="1"/><rect x="3" y="10" width="6" height="1"/><rect x="4" y="11" width="4" height="1"/><rect x="5" y="12" width="3" height="1"/><rect x="5" y="13" width="2" height="1"/><rect x="4" y="14" width="4" height="2"/></svg>'
-};
-function eChr(raw){var k=(raw||'hexagon').split('|')[0];return SVG_EMBLEMS[k]||EMBLEMS[k]||'⬡';}
-function eChrCanvas(raw){var k=(raw||'hexagon').split('|')[0];return SVG_EMBLEMS[k]?'◈':EMBLEMS[k]||'⬡';}
+function eChr(raw){return EMBLEMS[(raw||'hexagon').split('|')[0]]||'⬡';}
 function eTh(raw,th){var c=(raw||'').split('|')[1];return c?cHex(c):th;}
 function eRa(raw,ra){var c=(raw||'').split('|')[1];return c?(THEME_RGBA[c]||THEME_RGBA.green):ra;}
 var BADGE={
@@ -1098,7 +1091,7 @@ function updatePreview(){
   var eClr=p.emblem_color?cHex(p.emblem_color):th;
   var eRgba=p.emblem_color?(THEME_RGBA[p.emblem_color]||THEME_RGBA.green):ra;
   var pe=document.getElementById('pc-emblem');
-  pe.innerHTML=eChr(p.emblem);
+  pe.textContent=EMBLEMS[p.emblem]||'⬡';
   pe.style.color=eClr;
   pe.style.setProperty('--eg1',eClr);
   pe.style.setProperty('--eg2',eRgba('0.72'));
@@ -1558,7 +1551,7 @@ function openModal(h){
   document.getElementById('modal-name').textContent=h.codename;
   document.getElementById('modal-tagline').textContent=h.tagline?'"'+h.tagline+'"':'';
   document.getElementById('modal-rank').textContent=h.rank;
-  document.getElementById('modal-emblem').innerHTML=eChr(h.emblem);
+  document.getElementById('modal-emblem').textContent=eChr(h.emblem);
   document.getElementById('modal-titles').innerHTML=(h.titles||[]).map(bdgHtml).join('');
   document.getElementById('ms-tx').textContent=h.total_conversations||0;
   document.getElementById('ms-days').textContent=h.days_active||0;
@@ -1700,7 +1693,7 @@ function buildShareCanvas(h){
 
   var eClrC=eTh(h.emblem,th);
   ctx.font='72px "Courier New"'; ctx.fillStyle=eClrC; ctx.shadowColor=eClrC; ctx.shadowBlur=28;
-  ctx.textAlign='right'; ctx.fillText(eChrCanvas(h.emblem),W-20,90); ctx.shadowBlur=0; ctx.textAlign='left';
+  ctx.textAlign='right'; ctx.fillText(eChr(h.emblem),W-20,90); ctx.shadowBlur=0; ctx.textAlign='left';
 
   var ns=28; ctx.font='bold '+ns+'px "Courier New"';
   while(ctx.measureText(h.codename.toUpperCase()).width>W-150&&ns>14){ns-=2;ctx.font='bold '+ns+'px "Courier New"';}
