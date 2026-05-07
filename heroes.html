@@ -1238,6 +1238,27 @@ function updateEmblGrid(eClr,eRgba){
   });
 }
 
+function initPreviewTilt(){
+  var pc=document.getElementById('preview-card');
+  if(pc._tiltReady)return;
+  pc._tiltReady=true;
+  pc.addEventListener('mouseenter',function(){
+    pc.style.boxShadow='0 18px 50px rgba(0,0,0,0.4), 0 4px 16px rgba(0,0,0,0.2)';
+  });
+  pc.addEventListener('mousemove',function(e){
+    if('ontouchstart' in window)return;
+    var r=pc.getBoundingClientRect();
+    var dx=(e.clientX-(r.left+r.width/2))/(r.width/2);
+    var dy=(e.clientY-(r.top+r.height/2))/(r.height/2);
+    pc.style.transform='perspective(700px) rotateX('+(-dy*8)+'deg) rotateY('+(dx*8)+'deg) translateY(-5px) scale(1.012)';
+  });
+  pc.addEventListener('mouseleave',function(){
+    pc.style.transition='transform .45s ease, box-shadow .4s';
+    pc.style.transform='';
+    pc.style.boxShadow='';
+    setTimeout(function(){pc.style.transition='';},450);
+  });
+}
 async function saveCard(){
   var sess=getSession(); if(!sess||!sess.sessionToken)return;
   var cn=document.getElementById('codename-input').value.trim().toUpperCase().slice(0,24);
@@ -1977,6 +1998,7 @@ async function load(){
       if(mr.ok){
         myHero=await mr.json();
         populateMyCard(myHero);
+        initPreviewTilt();
         document.getElementById('my-section').style.display='block';
         document.getElementById('wall-div').style.display='block';
       } else {
