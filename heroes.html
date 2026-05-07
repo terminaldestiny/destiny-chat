@@ -32,11 +32,18 @@ body::before{content:'';position:fixed;inset:0;background:repeating-linear-gradi
 .si-lbl{font-size:8px;letter-spacing:2.5px;color:rgba(0,255,65,0.28);display:block;}
 
 /* ── No session ────────────────────────────── */
-#no-session{display:none;margin:32px 20px 0;padding:28px 24px;border:1px solid rgba(0,255,65,0.1);background:rgba(0,255,65,0.018);position:relative;z-index:1;text-align:center;}
-.ns-title{font-size:18px;font-weight:bold;letter-spacing:4px;color:rgba(0,255,65,0.7);margin-bottom:12px;}
-.ns-req{font-size:9px;letter-spacing:2px;color:rgba(255,255,255,0.3);margin-bottom:20px;}
-.ns-cta{display:inline-block;font-size:9px;letter-spacing:3px;color:var(--cyan);border:1px solid rgba(0,212,255,0.3);padding:9px 22px;text-decoration:none;transition:.15s;}
-.ns-cta:hover{background:rgba(0,212,255,0.08);border-color:var(--cyan);color:#fff;}
+#no-session{display:none;margin:24px 20px 0;position:relative;z-index:1;}
+.ns-bar{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:14px 20px;border:1px solid rgba(0,255,65,0.1);background:rgba(0,0,0,0.35);flex-wrap:wrap;}
+.ns-left{flex:1;min-width:200px;}
+.ns-eyebrow{font-size:7px;letter-spacing:3px;color:rgba(0,255,65,0.45);margin-bottom:5px;}
+.ns-headline{font-size:13px;font-weight:bold;letter-spacing:3px;color:rgba(255,255,255,0.82);margin-bottom:5px;}
+.ns-sub{font-size:9px;letter-spacing:1.5px;color:rgba(255,255,255,0.28);line-height:1.6;}
+.ns-perks{display:flex;gap:10px;align-items:center;flex-wrap:wrap;flex-shrink:0;}
+.ns-perk{font-size:18px;line-height:1;opacity:0.7;cursor:default;transition:.15s;}
+.ns-perk:hover{opacity:1;transform:scale(1.2);}
+.ns-cta{display:inline-block;font-size:8px;letter-spacing:3px;color:var(--cyan);border:1px solid rgba(0,212,255,0.35);padding:9px 20px;text-decoration:none;transition:.15s;white-space:nowrap;flex-shrink:0;}
+.ns-cta:hover{background:rgba(0,212,255,0.1);border-color:var(--cyan);color:#fff;}
+.ns-ghost-label{font-size:7px;letter-spacing:2.5px;color:rgba(255,255,255,0.18);padding:6px 20px 0;}
 
 /* ── My section ────────────────────────────── */
 #my-section{display:none;padding:28px 20px 0;position:relative;z-index:1;}
@@ -110,6 +117,12 @@ body::before{content:'';position:fixed;inset:0;background:repeating-linear-gradi
 
 /* ── Edit panel ────────────────────────────── */
 #edit-panel{flex:1;min-width:260px;padding:18px;border:1px solid rgba(0,255,65,0.08);background:rgba(0,0,0,0.22);}
+.cs-section{border-bottom:1px solid rgba(0,255,65,0.06);}
+.cs-hdr{width:100%;display:flex;justify-content:space-between;align-items:center;background:none;border:none;padding:11px 0;cursor:pointer;font-family:inherit;font-size:8px;letter-spacing:3px;color:rgba(255,255,255,0.38);text-align:left;transition:color .15s;}
+.cs-hdr:hover{color:rgba(255,255,255,0.72);}
+.cs-arrow{font-size:11px;color:rgba(0,255,65,0.45);transition:transform .22s;}
+.cs-section.closed .cs-arrow{transform:rotate(-90deg);}
+.cs-body{overflow:hidden;transition:max-height .24s ease;padding-bottom:4px;}
 .e-lbl{font-size:9px;letter-spacing:3px;color:rgba(0,255,65,0.35);margin-bottom:4px;}
 .e-row{margin-bottom:13px;}
 .e-pair{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:13px;}
@@ -486,9 +499,21 @@ body::before{content:'';position:fixed;inset:0;background:repeating-linear-gradi
 <div id="ticker-wrap"><div id="ticker-inner"></div></div>
 
 <div id="no-session">
-  <div class="ns-title">⬡ HEROES ONLY</div>
-  <div class="ns-req">Hold 250K+ $DESTINY · Connect wallet in the Terminal</div>
-  <a href="/" class="ns-cta" onclick="sessionStorage.setItem('skip_boot','1')">→ ENTER TERMINAL</a>
+  <div class="ns-bar">
+    <div class="ns-left">
+      <div class="ns-eyebrow">GHOST MODE — READ ONLY</div>
+      <div class="ns-headline">YOUR HERO CARD IS UNCLAIMED</div>
+      <div class="ns-sub">Hold 250K+ $DESTINY to unlock your field identity — custom emblem, rank, banner &amp; a permanent slot in the registry.</div>
+    </div>
+    <div class="ns-perks" title="Emblems · Badges · Rank · Custom card">
+      <span class="ns-perk" title="30 custom emblems">⬡</span>
+      <span class="ns-perk" title="Earn badges">🎖</span>
+      <span class="ns-perk" title="Rank system">👑</span>
+      <span class="ns-perk" title="Banner FX">◈</span>
+    </div>
+    <a href="/" class="ns-cta" onclick="sessionStorage.setItem('skip_boot','1')">→ ENTER TERMINAL</a>
+  </div>
+  <div class="ns-ghost-label">BROWSING THE FIELD ROSTER AS A GHOST · CARDS ARE READ-ONLY</div>
 </div>
 
 <div id="my-section">
@@ -536,128 +561,153 @@ body::before{content:'';position:fixed;inset:0;background:repeating-linear-gradi
     </div>
 
     <div id="edit-panel">
-      <div class="e-row">
-        <div class="e-lbl">COLOR THEME</div>
-        <div id="theme-row">
-          <div class="tswatch" data-t="green"  title="SIGNAL"  onclick="pickTheme('green')"></div>
-          <div class="tswatch" data-t="cyan"   title="CODEC"   onclick="pickTheme('cyan')"></div>
 
-          <div class="tswatch" data-t="red"    title="CRIMSON" onclick="pickTheme('red')"></div>
-          <div class="tswatch" data-t="purple" title="VOID"    onclick="pickTheme('purple')"></div>
-          <div class="tswatch" data-t="blue"   title="DEEP"    onclick="pickTheme('blue')"></div>
-          <div class="tswatch" data-t="pink"   title="NOVA"    onclick="pickTheme('pink')"></div>
-          <div class="tswatch" data-t="orange" title="BLAZE"   onclick="pickTheme('orange')"></div>
-          <div class="tswatch" data-t="solar"  title="SOLAR"   onclick="pickTheme('solar')"></div>
+      <!-- ① THEME & IDENTITY — open by default -->
+      <div class="cs-section">
+        <button class="cs-hdr" onclick="toggleSection(this)"><span>THEME &amp; IDENTITY</span><span class="cs-arrow">▾</span></button>
+        <div class="cs-body" style="max-height:none">
+          <div class="e-row">
+            <div class="e-lbl">COLOR THEME</div>
+            <div id="theme-row">
+              <div class="tswatch" data-t="green"  title="SIGNAL"  onclick="pickTheme('green')"></div>
+              <div class="tswatch" data-t="cyan"   title="CODEC"   onclick="pickTheme('cyan')"></div>
+              <div class="tswatch" data-t="red"    title="CRIMSON" onclick="pickTheme('red')"></div>
+              <div class="tswatch" data-t="purple" title="VOID"    onclick="pickTheme('purple')"></div>
+              <div class="tswatch" data-t="blue"   title="DEEP"    onclick="pickTheme('blue')"></div>
+              <div class="tswatch" data-t="pink"   title="NOVA"    onclick="pickTheme('pink')"></div>
+              <div class="tswatch" data-t="orange" title="BLAZE"   onclick="pickTheme('orange')"></div>
+              <div class="tswatch" data-t="solar"  title="SOLAR"   onclick="pickTheme('solar')"></div>
+            </div>
+          </div>
+          <div class="e-pair">
+            <div class="e-row">
+              <div class="e-lbl">CALLSIGN</div>
+              <input class="e-input" type="text" id="codename-input" maxlength="24" autocomplete="off" placeholder="YOUR CALLSIGN" oninput="p.codename=this.value.trim().toUpperCase();updatePreview();">
+            </div>
+            <div class="e-row">
+              <div class="e-lbl">MOTTO</div>
+              <input class="e-input" id="tagline-input" type="text" maxlength="50" autocomplete="off" placeholder="a short motto" oninput="p.tagline=this.value;updatePreview();">
+            </div>
+          </div>
         </div>
       </div>
-      <div class="e-pair">
-        <div class="e-row">
-          <div class="e-lbl">CALLSIGN</div>
-          <input class="e-input" type="text" id="codename-input" maxlength="24" autocomplete="off" placeholder="YOUR CALLSIGN" oninput="p.codename=this.value.trim().toUpperCase();updatePreview();">
-        </div>
-        <div class="e-row">
-          <div class="e-lbl">MOTTO</div>
-          <input class="e-input" id="tagline-input" type="text" maxlength="50" autocomplete="off" placeholder="a short motto" oninput="p.tagline=this.value;updatePreview();">
-        </div>
-      </div>
-      <div class="e-row">
-        <div class="e-lbl">EMBLEM</div>
-        <div id="emblem-grid">
-          <div class="embl" data-e="hexagon"   title="HEXAGON"   onclick="pickEmblem('hexagon')">⬡</div>
-          <div class="embl" data-e="diamond"   title="DIAMOND"   onclick="pickEmblem('diamond')">◆</div>
-          <div class="embl" data-e="skull"     title="SKULL"     onclick="pickEmblem('skull')">☠</div>
-          <div class="embl" data-e="shield"    title="SHIELD"    onclick="pickEmblem('shield')">⛨</div>
-          <div class="embl" data-e="sword"     title="SWORD"     onclick="pickEmblem('sword')">⚔</div>
-          <div class="embl" data-e="star"      title="STAR"      onclick="pickEmblem('star')">✦</div>
-          <div class="embl" data-e="lightning" title="LIGHTNING" onclick="pickEmblem('lightning')">⚡</div>
-          <div class="embl" data-e="infinity"  title="INFINITY"  onclick="pickEmblem('infinity')">∞</div>
-          <div class="embl" data-e="target"    title="TARGET"    onclick="pickEmblem('target')">◎</div>
-          <div class="embl" data-e="signal"    title="SIGNAL"    onclick="pickEmblem('signal')">≋</div>
-          <div class="embl" data-e="psi"       title="PSI"       onclick="pickEmblem('psi')">Ψ</div>
-          <div class="embl" data-e="omega"     title="OMEGA"     onclick="pickEmblem('omega')">Ω</div>
-          <div class="embl" data-e="delta"     title="DELTA"     onclick="pickEmblem('delta')">Δ</div>
-          <div class="embl" data-e="phi"       title="PHI"       onclick="pickEmblem('phi')">Φ</div>
-          <div class="embl" data-e="prism"     title="PRISM"     onclick="pickEmblem('prism')">◈</div>
-          <div class="embl" data-e="nexus"     title="NEXUS"     onclick="pickEmblem('nexus')">⁂</div>
-          <div class="embl" data-e="origin"    title="ORIGIN"    onclick="pickEmblem('origin')">⊕</div>
-          <div class="embl" data-e="apex"      title="APEX"      onclick="pickEmblem('apex')">▲</div>
-          <div class="embl" data-e="command"   title="COMMAND"   onclick="pickEmblem('command')">⌘</div>
-          <div class="embl" data-e="gear"      title="GEAR"      onclick="pickEmblem('gear')">⚙</div>
-          <div class="embl" data-e="bullseye"  title="BULLSEYE"  onclick="pickEmblem('bullseye')">◉</div>
-          <div class="embl" data-e="cross"     title="CROSS"     onclick="pickEmblem('cross')">✙</div>
-          <div class="embl" data-e="crown"     title="CROWN"     onclick="pickEmblem('crown')">♛</div>
-          <div class="embl" data-e="circlex"   title="VOID-X"    onclick="pickEmblem('circlex')">⊗</div>
-          <div class="embl" data-e="anchor"    title="ANCHOR"    onclick="pickEmblem('anchor')">⚓</div>
-          <div class="embl" data-e="crescent"  title="CRESCENT"  onclick="pickEmblem('crescent')">☽</div>
-          <div class="embl" data-e="ringeye"   title="RING-EYE"  onclick="pickEmblem('ringeye')">⊙</div>
-          <div class="embl" data-e="semi"      title="HALF"      onclick="pickEmblem('semi')">◑</div>
-          <div class="embl" data-e="bars"      title="BARS"      onclick="pickEmblem('bars')">≡</div>
-          <div class="embl" data-e="spark"     title="SPARK"     onclick="pickEmblem('spark')">✺</div>
-        </div>
-        <div id="ec-row">
-          <span id="ec-label">TINT</span>
-          <button class="ec-auto active" data-ec="" onclick="pickEmblemColor('')" title="MATCH THEME">AUTO</button>
-          <div class="ec-swatch" data-ec="green"  onclick="pickEmblemColor('green')"  style="background:#00ff41"></div>
-          <div class="ec-swatch" data-ec="cyan"   onclick="pickEmblemColor('cyan')"   style="background:#00d4ff"></div>
 
-          <div class="ec-swatch" data-ec="red"    onclick="pickEmblemColor('red')"    style="background:#ff2a00"></div>
-          <div class="ec-swatch" data-ec="purple" onclick="pickEmblemColor('purple')" style="background:#cc44ff"></div>
-          <div class="ec-swatch" data-ec="blue"   onclick="pickEmblemColor('blue')"   style="background:#0088ff"></div>
-          <div class="ec-swatch" data-ec="pink"   onclick="pickEmblemColor('pink')"   style="background:#ff2288"></div>
-          <div class="ec-swatch" data-ec="orange" onclick="pickEmblemColor('orange')" style="background:#ff6600"></div>
-          <div class="ec-swatch" data-ec="solar"  onclick="pickEmblemColor('solar')"  style="background:#ffff00"></div>
-        </div>
-      </div>
-      <div class="e-pair">
-        <div class="e-row">
-          <div class="e-lbl">BACKGROUND</div>
-          <div id="pattern-row">
-            <div class="pat-opt" data-p="none"    onclick="pickPattern('none')">CLEAN</div>
-            <div class="pat-opt" data-p="grid"    onclick="pickPattern('grid')">GRID</div>
-            <div class="pat-opt" data-p="scan"    onclick="pickPattern('scan')">SCAN</div>
-            <div class="pat-opt" data-p="circuit" onclick="pickPattern('circuit')">CIRCUIT</div>
-            <div class="pat-opt" data-p="dot"     onclick="pickPattern('dot')">DOT</div>
-            <div class="pat-opt" data-p="hex"     onclick="pickPattern('hex')">HEX</div>
-            <div class="pat-opt" data-p="rain"    onclick="pickPattern('rain')">RAIN</div>
-            <div class="pat-opt" data-p="cross"   onclick="pickPattern('cross')">RINGS</div>
-            <div class="pat-opt" data-p="pulse"   onclick="pickPattern('pulse')">PULSE</div>
+      <!-- ② EMBLEM — open by default -->
+      <div class="cs-section">
+        <button class="cs-hdr" onclick="toggleSection(this)"><span>EMBLEM</span><span class="cs-arrow">▾</span></button>
+        <div class="cs-body" style="max-height:none">
+          <div class="e-row">
+            <div id="emblem-grid">
+              <div class="embl" data-e="hexagon"   title="HEXAGON"   onclick="pickEmblem('hexagon')">⬡</div>
+              <div class="embl" data-e="diamond"   title="DIAMOND"   onclick="pickEmblem('diamond')">◆</div>
+              <div class="embl" data-e="skull"     title="SKULL"     onclick="pickEmblem('skull')">☠</div>
+              <div class="embl" data-e="shield"    title="SHIELD"    onclick="pickEmblem('shield')">⛨</div>
+              <div class="embl" data-e="sword"     title="SWORD"     onclick="pickEmblem('sword')">⚔</div>
+              <div class="embl" data-e="star"      title="STAR"      onclick="pickEmblem('star')">✦</div>
+              <div class="embl" data-e="lightning" title="LIGHTNING" onclick="pickEmblem('lightning')">⚡</div>
+              <div class="embl" data-e="infinity"  title="INFINITY"  onclick="pickEmblem('infinity')">∞</div>
+              <div class="embl" data-e="target"    title="TARGET"    onclick="pickEmblem('target')">◎</div>
+              <div class="embl" data-e="signal"    title="SIGNAL"    onclick="pickEmblem('signal')">≋</div>
+              <div class="embl" data-e="psi"       title="PSI"       onclick="pickEmblem('psi')">Ψ</div>
+              <div class="embl" data-e="omega"     title="OMEGA"     onclick="pickEmblem('omega')">Ω</div>
+              <div class="embl" data-e="delta"     title="DELTA"     onclick="pickEmblem('delta')">Δ</div>
+              <div class="embl" data-e="phi"       title="PHI"       onclick="pickEmblem('phi')">Φ</div>
+              <div class="embl" data-e="prism"     title="PRISM"     onclick="pickEmblem('prism')">◈</div>
+              <div class="embl" data-e="nexus"     title="NEXUS"     onclick="pickEmblem('nexus')">⁂</div>
+              <div class="embl" data-e="origin"    title="ORIGIN"    onclick="pickEmblem('origin')">⊕</div>
+              <div class="embl" data-e="apex"      title="APEX"      onclick="pickEmblem('apex')">▲</div>
+              <div class="embl" data-e="command"   title="COMMAND"   onclick="pickEmblem('command')">⌘</div>
+              <div class="embl" data-e="gear"      title="GEAR"      onclick="pickEmblem('gear')">⚙</div>
+              <div class="embl" data-e="bullseye"  title="BULLSEYE"  onclick="pickEmblem('bullseye')">◉</div>
+              <div class="embl" data-e="cross"     title="CROSS"     onclick="pickEmblem('cross')">✙</div>
+              <div class="embl" data-e="crown"     title="CROWN"     onclick="pickEmblem('crown')">♛</div>
+              <div class="embl" data-e="circlex"   title="VOID-X"    onclick="pickEmblem('circlex')">⊗</div>
+              <div class="embl" data-e="anchor"    title="ANCHOR"    onclick="pickEmblem('anchor')">⚓</div>
+              <div class="embl" data-e="crescent"  title="CRESCENT"  onclick="pickEmblem('crescent')">☽</div>
+              <div class="embl" data-e="ringeye"   title="RING-EYE"  onclick="pickEmblem('ringeye')">⊙</div>
+              <div class="embl" data-e="semi"      title="HALF"      onclick="pickEmblem('semi')">◑</div>
+              <div class="embl" data-e="bars"      title="BARS"      onclick="pickEmblem('bars')">≡</div>
+              <div class="embl" data-e="spark"     title="SPARK"     onclick="pickEmblem('spark')">✺</div>
+            </div>
+            <div id="ec-row">
+              <span id="ec-label">TINT</span>
+              <button class="ec-auto active" data-ec="" onclick="pickEmblemColor('')" title="MATCH THEME">AUTO</button>
+              <div class="ec-swatch" data-ec="green"  onclick="pickEmblemColor('green')"  style="background:#00ff41"></div>
+              <div class="ec-swatch" data-ec="cyan"   onclick="pickEmblemColor('cyan')"   style="background:#00d4ff"></div>
+              <div class="ec-swatch" data-ec="red"    onclick="pickEmblemColor('red')"    style="background:#ff2a00"></div>
+              <div class="ec-swatch" data-ec="purple" onclick="pickEmblemColor('purple')" style="background:#cc44ff"></div>
+              <div class="ec-swatch" data-ec="blue"   onclick="pickEmblemColor('blue')"   style="background:#0088ff"></div>
+              <div class="ec-swatch" data-ec="pink"   onclick="pickEmblemColor('pink')"   style="background:#ff2288"></div>
+              <div class="ec-swatch" data-ec="orange" onclick="pickEmblemColor('orange')" style="background:#ff6600"></div>
+              <div class="ec-swatch" data-ec="solar"  onclick="pickEmblemColor('solar')"  style="background:#ffff00"></div>
+            </div>
           </div>
         </div>
-        <div class="e-row">
-          <div class="e-lbl">BANNER STYLE</div>
-          <div id="banner-row">
-            <div class="ban-opt active" data-b="clean"   onclick="pickBanner('clean')">CLEAR</div>
-            <div class="ban-opt" data-b="aurora"  onclick="pickBanner('aurora')">〜 AURORA</div>
-            <div class="ban-opt" data-b="plasma"  onclick="pickBanner('plasma')">◎ PLASMA</div>
-            <div class="ban-opt" data-b="inferno" onclick="pickBanner('inferno')">🔥 INFERNO</div>
-            <div class="ban-opt" data-b="prism"   onclick="pickBanner('prism')">◈ PRISM</div>
-            <div class="ban-opt" data-b="glitch"  onclick="pickBanner('glitch')">▒ GLITCH</div>
-            <div class="ban-opt" data-b="neon"    onclick="pickBanner('neon')">— NEON</div>
-            <div class="ban-opt" data-b="void"    onclick="pickBanner('void')">· VOID</div>
+      </div>
+
+      <!-- ③ CARD STYLE — collapsed by default -->
+      <div class="cs-section closed">
+        <button class="cs-hdr" onclick="toggleSection(this)"><span>CARD STYLE</span><span class="cs-arrow">▾</span></button>
+        <div class="cs-body" style="max-height:0">
+          <div class="e-pair">
+            <div class="e-row">
+              <div class="e-lbl">BACKGROUND</div>
+              <div id="pattern-row">
+                <div class="pat-opt" data-p="none"    onclick="pickPattern('none')">CLEAN</div>
+                <div class="pat-opt" data-p="grid"    onclick="pickPattern('grid')">GRID</div>
+                <div class="pat-opt" data-p="scan"    onclick="pickPattern('scan')">SCAN</div>
+                <div class="pat-opt" data-p="circuit" onclick="pickPattern('circuit')">CIRCUIT</div>
+                <div class="pat-opt" data-p="dot"     onclick="pickPattern('dot')">DOT</div>
+                <div class="pat-opt" data-p="hex"     onclick="pickPattern('hex')">HEX</div>
+                <div class="pat-opt" data-p="rain"    onclick="pickPattern('rain')">RAIN</div>
+                <div class="pat-opt" data-p="cross"   onclick="pickPattern('cross')">RINGS</div>
+                <div class="pat-opt" data-p="pulse"   onclick="pickPattern('pulse')">PULSE</div>
+              </div>
+            </div>
+            <div class="e-row">
+              <div class="e-lbl">BANNER STYLE</div>
+              <div id="banner-row">
+                <div class="ban-opt active" data-b="clean"   onclick="pickBanner('clean')">CLEAR</div>
+                <div class="ban-opt" data-b="aurora"  onclick="pickBanner('aurora')">〜 AURORA</div>
+                <div class="ban-opt" data-b="plasma"  onclick="pickBanner('plasma')">◎ PLASMA</div>
+                <div class="ban-opt" data-b="inferno" onclick="pickBanner('inferno')">🔥 INFERNO</div>
+                <div class="ban-opt" data-b="prism"   onclick="pickBanner('prism')">◈ PRISM</div>
+                <div class="ban-opt" data-b="glitch"  onclick="pickBanner('glitch')">▒ GLITCH</div>
+                <div class="ban-opt" data-b="neon"    onclick="pickBanner('neon')">— NEON</div>
+                <div class="ban-opt" data-b="void"    onclick="pickBanner('void')">· VOID</div>
+              </div>
+            </div>
           </div>
         </div>
       </div>
-      <div class="e-row">
-        <div class="e-lbl">SPECIAL EFFECT</div>
-        <div id="fx-grid">
-          <div class="fx-opt" data-f="none"       onclick="pickFx('none')">NONE</div>
-          <div class="fx-opt" data-f="glitch"     onclick="pickFx('glitch')">GLITCH</div>
-          <div class="fx-opt" data-f="hologram"   onclick="pickFx('hologram')">HOLOGRAM</div>
-          <div class="fx-opt" data-f="classified" onclick="pickFx('classified')">CLASSIFIED</div>
-          <div class="fx-opt" data-f="overdrive"  onclick="pickFx('overdrive')">OVERDRIVE</div>
-        </div>
-      </div>
-      <div class="e-pair">
-        <div class="e-row">
-          <div class="e-lbl">BARCODE STRIP</div>
-          <div id="barcode-toggle-row">
-            <div class="bc-opt active" data-v="0" onclick="pickBarcode(false)">OFF</div>
-            <div class="bc-opt" data-v="1" onclick="pickBarcode(true)">ON</div>
+
+      <!-- ④ EFFECTS & DETAILS — collapsed by default -->
+      <div class="cs-section closed">
+        <button class="cs-hdr" onclick="toggleSection(this)"><span>EFFECTS &amp; DETAILS</span><span class="cs-arrow">▾</span></button>
+        <div class="cs-body" style="max-height:0">
+          <div class="e-row">
+            <div class="e-lbl">SPECIAL EFFECT</div>
+            <div id="fx-grid">
+              <div class="fx-opt" data-f="none"       onclick="pickFx('none')">NONE</div>
+              <div class="fx-opt" data-f="glitch"     onclick="pickFx('glitch')">GLITCH</div>
+              <div class="fx-opt" data-f="hologram"   onclick="pickFx('hologram')">HOLOGRAM</div>
+              <div class="fx-opt" data-f="classified" onclick="pickFx('classified')">CLASSIFIED</div>
+              <div class="fx-opt" data-f="overdrive"  onclick="pickFx('overdrive')">OVERDRIVE</div>
+            </div>
           </div>
-        </div>
-        <div class="e-row">
-          <div class="e-lbl">X HANDLE</div>
-          <input class="e-input" id="x-input" type="text" maxlength="16" autocomplete="off" placeholder="@YOURHANDLE" oninput="p.x_handle=this.value.replace(/^@/,'').trim();updatePreview();">
+          <div class="e-pair">
+            <div class="e-row">
+              <div class="e-lbl">BARCODE STRIP</div>
+              <div id="barcode-toggle-row">
+                <div class="bc-opt active" data-v="0" onclick="pickBarcode(false)">OFF</div>
+                <div class="bc-opt" data-v="1" onclick="pickBarcode(true)">ON</div>
+              </div>
+            </div>
+            <div class="e-row">
+              <div class="e-lbl">X HANDLE</div>
+              <input class="e-input" id="x-input" type="text" maxlength="16" autocomplete="off" placeholder="@YOURHANDLE" oninput="p.x_handle=this.value.replace(/^@/,'').trim();updatePreview();">
+            </div>
+          </div>
         </div>
       </div>
       <button id="save-btn" onclick="saveCard()">SAVE CHANGES</button>
@@ -1144,6 +1194,18 @@ function pickBarcode(v){
   p.show_barcode=v;
   document.querySelectorAll('.bc-opt').forEach(function(el){el.classList.toggle('active',el.dataset.v===(v?'1':'0'));});
   updatePreview();
+}
+function toggleSection(btn){
+  var sec=btn.closest('.cs-section');
+  var body=sec.querySelector('.cs-body');
+  if(sec.classList.contains('closed')){
+    sec.classList.remove('closed');
+    body.style.maxHeight=body.scrollHeight+'px';
+    setTimeout(function(){body.style.maxHeight='none';},250);
+  }else{
+    body.style.maxHeight=body.scrollHeight+'px';
+    requestAnimationFrame(function(){body.style.maxHeight='0';sec.classList.add('closed');});
+  }
 }
 function pickFx(f){
   p.fx=f;
