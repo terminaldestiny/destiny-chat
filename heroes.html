@@ -1306,25 +1306,30 @@ function revealCards(){
     if(rect.top<window.innerHeight+80)inView.push(card);
     else outView.push(card);
   });
+  function applyReveal(card){
+    function cleanup(e){
+      if(e.animationName!=='card-in')return;
+      card.style.opacity='1';
+      if(card.dataset.glitch){card.style.animation='glitch-loop 7s linear '+card.dataset.glitchDelay+'ms infinite';}
+      else if(card.dataset.overdrive){card.style.animation='overdrive-loop 3.5s linear '+card.dataset.overdriveDelay+'ms infinite';}
+      else if(card.dataset.hologram){card.style.animation='holo-cycle 3.5s linear 0ms infinite';}
+      else{card.classList.remove('reveal');card.style.animation='';}
+    }
+    card.addEventListener('animationend',cleanup,{once:true});
+    if(card.dataset.glitch){card.style.animation='card-in .45s ease forwards,glitch-loop 7s linear '+card.dataset.glitchDelay+'ms infinite';}
+    else if(card.dataset.overdrive){card.style.animation='card-in .45s ease forwards,overdrive-loop 3.5s linear '+card.dataset.overdriveDelay+'ms infinite';}
+    else if(card.dataset.hologram){card.style.animation='card-in .45s ease forwards,holo-cycle 3.5s linear .45s infinite';}
+    else{card.classList.add('reveal');}
+    card.dataset.revealed='1';
+  }
   inView.forEach(function(card,i){
-    setTimeout(function(){
-      if(card.dataset.glitch){card.style.animation='card-in .45s ease forwards,glitch-loop 7s linear '+card.dataset.glitchDelay+'ms infinite';}
-      else if(card.dataset.overdrive){card.style.animation='card-in .45s ease forwards,overdrive-loop 3.5s linear '+card.dataset.overdriveDelay+'ms infinite';}
-      else if(card.dataset.hologram){card.style.animation='card-in .45s ease forwards,holo-cycle 3.5s linear .45s infinite';}
-      else{card.classList.add('reveal');}
-      card.dataset.revealed='1';
-    },i*45);
+    setTimeout(function(){applyReveal(card);},i*45);
   });
   revealObs=new IntersectionObserver(function(entries){
     entries.forEach(function(entry){
       if(entry.isIntersecting&&!entry.target.dataset.revealed){
-        var c=entry.target;
-        if(c.dataset.glitch){c.style.animation='card-in .45s ease forwards,glitch-loop 7s linear '+c.dataset.glitchDelay+'ms infinite';}
-        else if(c.dataset.overdrive){c.style.animation='card-in .45s ease forwards,overdrive-loop 3.5s linear '+c.dataset.overdriveDelay+'ms infinite';}
-        else if(c.dataset.hologram){c.style.animation='card-in .45s ease forwards,holo-cycle 3.5s linear .45s infinite';}
-        else{c.classList.add('reveal');}
-        c.dataset.revealed='1';
-        revealObs.unobserve(c);
+        applyReveal(entry.target);
+        revealObs.unobserve(entry.target);
       }
     });
   },{threshold:0.06});
