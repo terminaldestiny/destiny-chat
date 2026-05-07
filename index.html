@@ -784,7 +784,7 @@
     #mhc-name{font-size:15px;font-weight:bold;letter-spacing:2px;margin-bottom:2px;}
     #mhc-tagline{font-size:9px;font-style:italic;margin-bottom:8px;}
     #mhc-titles{display:flex;flex-wrap:wrap;gap:4px;margin-bottom:10px;}
-    .mhc-chip{font-size:7px;letter-spacing:1.5px;padding:2px 6px;border:1px solid rgba(255,255,255,0.1);color:rgba(255,255,255,0.38);}
+    .mhc-chip{display:inline-flex;align-items:center;justify-content:center;width:24px;height:24px;font-size:13px;line-height:1;background:rgba(0,0,0,0.5);border:1px solid rgba(0,212,255,0.22);cursor:default;}
     #mhc-stats{display:flex;gap:20px;padding-top:8px;border-top:1px solid rgba(255,255,255,0.06);}
     .mhc-stat-lbl{font-size:7px;letter-spacing:2px;color:rgba(255,255,255,0.25);margin-bottom:2px;}
     .mhc-stat-val{font-size:14px;font-weight:bold;letter-spacing:-0.5px;}
@@ -3026,8 +3026,11 @@ function _renderMenuHeroCard(h){
   if(tagEl){tagEl.textContent=h.tagline||'';tagEl.style.color=ra('0.45');}
   if(titlesEl){
     var titles=Array.isArray(h.titles)?h.titles.filter(Boolean):[];
+    var _MHC_BADGE={'NIGHT OWL':'🦉','FIRST BUILDER':'🔧','EARLY OPERATIVE':'🛡','CENTURION':'🎖','PHANTOM':'🌑','SOVEREIGN':'👑'};
     titlesEl.innerHTML=titles.map(function(t){
-      return '<div class="mhc-chip">'+String(t).replace(/[&<>'"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c];})+'</div>';
+      var icon=_MHC_BADGE[t]||'◈';
+      var tip=t;
+      return '<div class="mhc-chip" title="'+tip+'">'+icon+'</div>';
     }).join('');
   }
   if(statsEl){

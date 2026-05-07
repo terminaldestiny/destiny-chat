@@ -918,8 +918,8 @@ app.post('/api/heroes/me', jsonSmall, async function(req, res) {
   try {
     var { data, error } = await supabase.from('heroes').select('*').eq('wallet', session.wallet).single();
     if (error || !data) return res.status(404).json({ error: 'not_found' });
-    var b = data.balance || 0;
-    var rank = b >= 50000000 ? 'LEGEND' : b >= 10000000 ? 'COMMANDER' : b >= 2000000 ? 'AGENT' : 'OPERATIVE';
+    var b = (session.balance != null ? session.balance : data.balance) || 0;
+    var rank = b >= 10000000 ? 'LEGEND' : b >= 2000000 ? 'COMMANDER' : b >= 500000 ? 'AGENT' : 'OPERATIVE';
     res.json({ serial: data.serial, codename: data.codename, emblem: data.emblem,
                titles: data.titles, total_conversations: data.total_conversations,
                days_active: data.days_active, joined_at: data.joined_at, rank, gold: b >= 2000000,
