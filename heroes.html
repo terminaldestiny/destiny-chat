@@ -106,15 +106,17 @@ body::before{content:'';position:fixed;inset:0;background:repeating-linear-gradi
 #pc-joined{font-size:7px;letter-spacing:1px;color:rgba(255,255,255,0.18);}
 
 /* ── Edit panel ────────────────────────────── */
-#edit-panel{flex:1;min-width:260px;}
-.e-lbl{font-size:9px;letter-spacing:3px;color:rgba(0,255,65,0.35);margin-bottom:7px;}
-.e-row{margin-bottom:18px;}
+#edit-panel{flex:1;min-width:260px;padding:18px;border:1px solid rgba(0,255,65,0.08);background:rgba(0,0,0,0.22);}
+.e-lbl{font-size:9px;letter-spacing:3px;color:rgba(0,255,65,0.35);margin-bottom:4px;}
+.e-row{margin-bottom:13px;}
+.e-pair{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:13px;}
+.e-pair>.e-row{margin-bottom:0;}
 .e-input{width:100%;background:rgba(0,0,0,0.6);border:1px solid rgba(0,255,65,0.16);color:rgba(255,255,255,0.88);font-family:inherit;font-size:12px;letter-spacing:2px;padding:9px 12px;outline:none;transition:.15s;text-transform:uppercase;}
 .e-input:focus{border-color:var(--cyan);box-shadow:0 0 12px rgba(0,212,255,0.07);}
 #tagline-input{text-transform:none;font-size:11px;letter-spacing:1px;}
 #tagline-input::placeholder{color:rgba(255,255,255,0.15);}
 #emblem-grid{display:grid;grid-template-columns:repeat(6,1fr);gap:6px;}
-.embl{height:52px;border:1px solid rgba(0,255,65,0.14);background:rgba(0,0,0,0.4);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:24px;transition:all .15s;user-select:none;position:relative;}
+.embl{height:44px;border:1px solid rgba(0,255,65,0.14);background:rgba(0,0,0,0.4);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:22px;transition:all .15s;user-select:none;position:relative;}
 .embl:hover{border-color:rgba(255,255,255,0.3);background:rgba(255,255,255,0.04);transform:scale(1.08);}
 .embl.active{background:rgba(0,255,65,0.07);transform:scale(1.08);}
 .embl.active::after{content:'';position:absolute;inset:0;border:1px solid var(--green);pointer-events:none;}
@@ -275,8 +277,8 @@ body::before{content:'';position:fixed;inset:0;background:repeating-linear-gradi
 #modal-share-btn:hover{color:#fff;border-color:rgba(255,255,255,0.3);}
 
 /* ── FX picker ─────────────────────────────── */
-#fx-grid{display:flex;gap:6px;flex-wrap:wrap;}
-.fx-opt{padding:7px 14px;border:1px solid rgba(255,255,255,0.08);font-size:8px;letter-spacing:2px;color:rgba(255,255,255,0.35);cursor:pointer;transition:.15s;}
+#fx-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:5px;}
+.fx-opt{padding:7px 6px;border:1px solid rgba(255,255,255,0.08);font-size:8px;letter-spacing:1.5px;color:rgba(255,255,255,0.35);cursor:pointer;transition:.15s;text-align:center;}
 .fx-opt:hover{border-color:rgba(255,255,255,0.25);color:rgba(255,255,255,0.65);}
 .fx-opt.active{color:var(--amber);border-color:rgba(255,170,0,0.5);background:rgba(255,170,0,0.04);}
 
@@ -355,8 +357,13 @@ body::before{content:'';position:fixed;inset:0;background:repeating-linear-gradi
   #card-col{width:100%;}
   #preview-card{width:100%;}
   #customize-toggle{width:100%;}
-  #edit-panel{display:none;}
+  #edit-panel{display:none;padding:14px 12px;}
   #edit-panel.open{display:block;}
+  .e-pair{grid-template-columns:1fr 1fr;}
+  .embl{height:38px;font-size:19px;}
+  #more-emblems-btn{height:38px;}
+  .ban-opt,.pat-opt{padding:6px 9px;font-size:7.5px;letter-spacing:1.5px;}
+  .fx-opt{padding:6px 4px;font-size:7px;letter-spacing:1px;}
   #filter-bar{flex-direction:column;align-items:flex-start;gap:10px;}
   #search-input{max-width:100%;width:100%;}
   #rank-legend{padding-left:14px;padding-right:14px;}
@@ -419,7 +426,7 @@ body::before{content:'';position:fixed;inset:0;background:repeating-linear-gradi
 .rl-label{color:rgba(255,255,255,0.1);font-size:7px;letter-spacing:1px;}
 
 /* ── More emblems ────────────────────────── */
-#more-emblems-btn{height:52px;background:rgba(0,255,65,0.04);border:1px dashed rgba(0,255,65,0.16);color:rgba(255,255,255,0.25);cursor:pointer;font-family:inherit;font-size:9px;letter-spacing:1.5px;transition:.15s;}
+#more-emblems-btn{height:44px;background:rgba(0,255,65,0.04);border:1px dashed rgba(0,255,65,0.16);color:rgba(255,255,255,0.25);cursor:pointer;font-family:inherit;font-size:9px;letter-spacing:1.5px;transition:.15s;}
 #more-emblems-btn:hover{border-color:rgba(255,255,255,0.28);color:rgba(255,255,255,0.65);}
 #more-emblems-btn.open{border-color:rgba(255,170,0,0.4);color:var(--amber);background:rgba(255,170,0,0.03);}
 #more-emblems-row{display:none;grid-template-columns:repeat(6,1fr);gap:6px;margin-top:6px;}
@@ -611,37 +618,45 @@ body::before{content:'';position:fixed;inset:0;background:repeating-linear-gradi
           <span class="t-name" id="theme-name">SIGNAL</span>
         </div>
       </div>
-      <div class="e-row">
-        <div class="e-lbl">BACKGROUND</div>
-        <div id="pattern-row">
-          <div class="pat-opt" data-p="none"    onclick="pickPattern('none')">CLEAN</div>
-          <div class="pat-opt" data-p="grid"    onclick="pickPattern('grid')">GRID</div>
-          <div class="pat-opt" data-p="scan"    onclick="pickPattern('scan')">SCAN</div>
-          <div class="pat-opt" data-p="circuit" onclick="pickPattern('circuit')">CIRCUIT</div>
-          <div class="pat-opt" data-p="dot"     onclick="pickPattern('dot')">DOT</div>
-          <div class="pat-opt" data-p="hex"     onclick="pickPattern('hex')">HEX</div>
-          <div class="pat-opt" data-p="rain"    onclick="pickPattern('rain')">RAIN</div>
-          <div class="pat-opt" data-p="cross"   onclick="pickPattern('cross')">RINGS</div>
+      <div class="e-pair">
+        <div class="e-row">
+          <div class="e-lbl">BACKGROUND</div>
+          <div id="pattern-row">
+            <div class="pat-opt" data-p="none"    onclick="pickPattern('none')">CLEAN</div>
+            <div class="pat-opt" data-p="grid"    onclick="pickPattern('grid')">GRID</div>
+            <div class="pat-opt" data-p="scan"    onclick="pickPattern('scan')">SCAN</div>
+            <div class="pat-opt" data-p="circuit" onclick="pickPattern('circuit')">CIRCUIT</div>
+            <div class="pat-opt" data-p="dot"     onclick="pickPattern('dot')">DOT</div>
+            <div class="pat-opt" data-p="hex"     onclick="pickPattern('hex')">HEX</div>
+            <div class="pat-opt" data-p="rain"    onclick="pickPattern('rain')">RAIN</div>
+            <div class="pat-opt" data-p="cross"   onclick="pickPattern('cross')">RINGS</div>
+          </div>
+        </div>
+        <div class="e-row">
+          <div class="e-lbl">BANNER STYLE</div>
+          <div id="banner-row">
+            <div class="ban-opt active" data-b="clean"   onclick="pickBanner('clean')">CLEAR</div>
+            <div class="ban-opt" data-b="aurora"  onclick="pickBanner('aurora')">〜 AURORA</div>
+            <div class="ban-opt" data-b="plasma"  onclick="pickBanner('plasma')">◎ PLASMA</div>
+            <div class="ban-opt" data-b="inferno" onclick="pickBanner('inferno')">🔥 INFERNO</div>
+            <div class="ban-opt" data-b="prism"   onclick="pickBanner('prism')">◈ PRISM</div>
+            <div class="ban-opt" data-b="glitch"  onclick="pickBanner('glitch')">▒ GLITCH</div>
+            <div class="ban-opt" data-b="neon"    onclick="pickBanner('neon')">— NEON</div>
+            <div class="ban-opt" data-b="void"    onclick="pickBanner('void')">· VOID</div>
+          </div>
         </div>
       </div>
-      <div class="e-row">
-        <div class="e-lbl">BANNER STYLE</div>
-        <div id="banner-row">
-          <div class="ban-opt active" data-b="clean"   onclick="pickBanner('clean')">CLEAR</div>
-          <div class="ban-opt" data-b="aurora"  onclick="pickBanner('aurora')">〜 AURORA</div>
-          <div class="ban-opt" data-b="plasma"  onclick="pickBanner('plasma')">◎ PLASMA</div>
-          <div class="ban-opt" data-b="inferno" onclick="pickBanner('inferno')">🔥 INFERNO</div>
-          <div class="ban-opt" data-b="prism"   onclick="pickBanner('prism')">◈ PRISM</div>
-          <div class="ban-opt" data-b="glitch"  onclick="pickBanner('glitch')">▒ GLITCH</div>
-          <div class="ban-opt" data-b="neon"    onclick="pickBanner('neon')">— NEON</div>
-          <div class="ban-opt" data-b="void"    onclick="pickBanner('void')">· VOID</div>
+      <div class="e-pair">
+        <div class="e-row">
+          <div class="e-lbl">BARCODE STRIP</div>
+          <div id="barcode-toggle-row">
+            <div class="bc-opt active" data-v="0" onclick="pickBarcode(false)">OFF</div>
+            <div class="bc-opt" data-v="1" onclick="pickBarcode(true)">ON</div>
+          </div>
         </div>
-      </div>
-      <div class="e-row">
-        <div class="e-lbl">BARCODE STRIP</div>
-        <div id="barcode-toggle-row">
-          <div class="bc-opt active" data-v="0" onclick="pickBarcode(false)">OFF</div>
-          <div class="bc-opt" data-v="1" onclick="pickBarcode(true)">ON</div>
+        <div class="e-row">
+          <div class="e-lbl">X HANDLE</div>
+          <input class="e-input" id="x-input" type="text" maxlength="16" autocomplete="off" placeholder="@YOURHANDLE" oninput="p.x_handle=this.value.replace(/^@/,'').trim();updatePreview();">
         </div>
       </div>
       <div class="e-row">
@@ -653,10 +668,6 @@ body::before{content:'';position:fixed;inset:0;background:repeating-linear-gradi
           <div class="fx-opt" data-f="classified" onclick="pickFx('classified')">CLASSIFIED</div>
           <div class="fx-opt" data-f="overdrive"  onclick="pickFx('overdrive')">OVERDRIVE</div>
         </div>
-      </div>
-      <div class="e-row">
-        <div class="e-lbl">X HANDLE</div>
-        <input class="e-input" id="x-input" type="text" maxlength="16" autocomplete="off" placeholder="@YOURHANDLE" oninput="p.x_handle=this.value.replace(/^@/,'').trim();updatePreview();">
       </div>
       <button id="save-btn" onclick="saveCard()">SAVE CHANGES</button>
       <span id="save-msg">✓ SAVED</span>
@@ -768,6 +779,8 @@ var EMBLEMS={
 function eChr(raw){return EMBLEMS[(raw||'hexagon').split('|')[0]]||'⬡';}
 function eTh(raw,th){var c=(raw||'').split('|')[1];return c?cHex(c):th;}
 function eRa(raw,ra){var c=(raw||'').split('|')[1];return c?(THEME_RGBA[c]||THEME_RGBA.green):ra;}
+var RANK_HEX={LEGEND:'#ffaa00',COMMANDER:'#cc44ff',AGENT:'#00d4ff',OPERATIVE:'#00ff41'};
+var RANK_RGBA={LEGEND:function(a){return 'rgba(255,170,0,'+a+')';},COMMANDER:function(a){return 'rgba(204,68,255,'+a+')';},AGENT:function(a){return 'rgba(0,212,255,'+a+')';},OPERATIVE:function(a){return 'rgba(0,255,65,'+a+')';}};
 var THEME_HEX={green:'#00ff41',cyan:'#00d4ff',amber:'#ffaa00',red:'#ff2a00',purple:'#cc44ff',blue:'#0088ff',pink:'#ff2288',orange:'#ff6600',solar:'#ffff00',jade:'#00ff99',flux:'#ff00cc',warp:'#9933ff',ghost:'#e0e0e0',ember:'#ff8800'};
 var THEME_NAME={green:'SIGNAL',cyan:'CODEC',amber:'GOLD',red:'CRIMSON',purple:'VOID',blue:'DEEP',pink:'NOVA',orange:'BLAZE',solar:'SOLAR',jade:'JADE',flux:'FLUX',warp:'WARP',ghost:'GHOST',ember:'EMBER'};
 var THEME_RGBA={
@@ -1028,8 +1041,10 @@ function updatePreview(){
   document.getElementById('pc-tagline').style.color=ra('0.5');
 
   var rankEl=document.getElementById('pc-rank');
-  rankEl.style.borderColor=ra('0.45'); rankEl.style.color=th;
-  rankEl.style.boxShadow='0 0 10px '+ra('0.12')+', inset 0 0 10px '+ra('0.04');
+  var rnk=(myHero&&myHero.rank)||'OPERATIVE';
+  var rnkHex=RANK_HEX[rnk]||'#00ff41'; var rnkRa=RANK_RGBA[rnk]||RANK_RGBA.OPERATIVE;
+  rankEl.style.color=rnkHex; rankEl.style.borderColor=rnkRa('0.45');
+  rankEl.style.boxShadow='0 0 10px '+rnkRa('0.12')+', inset 0 0 10px '+rnkRa('0.04');
 
   document.getElementById('pc-divider').style.background=ra('0.12');
   document.getElementById('pc-divider').style.boxShadow='0 0 8px '+ra('0.1');
@@ -1323,7 +1338,7 @@ function renderCard(h){
   body.innerHTML=[
     '<div class="hcard-name">'+(isActiveH?'<span class="dot-active" title="Active in last 24h"></span>':'')+escHtml(h.codename)+'</div>',
     h.tagline?'<div class="hcard-tagline">"'+escHtml(h.tagline)+'"</div>':'<div class="hcard-tagline"></div>',
-    '<div style="margin-bottom:9px;"><span class="hcard-rank" style="color:'+th+';border-color:'+ra('0.45')+';box-shadow:0 0 8px '+ra('0.1')+'">'+escHtml(h.rank)+'</span></div>',
+    '<div style="margin-bottom:9px;"><span class="hcard-rank" style="color:'+(RANK_HEX[h.rank]||'#00ff41')+';border-color:'+(RANK_RGBA[h.rank]||RANK_RGBA.OPERATIVE)('0.4')+';box-shadow:0 0 8px '+(RANK_RGBA[h.rank]||RANK_RGBA.OPERATIVE)('0.1')+'">'+escHtml(h.rank)+'</span></div>',
     '<div class="hcard-titles">'+((h.titles||[]).map(function(t){return '<span class="hcard-title">'+escHtml(t)+'</span>';})).join('')+'</div>',
     '<div class="hcard-stats">',
       '<div><div class="hstat-val">'+(h.total_conversations||0)+'</div><div class="hstat-lbl">TRANSMISSIONS</div></div>',
@@ -1386,9 +1401,10 @@ function applyModalTheme(h){
   document.getElementById('modal-scan-dot').style.background=th;
   document.getElementById('modal-scan-dot').style.boxShadow='0 0 8px '+th;
   document.getElementById('modal-tagline').style.color=ra('0.5');
-  document.getElementById('modal-rank').style.borderColor=ra('0.45');
-  document.getElementById('modal-rank').style.color=th;
-  document.getElementById('modal-rank').style.boxShadow='0 0 10px '+ra('0.12')+', inset 0 0 10px '+ra('0.04');
+  var mrnkHex=RANK_HEX[h.rank]||'#00ff41'; var mrnkRa=RANK_RGBA[h.rank]||RANK_RGBA.OPERATIVE;
+  document.getElementById('modal-rank').style.color=mrnkHex;
+  document.getElementById('modal-rank').style.borderColor=mrnkRa('0.45');
+  document.getElementById('modal-rank').style.boxShadow='0 0 10px '+mrnkRa('0.12')+', inset 0 0 10px '+mrnkRa('0.04');
   document.getElementById('modal-emblem').style.color=eTh(h.emblem,th);
   document.getElementById('modal-emblem').style.filter='drop-shadow(0 0 16px '+eTh(h.emblem,th)+') drop-shadow(0 0 36px '+eRa(h.emblem,ra)('0.5')+') drop-shadow(0 0 60px '+eRa(h.emblem,ra)('0.22')+')';
   document.getElementById('modal-divider').style.background=ra('0.12');
