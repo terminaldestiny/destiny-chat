@@ -185,10 +185,10 @@ body::before{content:'';position:fixed;inset:0;background:repeating-linear-gradi
 /* ── Community grid ────────────────────────── */
 #grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(255px,1fr));gap:12px;padding:16px 20px 50px;position:relative;z-index:1;}
 .hcard{background:#050705;border:1px solid rgba(0,255,65,0.14);cursor:pointer;transition:box-shadow .18s,border-color .18s;position:relative;overflow:hidden;opacity:0;will-change:transform;}
-@keyframes card-in{from{opacity:0;transform:translateY(12px);}to{opacity:1;transform:translateY(0);}}
-.hcard.reveal{animation:card-in .45s ease forwards;}
-.hcard-legend.reveal{animation:card-in .45s ease forwards;}
-.hcard-commander.reveal{animation:card-in .45s ease forwards;}
+@keyframes card-in{from{opacity:0;}to{opacity:1;}}
+.hcard.reveal{animation:card-in .45s ease;}
+.hcard-legend.reveal{animation:card-in .45s ease;}
+.hcard-commander.reveal{animation:card-in .45s ease;}
 .hcard::before{content:'';position:absolute;top:5px;left:5px;width:10px;height:10px;border-top:1px solid var(--cc,rgba(0,255,65,0.3));border-left:1px solid var(--cc,rgba(0,255,65,0.3));pointer-events:none;transition:border-color .2s;}
 .hcard::after{content:'';position:absolute;bottom:5px;right:5px;width:10px;height:10px;border-bottom:1px solid var(--cc,rgba(0,255,65,0.3));border-right:1px solid var(--cc,rgba(0,255,65,0.3));pointer-events:none;transition:border-color .2s;}
 .hcard-bar{height:2px;width:100%;}
@@ -308,7 +308,7 @@ body::before{content:'';position:fixed;inset:0;background:repeating-linear-gradi
 .hcard-barcode{height:16px;margin-top:8px;opacity:.6;}
 
 /* ── Special effects ────────────────────────── */
-.fx-glitch{animation:card-in .4s ease forwards,glitch-loop 7s 1s infinite!important;}
+.fx-glitch{animation:card-in .4s ease,glitch-loop 7s 1s infinite!important;}
 @keyframes glitch-loop{
   0%,82%,100%{filter:none;transform:none;}
   83%{filter:hue-rotate(40deg) saturate(200%);transform:translateX(3px);}
@@ -348,7 +348,7 @@ body::before{content:'';position:fixed;inset:0;background:repeating-linear-gradi
 }
 
 /* ── New hero arrival flash ────────────────── */
-.hcard-new-arrival{animation:card-in .4s ease forwards,glow-arrive 1.8s ease .35s!important;}
+.hcard-new-arrival{animation:card-in .4s ease,glow-arrive 1.8s ease .35s!important;}
 @keyframes glow-arrive{0%{box-shadow:0 0 0 rgba(0,255,65,0);}30%{box-shadow:0 0 30px rgba(0,255,65,0.38),0 0 0 1px rgba(0,255,65,0.28);}100%{box-shadow:0 0 0 rgba(0,255,65,0);}}
 
 /* ── Sync dot ──────────────────────────────── */
@@ -1337,9 +1337,9 @@ function revealCards(){
       else{card.classList.remove('reveal');card.style.animation='';}
     }
     card.addEventListener('animationend',cleanup,{once:true});
-    if(card.dataset.glitch){card.style.animation='card-in .45s ease forwards,glitch-loop 7s linear '+card.dataset.glitchDelay+'ms infinite';}
-    else if(card.dataset.overdrive){card.style.animation='card-in .45s ease forwards,overdrive-loop 3.5s linear '+card.dataset.overdriveDelay+'ms infinite';}
-    else if(card.dataset.hologram){card.style.animation='card-in .45s ease forwards,holo-cycle 3.5s linear .45s infinite';}
+    if(card.dataset.glitch){card.style.animation='card-in .45s ease,glitch-loop 7s linear '+card.dataset.glitchDelay+'ms infinite';}
+    else if(card.dataset.overdrive){card.style.animation='card-in .45s ease,overdrive-loop 3.5s linear '+card.dataset.overdriveDelay+'ms infinite';}
+    else if(card.dataset.hologram){card.style.animation='card-in .45s ease,holo-cycle 3.5s linear .45s infinite';}
     else{card.classList.add('reveal');}
     card.dataset.revealed='1';
   }
