@@ -102,7 +102,7 @@ body::before{content:'';position:fixed;inset:0;background:repeating-linear-gradi
 .pc-stat-val{font-size:18px;font-weight:bold;color:rgba(255,255,255,0.85);}
 #pc-footer{display:flex;justify-content:space-between;align-items:center;padding-top:10px;transition:border-color .4s;}
 #pc-x{font-size:9px;letter-spacing:1px;}
-#pc-url{font-size:7px;letter-spacing:1.5px;color:rgba(255,255,255,0.18);}
+
 #pc-joined{font-size:7px;letter-spacing:1px;color:rgba(255,255,255,0.18);}
 
 /* ── Edit panel ────────────────────────────── */
@@ -115,7 +115,7 @@ body::before{content:'';position:fixed;inset:0;background:repeating-linear-gradi
 .e-input:focus{border-color:var(--cyan);box-shadow:0 0 12px rgba(0,212,255,0.07);}
 #tagline-input{text-transform:none;font-size:11px;letter-spacing:1px;}
 #tagline-input::placeholder{color:rgba(255,255,255,0.15);}
-#emblem-grid{display:grid;grid-template-columns:repeat(6,1fr);gap:6px;}
+#emblem-grid{display:grid;grid-template-columns:repeat(6,1fr);gap:5px;}
 .embl{height:44px;border:1px solid rgba(0,255,65,0.14);background:rgba(0,0,0,0.4);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:22px;transition:all .15s;user-select:none;position:relative;}
 .embl:hover{border-color:rgba(255,255,255,0.3);background:rgba(255,255,255,0.04);transform:scale(1.08);}
 .embl.active{background:rgba(0,255,65,0.07);transform:scale(1.08);}
@@ -361,7 +361,6 @@ body::before{content:'';position:fixed;inset:0;background:repeating-linear-gradi
   #edit-panel.open{display:block;}
   .e-pair{grid-template-columns:1fr 1fr;}
   .embl{height:38px;font-size:19px;}
-  #more-emblems-btn{height:38px;}
   .ban-opt,.pat-opt{padding:6px 9px;font-size:7.5px;letter-spacing:1.5px;}
   .fx-opt{padding:6px 4px;font-size:7px;letter-spacing:1px;}
   #filter-bar{flex-direction:column;align-items:flex-start;gap:10px;}
@@ -426,11 +425,6 @@ body::before{content:'';position:fixed;inset:0;background:repeating-linear-gradi
 .rl-label{color:rgba(255,255,255,0.1);font-size:7px;letter-spacing:1px;}
 
 /* ── More emblems ────────────────────────── */
-#more-emblems-btn{height:44px;background:rgba(0,255,65,0.04);border:1px dashed rgba(0,255,65,0.16);color:rgba(255,255,255,0.25);cursor:pointer;font-family:inherit;font-size:9px;letter-spacing:1.5px;transition:.15s;}
-#more-emblems-btn:hover{border-color:rgba(255,255,255,0.28);color:rgba(255,255,255,0.65);}
-#more-emblems-btn.open{border-color:rgba(255,170,0,0.4);color:var(--amber);background:rgba(255,170,0,0.03);}
-#more-emblems-row{display:none;grid-template-columns:repeat(6,1fr);gap:6px;margin-top:6px;}
-#more-emblems-row.open{display:grid;}
 
 /* ── Emblem color ─────────────────────────── */
 #ec-row{display:flex;gap:6px;flex-wrap:wrap;align-items:center;margin-top:8px;}
@@ -531,7 +525,6 @@ body::before{content:'';position:fixed;inset:0;background:repeating-linear-gradi
           <div id="pc-barcode-serial"></div>
         </div>
         <div id="pc-footer">
-          <div id="pc-url">terminaldestiny.com</div>
           <div id="pc-x"></div>
           <div id="pc-joined"></div>
         </div>
@@ -544,12 +537,29 @@ body::before{content:'';position:fixed;inset:0;background:repeating-linear-gradi
 
     <div id="edit-panel">
       <div class="e-row">
-        <div class="e-lbl">CALLSIGN</div>
-        <input class="e-input" type="text" id="codename-input" maxlength="24" autocomplete="off" placeholder="YOUR CALLSIGN" oninput="p.codename=this.value.trim().toUpperCase();updatePreview();">
+        <div class="e-lbl">COLOR THEME</div>
+        <div id="theme-row">
+          <div class="tswatch" data-t="green"  title="SIGNAL"  onclick="pickTheme('green')"></div>
+          <div class="tswatch" data-t="cyan"   title="CODEC"   onclick="pickTheme('cyan')"></div>
+          <div class="tswatch" data-t="amber"  title="GOLD"    onclick="pickTheme('amber')"></div>
+          <div class="tswatch" data-t="red"    title="CRIMSON" onclick="pickTheme('red')"></div>
+          <div class="tswatch" data-t="purple" title="VOID"    onclick="pickTheme('purple')"></div>
+          <div class="tswatch" data-t="blue"   title="DEEP"    onclick="pickTheme('blue')"></div>
+          <div class="tswatch" data-t="pink"   title="NOVA"    onclick="pickTheme('pink')"></div>
+          <div class="tswatch" data-t="orange" title="BLAZE"   onclick="pickTheme('orange')"></div>
+          <div class="tswatch" data-t="solar"  title="SOLAR"   onclick="pickTheme('solar')"></div>
+          <span class="t-name" id="theme-name">SIGNAL</span>
+        </div>
       </div>
-      <div class="e-row">
-        <div class="e-lbl">MOTTO</div>
-        <input class="e-input" id="tagline-input" type="text" maxlength="50" autocomplete="off" placeholder="a short motto for your card" oninput="p.tagline=this.value;updatePreview();">
+      <div class="e-pair">
+        <div class="e-row">
+          <div class="e-lbl">CALLSIGN</div>
+          <input class="e-input" type="text" id="codename-input" maxlength="24" autocomplete="off" placeholder="YOUR CALLSIGN" oninput="p.codename=this.value.trim().toUpperCase();updatePreview();">
+        </div>
+        <div class="e-row">
+          <div class="e-lbl">MOTTO</div>
+          <input class="e-input" id="tagline-input" type="text" maxlength="50" autocomplete="off" placeholder="a short motto" oninput="p.tagline=this.value;updatePreview();">
+        </div>
       </div>
       <div class="e-row">
         <div class="e-lbl">EMBLEM</div>
@@ -572,21 +582,18 @@ body::before{content:'';position:fixed;inset:0;background:repeating-linear-gradi
           <div class="embl" data-e="nexus"     title="NEXUS"     onclick="pickEmblem('nexus')">⁂</div>
           <div class="embl" data-e="origin"    title="ORIGIN"    onclick="pickEmblem('origin')">⊕</div>
           <div class="embl" data-e="apex"      title="APEX"      onclick="pickEmblem('apex')">▲</div>
-          <button id="more-emblems-btn" onclick="toggleMoreEmblems()">+ MORE</button>
-        </div>
-        <div id="more-emblems-row">
-          <div class="embl" data-e="command"  title="COMMAND"  onclick="pickEmblem('command')">⌘</div>
-          <div class="embl" data-e="gear"     title="GEAR"     onclick="pickEmblem('gear')">⚙</div>
-          <div class="embl" data-e="bullseye" title="BULLSEYE" onclick="pickEmblem('bullseye')">◉</div>
-          <div class="embl" data-e="cross"    title="CROSS"    onclick="pickEmblem('cross')">✙</div>
-          <div class="embl" data-e="crown"    title="CROWN"    onclick="pickEmblem('crown')">♛</div>
-          <div class="embl" data-e="circlex"  title="VOID-X"   onclick="pickEmblem('circlex')">⊗</div>
-          <div class="embl" data-e="anchor"   title="ANCHOR"   onclick="pickEmblem('anchor')">⚓</div>
-          <div class="embl" data-e="crescent" title="CRESCENT" onclick="pickEmblem('crescent')">☽</div>
-          <div class="embl" data-e="ringeye"  title="RING-EYE" onclick="pickEmblem('ringeye')">⊙</div>
-          <div class="embl" data-e="semi"     title="HALF"     onclick="pickEmblem('semi')">◑</div>
-          <div class="embl" data-e="bars"     title="BARS"     onclick="pickEmblem('bars')">≡</div>
-          <div class="embl" data-e="spark"    title="SPARK"    onclick="pickEmblem('spark')">✺</div>
+          <div class="embl" data-e="command"   title="COMMAND"   onclick="pickEmblem('command')">⌘</div>
+          <div class="embl" data-e="gear"      title="GEAR"      onclick="pickEmblem('gear')">⚙</div>
+          <div class="embl" data-e="bullseye"  title="BULLSEYE"  onclick="pickEmblem('bullseye')">◉</div>
+          <div class="embl" data-e="cross"     title="CROSS"     onclick="pickEmblem('cross')">✙</div>
+          <div class="embl" data-e="crown"     title="CROWN"     onclick="pickEmblem('crown')">♛</div>
+          <div class="embl" data-e="circlex"   title="VOID-X"    onclick="pickEmblem('circlex')">⊗</div>
+          <div class="embl" data-e="anchor"    title="ANCHOR"    onclick="pickEmblem('anchor')">⚓</div>
+          <div class="embl" data-e="crescent"  title="CRESCENT"  onclick="pickEmblem('crescent')">☽</div>
+          <div class="embl" data-e="ringeye"   title="RING-EYE"  onclick="pickEmblem('ringeye')">⊙</div>
+          <div class="embl" data-e="semi"      title="HALF"      onclick="pickEmblem('semi')">◑</div>
+          <div class="embl" data-e="bars"      title="BARS"      onclick="pickEmblem('bars')">≡</div>
+          <div class="embl" data-e="spark"     title="SPARK"     onclick="pickEmblem('spark')">✺</div>
         </div>
         <div id="ec-row">
           <span id="ec-label">TINT</span>
@@ -601,21 +608,6 @@ body::before{content:'';position:fixed;inset:0;background:repeating-linear-gradi
           <div class="ec-swatch" data-ec="orange" onclick="pickEmblemColor('orange')" style="background:#ff6600"></div>
           <div class="ec-swatch" data-ec="solar"  onclick="pickEmblemColor('solar')"  style="background:#ffff00"></div>
           <span id="ec-name">AUTO</span>
-        </div>
-      </div>
-      <div class="e-row">
-        <div class="e-lbl">COLOR THEME</div>
-        <div id="theme-row">
-          <div class="tswatch" data-t="green"  title="SIGNAL"  onclick="pickTheme('green')"></div>
-          <div class="tswatch" data-t="cyan"   title="CODEC"   onclick="pickTheme('cyan')"></div>
-          <div class="tswatch" data-t="amber"  title="GOLD"    onclick="pickTheme('amber')"></div>
-          <div class="tswatch" data-t="red"    title="CRIMSON" onclick="pickTheme('red')"></div>
-          <div class="tswatch" data-t="purple" title="VOID"    onclick="pickTheme('purple')"></div>
-          <div class="tswatch" data-t="blue"   title="DEEP"    onclick="pickTheme('blue')"></div>
-          <div class="tswatch" data-t="pink"   title="NOVA"    onclick="pickTheme('pink')"></div>
-          <div class="tswatch" data-t="orange" title="BLAZE"   onclick="pickTheme('orange')"></div>
-          <div class="tswatch" data-t="solar"  title="SOLAR"   onclick="pickTheme('solar')"></div>
-          <span class="t-name" id="theme-name">SIGNAL</span>
         </div>
       </div>
       <div class="e-pair">
@@ -1049,7 +1041,6 @@ function updatePreview(){
   document.getElementById('pc-divider').style.background=ra('0.12');
   document.getElementById('pc-divider').style.boxShadow='0 0 8px '+ra('0.1');
   document.getElementById('pc-divider').style.color=th;
-  document.getElementById('pc-url').style.color=ra('0.28');
   document.getElementById('pc-footer').style.borderTopColor=ra('0.07');
   var pcX=document.getElementById('pc-x');
   if(pcX){pcX.textContent=p.x_handle?('𝕏 @'+p.x_handle):'';pcX.style.color=ra('0.32');}
@@ -1095,8 +1086,6 @@ function populateMyCard(h){
   document.querySelectorAll('.tswatch').forEach(function(el){el.classList.toggle('active',el.dataset.t===p.theme);});
   document.querySelectorAll('.ec-swatch,.ec-auto').forEach(function(el){el.classList.toggle('active',el.dataset.ec===p.emblem_color);});
   document.getElementById('ec-name').textContent=p.emblem_color?(THEME_NAME[p.emblem_color]||p.emblem_color.toUpperCase()):'AUTO';
-  var extraEmblems=['command','gear','bullseye','cross','crown','circlex','anchor','crescent','ringeye','semi','bars','spark'];
-  if(extraEmblems.includes(p.emblem)){var me=document.getElementById('more-emblems-row');if(me&&!me.classList.contains('open')){me.classList.add('open');var meb=document.getElementById('more-emblems-btn');if(meb){meb.classList.add('open');meb.textContent='− LESS';}}}
   document.querySelectorAll('.pat-opt').forEach(function(el){el.classList.toggle('active',el.dataset.p===p.bg_pattern);});
   document.querySelectorAll('.ban-opt').forEach(function(el){el.classList.toggle('active',el.dataset.b===p.banner_style);});
   document.querySelectorAll('.fx-opt').forEach(function(el){el.classList.toggle('active',el.dataset.f===p.fx);});
@@ -1114,13 +1103,7 @@ function pickEmblem(e){
   });
   updatePreview();
 }
-function toggleMoreEmblems(){
-  var row=document.getElementById('more-emblems-row');
-  var btn=document.getElementById('more-emblems-btn');
-  var open=row.classList.toggle('open');
-  btn.classList.toggle('open',open);
-  btn.textContent=open?'− LESS':'+ MORE';
-}
+
 function pickEmblemColor(c){
   p.emblem_color=c;
   document.querySelectorAll('.ec-swatch,.ec-auto').forEach(function(el){el.classList.toggle('active',el.dataset.ec===c);});
@@ -1896,6 +1879,7 @@ async function load(){
     var data=await fetch(BACKEND+'/api/heroes').then(function(r){return r.json();});
     allHeroes=data.heroes||[];
     document.getElementById('loading').style.display='none';
+    if(myHero){var _me=allHeroes.find(function(h){return h.serial===myHero.serial;});if(_me&&_me.rank!==myHero.rank){myHero.rank=_me.rank;document.getElementById('pc-rank').textContent='▸ '+_me.rank;updatePreview();}}
 
     populateStats(allHeroes);
 
