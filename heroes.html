@@ -81,8 +81,16 @@ body::before{content:'';position:fixed;inset:0;background:repeating-linear-gradi
 .ban-opt.active{color:var(--amber);border-color:rgba(255,170,0,0.5);background:rgba(255,170,0,0.04);}
 #pc-emblem-wrap{display:flex;align-items:center;justify-content:flex-end;margin-bottom:0;}
 @keyframes emblem-float{0%,100%{transform:translateY(0);}50%{transform:translateY(-5px);}}
-#pc-emblem{font-size:50px;line-height:1;transition:filter .4s,color .4s;animation:emblem-float 3.5s ease-in-out infinite;display:inline-block;}
-#modal-emblem{font-size:50px;line-height:1;animation:emblem-float 3.5s ease-in-out infinite;display:inline-block;transition:filter .4s,color .4s;}
+@keyframes emblem-glow-pulse{0%,100%{filter:drop-shadow(0 0 8px var(--eg1)) drop-shadow(0 0 20px var(--eg2)) drop-shadow(0 0 44px var(--eg3));}50%{filter:drop-shadow(0 0 16px var(--eg1)) drop-shadow(0 0 38px var(--eg2)) drop-shadow(0 0 80px var(--eg3)) drop-shadow(0 0 130px var(--eg4));}}
+@keyframes emblem-ring{0%{transform:scale(0.78);opacity:0.8;}70%{opacity:0.14;}100%{transform:scale(2.9);opacity:0;}}
+@keyframes emblem-select-flash{0%{transform:scale(1);}38%{transform:scale(1.42);filter:brightness(2.8);}100%{transform:scale(1.08);}}
+#pc-emblem{font-size:50px;line-height:1;transition:color .4s;display:inline-block;}
+#modal-emblem{font-size:50px;line-height:1;display:inline-block;transition:color .4s;}
+.emblem-rings{position:relative;display:inline-flex;align-items:center;justify-content:center;}
+.emblem-rings::before,.emblem-rings::after{content:'';position:absolute;top:50%;left:50%;width:74px;height:74px;margin:-37px 0 0 -37px;border-radius:50%;border:1.5px solid var(--ehalo,rgba(0,255,65,0.4));pointer-events:none;box-sizing:border-box;}
+.emblem-rings::before{animation:emblem-ring 2.6s ease-out infinite;}
+.emblem-rings::after{animation:emblem-ring 2.6s ease-out infinite 1.3s;}
+.embl.pick-flash{animation:emblem-select-flash .28s ease-out forwards;}
 #pc-serial-row{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;}
 #pc-serial{font-size:9px;letter-spacing:2.5px;transition:color .4s;}
 #pc-scan-dot{width:6px;height:6px;border-radius:50%;background:var(--green);animation:dot-pulse 1.8s ease-in-out infinite;transition:background .4s,box-shadow .4s;}
@@ -116,10 +124,9 @@ body::before{content:'';position:fixed;inset:0;background:repeating-linear-gradi
 #tagline-input{text-transform:none;font-size:11px;letter-spacing:1px;}
 #tagline-input::placeholder{color:rgba(255,255,255,0.15);}
 #emblem-grid{display:grid;grid-template-columns:repeat(6,1fr);gap:5px;}
-.embl{height:44px;border:1px solid rgba(0,255,65,0.14);background:rgba(0,0,0,0.4);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:22px;transition:all .15s;user-select:none;position:relative;}
-.embl:hover{border-color:rgba(255,255,255,0.3);background:rgba(255,255,255,0.04);transform:scale(1.08);}
-.embl.active{background:rgba(0,255,65,0.07);transform:scale(1.08);}
-.embl.active::after{content:'';position:absolute;inset:0;border:1px solid var(--green);pointer-events:none;}
+.embl{height:48px;border:1px solid rgba(0,255,65,0.14);background:rgba(0,0,0,0.4);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:24px;transition:border-color .15s,background .15s,box-shadow .15s;user-select:none;position:relative;}
+.embl:hover{border-color:rgba(255,255,255,0.3);background:rgba(255,255,255,0.05);}
+.embl.active{transform:scale(1.06);}
 #theme-row{display:flex;gap:9px;align-items:center;flex-wrap:wrap;}
 .tswatch{width:30px;height:30px;border:2px solid transparent;cursor:pointer;transition:all .15s;clip-path:polygon(50% 0%,100% 25%,100% 75%,50% 100%,0% 75%,0% 25%);}
 .tswatch:hover{transform:scale(1.15);}
@@ -132,7 +139,6 @@ body::before{content:'';position:fixed;inset:0;background:repeating-linear-gradi
 .tswatch[data-t="pink"]{background:#ff2288;}
 .tswatch[data-t="orange"]{background:#ff6600;}
 .tswatch[data-t="solar"]{background:#ffff00;}
-.t-name{font-size:9px;letter-spacing:2.5px;color:rgba(255,255,255,0.4);margin-left:2px;}
 #pattern-row{display:flex;gap:6px;flex-wrap:wrap;}
 .pat-opt{padding:7px 14px;border:1px solid rgba(0,255,65,0.14);font-size:8px;letter-spacing:2px;color:rgba(255,255,255,0.38);cursor:pointer;transition:.15s;}
 .pat-opt:hover{border-color:rgba(255,255,255,0.28);color:rgba(255,255,255,0.65);}
@@ -504,7 +510,7 @@ body::before{content:'';position:fixed;inset:0;background:repeating-linear-gradi
             <div id="pc-scan-dot"></div>
           </div>
         </div>
-        <div id="pc-emblem-wrap"><div id="pc-emblem">⬡</div></div>
+        <div id="pc-emblem-wrap"><div class="emblem-rings" id="pc-embl-rings"><div id="pc-emblem">⬡</div></div></div>
       </div>
       <div id="pc-body">
         <div id="pc-name"></div>
@@ -547,7 +553,6 @@ body::before{content:'';position:fixed;inset:0;background:repeating-linear-gradi
           <div class="tswatch" data-t="pink"   title="NOVA"    onclick="pickTheme('pink')"></div>
           <div class="tswatch" data-t="orange" title="BLAZE"   onclick="pickTheme('orange')"></div>
           <div class="tswatch" data-t="solar"  title="SOLAR"   onclick="pickTheme('solar')"></div>
-          <span class="t-name" id="theme-name">SIGNAL</span>
         </div>
       </div>
       <div class="e-pair">
@@ -722,7 +727,7 @@ body::before{content:'';position:fixed;inset:0;background:repeating-linear-gradi
         <div id="modal-scan-dot"></div>
       </div>
     </div>
-    <div id="modal-emblem-wrap"><div id="modal-emblem"></div></div>
+    <div id="modal-emblem-wrap"><div class="emblem-rings" id="modal-embl-rings"><div id="modal-emblem"></div></div></div>
   </div>
   <div id="modal-body">
     <div id="modal-top-row">
@@ -1018,9 +1023,18 @@ function updatePreview(){
 
   var eClr=p.emblem_color?cHex(p.emblem_color):th;
   var eRgba=p.emblem_color?(THEME_RGBA[p.emblem_color]||THEME_RGBA.green):ra;
-  document.getElementById('pc-emblem').textContent=EMBLEMS[p.emblem]||'⬡';
-  document.getElementById('pc-emblem').style.color=eClr;
-  document.getElementById('pc-emblem').style.filter='drop-shadow(0 0 10px '+eClr+') drop-shadow(0 0 22px '+eClr+') drop-shadow(0 0 48px '+eRgba('0.5')+')';
+  var pe=document.getElementById('pc-emblem');
+  pe.textContent=EMBLEMS[p.emblem]||'⬡';
+  pe.style.color=eClr;
+  pe.style.setProperty('--eg1',eClr);
+  pe.style.setProperty('--eg2',eRgba('0.72'));
+  pe.style.setProperty('--eg3',eRgba('0.32'));
+  pe.style.setProperty('--eg4',eRgba('0.1'));
+  pe.style.filter='';
+  pe.style.animation='emblem-float 3.5s ease-in-out infinite,emblem-glow-pulse 2.4s ease-in-out infinite';
+  var pr=document.getElementById('pc-embl-rings');
+  if(pr)pr.style.setProperty('--ehalo',eRgba('0.55'));
+  updateEmblGrid(eClr,eRgba);
 
   document.getElementById('pc-serial').style.color=ra('0.4');
   document.getElementById('pc-scan-dot').style.background=th;
@@ -1089,17 +1103,13 @@ function populateMyCard(h){
   document.querySelectorAll('.ban-opt').forEach(function(el){el.classList.toggle('active',el.dataset.b===p.banner_style);});
   document.querySelectorAll('.fx-opt').forEach(function(el){el.classList.toggle('active',el.dataset.f===p.fx);});
   document.querySelectorAll('.bc-opt').forEach(function(el){el.classList.toggle('active',el.dataset.v===(p.show_barcode?'1':'0'));});
-  document.getElementById('theme-name').textContent=THEME_NAME[p.theme]||'';
   updatePreview();
 }
 
 function pickEmblem(e){
   p.emblem=e;
-  document.querySelectorAll('.embl').forEach(function(el){
-    el.classList.toggle('active',el.dataset.e===e);
-    if(el.dataset.e===e){el.style.borderColor=THEME_HEX[p.theme];el.style.boxShadow='0 0 10px '+cRgba(p.theme,'0.3');}
-    else{el.style.borderColor='';el.style.boxShadow='';}
-  });
+  var fl=document.querySelector('.embl[data-e="'+e+'"]');
+  if(fl){fl.classList.add('pick-flash');setTimeout(function(){fl.classList.remove('pick-flash');},280);}
   updatePreview();
 }
 
@@ -1112,8 +1122,6 @@ function pickEmblemColor(c){
 function pickTheme(t){
   p.theme=t;
   document.querySelectorAll('.tswatch').forEach(function(el){el.classList.toggle('active',el.dataset.t===t);});
-  document.getElementById('theme-name').textContent=THEME_NAME[t]||'';
-  document.querySelectorAll('.embl.active').forEach(function(el){el.style.borderColor=THEME_HEX[t];el.style.boxShadow='0 0 10px '+cRgba(t,'0.3');});
   document.querySelectorAll('.pat-opt.active').forEach(function(el){el.style.borderColor=THEME_HEX[t];el.style.color=THEME_HEX[t];});
   updatePreview();
 }
@@ -1135,6 +1143,22 @@ function pickFx(f){
   p.fx=f;
   document.querySelectorAll('.fx-opt').forEach(function(el){el.classList.toggle('active',el.dataset.f===f);});
   updatePreview();
+}
+function updateEmblGrid(eClr,eRgba){
+  document.querySelectorAll('.embl').forEach(function(el){
+    var isAct=el.dataset.e===p.emblem;
+    el.classList.toggle('active',isAct);
+    if(isAct){
+      el.style.color=eClr;
+      el.style.background=eRgba('0.1');
+      el.style.boxShadow='0 0 18px '+eRgba('0.45')+',inset 0 0 12px '+eRgba('0.08');
+      el.style.borderColor=eRgba('0.85');
+      el.style.textShadow='0 0 14px '+eClr+',0 0 30px '+eRgba('0.6');
+    }else{
+      el.style.color='';el.style.background='';
+      el.style.boxShadow='';el.style.borderColor='';el.style.textShadow='';
+    }
+  });
 }
 
 async function saveCard(){
@@ -1299,10 +1323,10 @@ function renderCard(h){
   if(isNewH)badgesHtml+='<span class="badge-new">NEW</span>';
 
   var emblFilter=isLegend
-    ?'drop-shadow(0 0 14px '+eTh(h.emblem,th)+') drop-shadow(0 0 28px '+eRa(h.emblem,ra)('0.55')+') drop-shadow(0 0 50px '+eRa(h.emblem,ra)('0.2')+')'
+    ?'drop-shadow(0 0 14px '+eTh(h.emblem,th)+') drop-shadow(0 0 30px '+eRa(h.emblem,ra)('0.7')+') drop-shadow(0 0 58px '+eRa(h.emblem,ra)('0.35')+') drop-shadow(0 0 95px '+eRa(h.emblem,ra)('0.14')+')'
     :isCommander
-      ?'drop-shadow(0 0 12px '+eTh(h.emblem,th)+') drop-shadow(0 0 22px '+eRa(h.emblem,ra)('0.45')+')'
-      :'drop-shadow(0 0 8px '+eTh(h.emblem,th)+')';
+      ?'drop-shadow(0 0 12px '+eTh(h.emblem,th)+') drop-shadow(0 0 26px '+eRa(h.emblem,ra)('0.58')+') drop-shadow(0 0 52px '+eRa(h.emblem,ra)('0.22')+')'
+      :'drop-shadow(0 0 10px '+eTh(h.emblem,th)+') drop-shadow(0 0 22px '+eRa(h.emblem,ra)('0.42')+')';
 
   var banner=document.createElement('div'); banner.className='hcard-banner';
   banner.style.background='linear-gradient(180deg,'+ra('0.13')+' 0%,'+ra('0.05')+' 65%,transparent 100%)';
@@ -1387,8 +1411,17 @@ function applyModalTheme(h){
   document.getElementById('modal-rank').style.color=mrnkHex;
   document.getElementById('modal-rank').style.borderColor=mrnkRa('0.45');
   document.getElementById('modal-rank').style.boxShadow='0 0 10px '+mrnkRa('0.12')+', inset 0 0 10px '+mrnkRa('0.04');
-  document.getElementById('modal-emblem').style.color=eTh(h.emblem,th);
-  document.getElementById('modal-emblem').style.filter='drop-shadow(0 0 16px '+eTh(h.emblem,th)+') drop-shadow(0 0 36px '+eRa(h.emblem,ra)('0.5')+') drop-shadow(0 0 60px '+eRa(h.emblem,ra)('0.22')+')';
+  var me=document.getElementById('modal-emblem');
+  var eT=eTh(h.emblem,th),eR=eRa(h.emblem,ra);
+  me.style.color=eT;
+  me.style.setProperty('--eg1',eT);
+  me.style.setProperty('--eg2',eR('0.72'));
+  me.style.setProperty('--eg3',eR('0.32'));
+  me.style.setProperty('--eg4',eR('0.1'));
+  me.style.filter='';
+  me.style.animation='emblem-float 3.5s ease-in-out infinite,emblem-glow-pulse 2.4s ease-in-out infinite';
+  var mr=document.getElementById('modal-embl-rings');
+  if(mr)mr.style.setProperty('--ehalo',eR('0.55'));
   document.getElementById('modal-divider').style.background=ra('0.12');
   document.getElementById('modal-divider').style.boxShadow='0 0 8px '+ra('0.1');
   document.getElementById('modal-divider').style.color=th;
