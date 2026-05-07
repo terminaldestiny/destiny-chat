@@ -871,8 +871,8 @@ function applyBannerFx(el,style,theme){
     el.style.animation='bfx-glitch 2s linear infinite';
   } else if(s==='neon'){
     el.style.backgroundImage=
-      'linear-gradient(to right,'+ra('0.9')+' 0%,'+ra('0.5')+' 2px,'+ra('0.08')+' 16%,transparent 38%,transparent 62%,'+ra('0.08')+' 84%,'+ra('0.5')+' 98%,'+ra('0.9')+' 100%),'+
-      'linear-gradient(to top,'+ra('1.0')+' 0%,'+ra('0.6')+' 2px,'+ra('0.2')+' 14%,'+ra('0.03')+' 35%,transparent 52%)';
+      'linear-gradient(to right,'+ra('0.55')+' 0%,'+ra('0.28')+' 2px,'+ra('0.05')+' 16%,transparent 38%,transparent 62%,'+ra('0.05')+' 84%,'+ra('0.28')+' 98%,'+ra('0.55')+' 100%),'+
+      'linear-gradient(to top,'+ra('0.6')+' 0%,'+ra('0.32')+' 2px,'+ra('0.1')+' 14%,'+ra('0.015')+' 35%,transparent 52%)';
     el.style.animation='bfx-neon 3s linear infinite';
   } else if(s==='void'){
     el.style.backgroundImage=
@@ -1002,7 +1002,7 @@ function applyBgPattern(el,pat,theme){
     el.style.backgroundSize='20px 20px';
   } else if(pat==='pulse'){
     el.style.backgroundImage=
-      'radial-gradient(circle at center,transparent 15px,'+ra('0.09')+' 15px,'+ra('0.09')+' 16px,transparent 16px,transparent 30px,'+ra('0.055')+' 30px,'+ra('0.055')+' 31px,transparent 31px,transparent 45px,'+ra('0.025')+' 45px,'+ra('0.025')+' 46px,transparent 46px)';
+      'radial-gradient(circle at center,transparent 15px,'+ra('0.14')+' 15px,'+ra('0.14')+' 16px,transparent 16px,transparent 30px,'+ra('0.09')+' 30px,'+ra('0.09')+' 31px,transparent 31px,transparent 45px,'+ra('0.045')+' 45px,'+ra('0.045')+' 46px,transparent 46px)';
     el.style.backgroundSize='64px 64px';
   } else {
     el.style.backgroundImage='none';

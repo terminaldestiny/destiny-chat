@@ -219,7 +219,7 @@ async function ensureHero(wallet, codename, balance) {
   } catch (e) { console.error('ensureHero:', e.message); return null; }
 }
 
-async function updateHeroActivity(wallet, message, hour) {
+async function updateHeroActivity(wallet, message, hour, sessionBalance) {
   if (!supabase) return;
   try {
     var { data: hero } = await supabase.from('heroes').select('*').eq('wallet', wallet).single();
@@ -228,16 +228,18 @@ async function updateHeroActivity(wallet, message, hour) {
     var activeDates = hero.active_dates || [];
     if (!activeDates.includes(today)) activeDates = activeDates.concat([today]);
     var titles = hero.titles || [];
+    var bal = (sessionBalance != null ? sessionBalance : null) || hero.balance || 0;
     if (hour >= 0 && hour < 5 && !titles.includes('NIGHT OWL')) titles.push('NIGHT OWL');
     if (BUILDER_RE.test(message) && !titles.includes('FIRST BUILDER')) titles.push('FIRST BUILDER');
     if ((hero.total_conversations || 0) + 1 >= 100 && !titles.includes('CENTURION')) titles.push('CENTURION');
     if (activeDates.length >= 30 && !titles.includes('PHANTOM')) titles.push('PHANTOM');
-    if ((hero.balance || 0) >= 10000000 && !titles.includes('SOVEREIGN')) titles.push('SOVEREIGN');
+    if (bal >= 10000000 && !titles.includes('SOVEREIGN')) titles.push('SOVEREIGN');
     await supabase.from('heroes').update({
       total_conversations: (hero.total_conversations || 0) + 1,
       active_dates: activeDates,
       days_active: activeDates.length,
       titles,
+      balance: bal,
       last_active_at: new Date().toISOString()
     }).eq('wallet', wallet);
   } catch (e) { console.error('updateHeroActivity:', e.message); }
@@ -734,7 +736,7 @@ app.post('/api/chat', jsonLarge, async function(req, res) {
         });
         sTextMessages.push({ role: 'assistant', content: fullText });
         await saveHistory(walletAddress, sTextMessages.slice(-40));
-        updateHeroActivity(walletAddress, message, new Date().getUTCHours());
+        updateHeroActivity(walletAddress, message, new Date().getUTCHours(), heroBalance);
       }
       res.write('data: ' + JSON.stringify({ done: true, remaining: remaining, model: modelKey }) + '\n\n');
       res.end();
@@ -759,6 +761,7 @@ app.post('/api/chat', jsonLarge, async function(req, res) {
       });
       textMessages.push({ role: 'assistant', content: text });
       await saveHistory(walletAddress, textMessages.slice(-40));
+      updateHeroActivity(walletAddress, message, new Date().getUTCHours(), heroBalance);
     }
 
     res.json({ response: text, remaining: remaining, model: modelKey });
