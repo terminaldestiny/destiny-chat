@@ -32,15 +32,15 @@ body::before{content:'';position:fixed;inset:0;background:repeating-linear-gradi
 .si-lbl{font-size:8px;letter-spacing:2.5px;color:rgba(0,255,65,0.28);display:block;}
 
 /* ── No session ────────────────────────────── */
-#no-session{display:none;margin:24px 20px 0;padding:20px 22px;border:1px solid rgba(0,255,65,0.08);background:rgba(0,255,65,0.015);font-size:9px;letter-spacing:2px;color:rgba(0,255,65,0.28);line-height:2.6;position:relative;z-index:1;}
-#no-session .ns-alert{color:rgba(255,42,0,0.5);display:block;margin-bottom:4px;}
-#no-session a{color:rgba(0,212,255,0.55);text-decoration:none;}
-#no-session a:hover{color:var(--cyan);}
+#no-session{display:none;margin:32px 20px 0;padding:28px 24px;border:1px solid rgba(0,255,65,0.1);background:rgba(0,255,65,0.018);position:relative;z-index:1;text-align:center;}
+.ns-title{font-size:18px;font-weight:bold;letter-spacing:4px;color:rgba(0,255,65,0.7);margin-bottom:12px;}
+.ns-req{font-size:9px;letter-spacing:2px;color:rgba(255,255,255,0.3);margin-bottom:20px;}
+.ns-cta{display:inline-block;font-size:9px;letter-spacing:3px;color:var(--cyan);border:1px solid rgba(0,212,255,0.3);padding:9px 22px;text-decoration:none;transition:.15s;}
+.ns-cta:hover{background:rgba(0,212,255,0.08);border-color:var(--cyan);color:#fff;}
 
 /* ── My section ────────────────────────────── */
 #my-section{display:none;padding:28px 20px 0;position:relative;z-index:1;}
-#my-lbl{font-size:8px;letter-spacing:5px;color:rgba(0,212,255,0.35);margin-bottom:4px;}
-#my-status{font-size:8px;letter-spacing:1.5px;color:rgba(0,255,65,0.22);margin-bottom:22px;}
+#my-section{padding-top:20px;}
 
 /* ── Card column ───────────────────────────── */
 #card-col{display:flex;flex-direction:column;gap:0;flex-shrink:0;width:300px;}
@@ -485,16 +485,12 @@ body::before{content:'';position:fixed;inset:0;background:repeating-linear-gradi
 <div id="ticker-wrap"><div id="ticker-inner"></div></div>
 
 <div id="no-session">
-  <span class="ns-alert">// ACCESS LEVEL: HERO REQUIRED</span>
-  // THIS PAGE DISPLAYS THE FIELD ROSTER FOR ALL ACTIVE HEROES<br>
-  // HEROES HOLD 500K+ $DESTINY AND CONNECT THEIR WALLET IN THE TERMINAL<br>
-  // → <a href="/">BACK TO TERMINAL TO AUTHENTICATE</a>
+  <div class="ns-title">⬡ HEROES ONLY</div>
+  <div class="ns-req">Hold 250K+ $DESTINY · Connect wallet in the Terminal</div>
+  <a href="/" class="ns-cta" onclick="sessionStorage.setItem('skip_boot','1')">→ ENTER TERMINAL</a>
 </div>
 
 <div id="my-section">
-  <div id="my-lbl">YOUR FIELD CARD</div>
-  <div id="my-status">Your Hero Card &bull; Editable</div>
-
   <div id="my-wrap">
     <div id="card-col">
     <div id="preview-card" onclick="if(myHero){openModal(myHero);}" title="VIEW YOUR CARD">
