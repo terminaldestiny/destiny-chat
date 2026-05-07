@@ -310,11 +310,11 @@ body::before{content:'';position:fixed;inset:0;background:repeating-linear-gradi
 /* ── Special effects ────────────────────────── */
 .fx-glitch{animation:card-in .4s ease,glitch-loop 7s 1s infinite!important;}
 @keyframes glitch-loop{
-  0%,82%,100%{filter:none;transform:none;}
-  83%{filter:hue-rotate(40deg) saturate(200%);transform:translateX(3px);}
-  84%{filter:none;transform:translateX(-2px);}
-  85%{filter:hue-rotate(-25deg) brightness(1.25);transform:translateY(1px) scaleX(1.005);}
-  86%{filter:none;transform:none;}
+  0%,82%,100%{filter:none;translate:none;}
+  83%{filter:hue-rotate(40deg) saturate(200%);translate:3px 0;}
+  84%{filter:none;translate:-2px 0;}
+  85%{filter:hue-rotate(-25deg) brightness(1.25);translate:0 1px;}
+  86%{filter:none;translate:none;}
 }
 .fx-hologram{animation:holo-cycle 3.5s linear infinite;}
 @keyframes holo-cycle{
