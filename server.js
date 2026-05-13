@@ -917,10 +917,7 @@ app.post('/api/heroes/me', jsonSmall, async function(req, res) {
   if (!supabase) return res.status(503).json({ error: 'no_supabase' });
   try {
     var { data, error } = await supabase.from('heroes').select('*').eq('wallet', session.wallet).single();
-    if (error || !data) {
-      data = await ensureHero(session.wallet, null, session.balance || 0);
-      if (!data) return res.status(404).json({ error: 'not_found' });
-    }
+    if (error || !data) return res.status(404).json({ error: 'not_found' });
     var b = (session.balance != null ? session.balance : data.balance) || 0;
     var rank = b >= 10000000 ? 'LEGEND' : b >= 2000000 ? 'COMMANDER' : b >= 500000 ? 'AGENT' : 'OPERATIVE';
     res.json({ serial: data.serial, codename: data.codename, emblem: data.emblem,
@@ -979,6 +976,7 @@ app.patch('/api/heroes/me', jsonSmall, async function(req, res) {
   }
   if (!Object.keys(updates).length) return res.status(400).json({ error: 'nothing_to_update' });
   try {
+    await ensureHero(session.wallet, updates.codename || null, session.balance || 0);
     await supabase.from('heroes').update(updates).eq('wallet', session.wallet);
     res.json({ ok: true });
   } catch (e) {
