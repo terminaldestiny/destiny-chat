@@ -1345,6 +1345,7 @@ async function saveCard(){
       var msg=document.getElementById('save-msg');
       msg.style.display='inline';
       setTimeout(function(){msg.style.display='none';},2500);
+      runReveal(myHero);
     }
   }catch(e){}
   btn.disabled=false; btn.textContent='SAVE CHANGES';
@@ -2058,7 +2059,6 @@ async function load(){
         myHero=await mr.json();
         populateMyCard(myHero);
         initPreviewTilt();
-        runReveal(myHero);
         document.getElementById('my-section').style.display='block';
         document.getElementById('wall-div').style.display='block';
       } else {
