@@ -425,8 +425,8 @@ body::before{content:'';position:fixed;inset:0;background:repeating-linear-gradi
 @keyframes rev-share-pulse{0%,100%{box-shadow:none}50%{box-shadow:0 0 22px rgba(0,255,65,0.55),0 0 44px rgba(0,255,65,0.18)}}
 #rev-hint{font-size:9px;letter-spacing:3.5px;color:rgba(0,255,65,0.5);text-align:center;padding-top:4px;}
 @keyframes rev-hint-show{0%{opacity:0}10%{opacity:1}75%{opacity:1}100%{opacity:0}}
-#rev-skip{position:fixed;bottom:20px;right:22px;font-family:'Courier New',monospace;font-size:10px;letter-spacing:2px;color:rgba(255,255,255,0.2);background:none;border:none;cursor:pointer;padding:8px 14px;transition:.15s;z-index:10000;}
-#rev-skip:hover{color:rgba(255,255,255,0.6);}
+#rev-skip{position:fixed;bottom:24px;right:24px;font-family:'Courier New',monospace;font-size:13px;letter-spacing:3px;color:rgba(255,255,255,0.55);background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.18);cursor:pointer;padding:11px 22px;transition:.15s;z-index:10000;}
+#rev-skip:hover{color:#fff;border-color:rgba(255,255,255,0.45);background:rgba(255,255,255,0.09);}
 
 /* ── Constellation mode ──────────────────── */
 #constellation-btn{background:none;border:1px solid rgba(0,255,65,0.18);color:rgba(0,255,65,0.38);font-family:inherit;font-size:10px;letter-spacing:2px;padding:8px 16px;cursor:pointer;transition:.15s;white-space:nowrap;}
@@ -801,7 +801,7 @@ body::before{content:'';position:fixed;inset:0;background:repeating-linear-gradi
   </div>
 </div>
 
-<div id="reveal-overlay">
+<div id="reveal-overlay" onclick="skipReveal()">
   <div id="rev-inner">
     <div id="rev-terminal">
       <div id="rev-lines"></div>
