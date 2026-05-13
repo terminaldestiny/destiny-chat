@@ -120,10 +120,11 @@ body::before{content:'';position:fixed;inset:0;background:repeating-linear-gradi
 
 /* ── Edit panel ────────────────────────────── */
 #edit-panel{flex:1;min-width:260px;padding:18px;border:1px solid rgba(0,255,65,0.08);background:rgba(0,0,0,0.22);}
-#generate-gate{display:none;flex:1;min-width:260px;flex-direction:column;align-items:center;justify-content:center;padding:40px 28px;border:1px solid rgba(0,255,65,0.1);background:rgba(0,0,0,0.22);text-align:center;gap:0;}
+#generate-gate{display:none;flex-direction:column;align-items:center;justify-content:center;padding:72px 28px;border:1px solid rgba(0,255,65,0.1);background:rgba(0,0,0,0.22);text-align:center;gap:0;min-height:320px;position:relative;overflow:hidden;}
 #my-section.gate-mode #generate-gate{display:flex;}
-#my-section.gate-mode #edit-panel{display:none!important;}
-#my-section.gate-mode #customize-toggle{display:none!important;}
+#my-section.gate-mode #my-wrap{display:none;}
+#gen-scan{position:absolute;left:0;right:0;height:1px;background:rgba(0,255,65,0.5);top:-2px;pointer-events:none;opacity:0;}
+@keyframes gen-scan-pass{0%{top:-2px;opacity:0}5%{opacity:1}95%{opacity:0.6}100%{top:100%;opacity:0}}
 #gen-emblem{font-size:38px;color:rgba(0,255,65,0.15);margin-bottom:20px;animation:emblem-float 3.5s ease-in-out infinite;}
 #gen-eyebrow{font-size:9px;letter-spacing:4px;color:rgba(0,255,65,0.35);margin-bottom:10px;}
 #gen-headline{font-size:15px;letter-spacing:5px;font-weight:bold;color:rgba(255,255,255,0.75);margin-bottom:14px;}
@@ -131,6 +132,7 @@ body::before{content:'';position:fixed;inset:0;background:repeating-linear-gradi
 #gen-btn{font-family:'Courier New',monospace;font-size:12px;letter-spacing:3px;padding:14px 28px;border:1px solid rgba(0,255,65,0.45);color:#00ff41;background:rgba(0,255,65,0.05);cursor:pointer;transition:.2s;width:100%;text-shadow:0 0 14px rgba(0,255,65,0.3);}
 #gen-btn:hover{background:rgba(0,255,65,0.1);box-shadow:0 0 28px rgba(0,255,65,0.1);border-color:rgba(0,255,65,0.75);}
 #gen-warn{font-size:8px;letter-spacing:2.5px;color:rgba(255,255,255,0.14);margin-top:14px;}
+#gen-seq{font-size:11px;letter-spacing:1.5px;color:rgba(0,255,65,0.55);margin-top:14px;min-height:20px;font-family:'Courier New',monospace;}
 .cs-section{border-bottom:1px solid rgba(0,255,65,0.08);}
 .cs-hdr{width:100%;display:flex;justify-content:space-between;align-items:center;background:none;border:none;padding:11px 0;cursor:pointer;font-family:inherit;font-size:10px;letter-spacing:3px;color:rgba(255,255,255,0.38);text-align:left;transition:color .15s,background .15s,padding .15s;}
 .cs-hdr:hover{color:rgba(255,255,255,0.72);}
@@ -567,6 +569,18 @@ body::before{content:'';position:fixed;inset:0;background:repeating-linear-gradi
 </div>
 
 <div id="my-section">
+
+  <div id="generate-gate">
+    <div id="gen-scan"></div>
+    <div id="gen-emblem">⬡</div>
+    <div id="gen-eyebrow">FIELD IDENTITY // UNCLAIMED</div>
+    <div id="gen-headline">YOUR HERO CARD AWAITS</div>
+    <div id="gen-sub">Choose your emblem, callsign, banner &amp; FX.<br>Claim your permanent slot in the registry.</div>
+    <button id="gen-btn" onclick="openGenerate()">⬡ GENERATE YOUR HERO CARD</button>
+    <div id="gen-seq"></div>
+    <div id="gen-warn">THIS IS YOUR IDENTITY. MAKE IT COUNT.</div>
+  </div>
+
   <div id="my-wrap">
     <div id="card-col">
     <div id="preview-card" onclick="if(myHero){openModal(myHero);}" title="VIEW YOUR CARD">
@@ -608,15 +622,6 @@ body::before{content:'';position:fixed;inset:0;background:repeating-linear-gradi
     <button id="customize-toggle" onclick="toggleCustomize()">
       <span>⬡ CUSTOMIZE YOUR CARD</span><span class="ct-icon">↑</span>
     </button>
-    </div>
-
-    <div id="generate-gate">
-      <div id="gen-emblem">⬡</div>
-      <div id="gen-eyebrow">FIELD IDENTITY // UNCLAIMED</div>
-      <div id="gen-headline">YOUR HERO CARD AWAITS</div>
-      <div id="gen-sub">Choose your emblem, callsign, banner &amp; FX.<br>Claim your permanent slot in the registry.</div>
-      <button id="gen-btn" onclick="openGenerate()">⬡ GENERATE YOUR HERO CARD</button>
-      <div id="gen-warn">THIS IS YOUR IDENTITY. MAKE IT COUNT.</div>
     </div>
 
     <div id="edit-panel">
@@ -1249,12 +1254,30 @@ function populateMyCard(h){
   document.querySelectorAll('.fx-opt').forEach(function(el){el.classList.toggle('active',el.dataset.f===p.fx);});
   document.querySelectorAll('.bc-opt').forEach(function(el){el.classList.toggle('active',el.dataset.v===(p.show_barcode?'1':'0'));});
   updatePreview();
-  var isNew=(!h.emblem||h.emblem==='hexagon')&&h.codename==='HERO';
+  var isNew=h.codename==='HERO'&&!localStorage.getItem('card_saved_'+h.serial);
   document.getElementById('my-section').classList.toggle('gate-mode',isNew);
 }
 
-function openGenerate(){
+async function openGenerate(){
+  var btn=document.getElementById('gen-btn');
+  var seq=document.getElementById('gen-seq');
+  var scanEl=document.getElementById('gen-scan');
+  var gate=document.getElementById('generate-gate');
+  btn.disabled=true;
+  scanEl.style.animation='gen-scan-pass 1.2s linear forwards';
+  await _typeInto(seq,'> INITIALIZING IDENTITY MATRIX...',38);
+  await _revWait(180);
+  seq.textContent='> READY. CONFIGURE YOUR FIELD IDENTITY.';
+  await _revWait(320);
+  gate.style.transition='opacity .28s';gate.style.opacity='0';
+  await _revWait(300);
   document.getElementById('my-section').classList.remove('gate-mode');
+  gate.style.opacity='';gate.style.transition='';
+  btn.disabled=false;seq.textContent='';scanEl.style.animation='';
+  var mw=document.getElementById('my-wrap');
+  mw.style.opacity='0';mw.style.transition='opacity .35s';
+  await _revWait(20);mw.style.opacity='1';
+  await _revWait(350);mw.style.transition='';
   document.getElementById('edit-panel').classList.add('open');
 }
 
@@ -1375,6 +1398,7 @@ async function saveCard(){
         renderGrid();
       }
       document.getElementById('my-section').classList.remove('gate-mode');
+      localStorage.setItem('card_saved_'+myHero.serial,'1');
       var msg=document.getElementById('save-msg');
       msg.style.display='inline';
       setTimeout(function(){msg.style.display='none';},2500);
