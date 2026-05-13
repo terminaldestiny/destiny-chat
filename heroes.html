@@ -1256,6 +1256,7 @@ function populateMyCard(h){
   updatePreview();
   var isNew=h.codename==='HERO'&&!localStorage.getItem('card_saved_'+h.serial);
   document.getElementById('my-section').classList.toggle('gate-mode',isNew);
+  document.getElementById('save-btn').textContent=isNew?'CREATE CARD':'SAVE CHANGES';
 }
 
 async function openGenerate(){
@@ -2121,6 +2122,7 @@ async function load(){
       } else if(mr.status===404){
         document.getElementById('my-section').style.display='block';
         document.getElementById('my-section').classList.add('gate-mode');
+        document.getElementById('save-btn').textContent='CREATE CARD';
         document.getElementById('wall-div').style.display='block';
       } else {
         document.getElementById('no-session').style.display='block';
