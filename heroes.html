@@ -1357,6 +1357,11 @@ async function saveCard(){
       body:JSON.stringify({sessionToken:sess.sessionToken,codename:cn,emblem:p.emblem+(p.emblem_color?'|'+p.emblem_color:''),theme:p.theme,tagline:p.tagline,bg_pattern:p.bg_pattern+(p.banner_style&&p.banner_style!=='clean'?'|'+p.banner_style:''),x_handle:p.x_handle,fx:p.fx,show_barcode:p.show_barcode})
     });
     if(r.ok){
+      if(!myHero){
+        var freshR=await fetch(BACKEND+'/api/heroes/me',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({sessionToken:sess.sessionToken})});
+        if(freshR.ok){myHero=await freshR.json();populateMyCard(myHero);initPreviewTilt();}
+        else{btn.disabled=false;btn.textContent='SAVE CHANGES';return;}
+      }
       var savedEmbl=p.emblem+(p.emblem_color?'|'+p.emblem_color:'');
       var savedBg=p.bg_pattern+(p.banner_style&&p.banner_style!=='clean'?'|'+p.banner_style:'');
       myHero.codename=cn; myHero.emblem=savedEmbl; myHero.theme=p.theme;
@@ -2087,6 +2092,10 @@ async function load(){
         populateMyCard(myHero);
         initPreviewTilt();
         document.getElementById('my-section').style.display='block';
+        document.getElementById('wall-div').style.display='block';
+      } else if(mr.status===404){
+        document.getElementById('my-section').style.display='block';
+        document.getElementById('my-section').classList.add('gate-mode');
         document.getElementById('wall-div').style.display='block';
       } else {
         document.getElementById('no-session').style.display='block';
