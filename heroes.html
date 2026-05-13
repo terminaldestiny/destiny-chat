@@ -1382,7 +1382,7 @@ async function saveCard(){
     if(r.ok){
       if(!myHero){
         var freshR=await fetch(BACKEND+'/api/heroes/me',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({sessionToken:sess.sessionToken})});
-        if(freshR.ok){myHero=await freshR.json();populateMyCard(myHero);initPreviewTilt();}
+        if(freshR.ok){myHero=await freshR.json();populateMyCard(myHero);initPreviewTilt();allHeroes.push(myHero);}
         else{btn.disabled=false;btn.textContent='SAVE CHANGES';return;}
       }
       var savedEmbl=p.emblem+(p.emblem_color?'|'+p.emblem_color:'');
@@ -2159,7 +2159,9 @@ async function load(){
 
 // ── Reveal Animation ──────────────────────────────────────────────────────
 
+var _revAutoClose=null;
 function skipReveal(){
+  if(_revAutoClose){clearTimeout(_revAutoClose);_revAutoClose=null;}
   var ov=document.getElementById('reveal-overlay');
   ov.style.transition='opacity .35s';ov.style.opacity='0';
   setTimeout(function(){ov.style.display='none';ov.style.transition='';ov.style.opacity='';},360);
@@ -2400,6 +2402,7 @@ async function runReveal(h){
   hintEl.style.color=th+'99';
   hintEl.style.animation='rev-hint-show 3.5s ease-out forwards';
   skipBtn.textContent='DONE →';
+  _revAutoClose=setTimeout(skipReveal,7000);
 }
 
 load();
