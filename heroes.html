@@ -1249,7 +1249,7 @@ function populateMyCard(h){
   document.querySelectorAll('.fx-opt').forEach(function(el){el.classList.toggle('active',el.dataset.f===p.fx);});
   document.querySelectorAll('.bc-opt').forEach(function(el){el.classList.toggle('active',el.dataset.v===(p.show_barcode?'1':'0'));});
   updatePreview();
-  var isNew=!h.emblem;
+  var isNew=(!h.emblem||h.emblem==='hexagon')&&h.codename==='HERO';
   document.getElementById('my-section').classList.toggle('gate-mode',isNew);
 }
 
@@ -1374,6 +1374,7 @@ async function saveCard(){
         allHeroes[idx].bg_pattern=savedBg; allHeroes[idx].x_handle=p.x_handle; allHeroes[idx].fx=p.fx; allHeroes[idx].show_barcode=p.show_barcode;
         renderGrid();
       }
+      document.getElementById('my-section').classList.remove('gate-mode');
       var msg=document.getElementById('save-msg');
       msg.style.display='inline';
       setTimeout(function(){msg.style.display='none';},2500);
