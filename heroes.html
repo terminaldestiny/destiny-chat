@@ -394,6 +394,40 @@ body::before{content:'';position:fixed;inset:0;background:repeating-linear-gradi
   .ms-val{font-size:18px;}
 }
 
+/* ── Reveal Overlay ──────────────────────── */
+#reveal-overlay{position:fixed;inset:0;z-index:9999;background:#000;display:none;flex-direction:column;align-items:center;justify-content:center;}
+#rev-inner{display:flex;flex-direction:column;align-items:center;gap:20px;padding:24px 20px;width:100%;max-width:620px;position:relative;}
+#rev-terminal{width:100%;max-width:560px;min-height:90px;}
+.rev-line{display:block;color:#00ff41;font-size:13px;letter-spacing:1.5px;margin-bottom:7px;white-space:pre-wrap;}
+#rev-cursor{color:#00ff41;font-size:14px;margin-top:4px;animation:rev-blink .75s step-end infinite;}
+@keyframes rev-blink{0%,100%{opacity:1}50%{opacity:0}}
+#rev-card-stage{position:relative;display:none;}
+#rev-canvas{display:block;width:min(560px,calc(100vw - 40px));height:auto;}
+#rev-border-svg{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;overflow:visible;}
+.rev-spark{position:absolute;border-radius:50%;transform:translate(-50%,-50%);pointer-events:none;}
+@keyframes rev-spark-fly{0%{transform:translate(-50%,-50%) translate(0,0);opacity:1;}100%{transform:translate(-50%,-50%) translate(var(--tx),var(--ty));opacity:0;}}
+#rev-sparks{position:absolute;left:50%;top:50%;pointer-events:none;}
+#rev-flash{position:absolute;inset:0;opacity:0;pointer-events:none;border-radius:1px;}
+@keyframes rev-flash-pop{0%{opacity:.85}100%{opacity:0}}
+#rev-shockwave{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:0;height:0;border-radius:50%;border:2px solid;opacity:0;pointer-events:none;}
+@keyframes rev-wave{0%{width:0;height:0;opacity:.85}100%{width:320px;height:320px;opacity:0}}
+#rev-shimmer{position:absolute;inset:0;pointer-events:none;background:linear-gradient(115deg,transparent 15%,rgba(255,255,255,0.07) 42%,rgba(255,255,255,0.20) 50%,rgba(255,255,255,0.07) 58%,transparent 85%);background-size:300% 100%;opacity:0;}
+@keyframes rev-shimmer-pass{0%{background-position:150% 0;opacity:1}100%{background-position:-50% 0;opacity:0}}
+@keyframes rev-shake-anim{0%{transform:translate(0,0)}15%{transform:translate(-7px,2px)}30%{transform:translate(5px,-3px)}50%{transform:translate(-4px,3px)}70%{transform:translate(3px,-2px)}100%{transform:translate(0,0)}}
+#rev-bottom{display:none;width:100%;max-width:560px;opacity:0;}
+#rev-comment{display:none;font-size:12px;letter-spacing:1.5px;line-height:1.8;padding:12px 16px;border-left:2px solid rgba(0,255,65,0.4);background:rgba(0,255,65,0.025);margin-bottom:16px;}
+#rev-comment-prefix{color:rgba(0,255,65,0.5);}
+#rev-comment-text{color:rgba(255,255,255,0.88);}
+#rev-comment-cur{color:#00ff41;animation:rev-blink .6s step-end infinite;}
+#rev-actions{display:none;flex-direction:column;align-items:stretch;gap:10px;width:100%;}
+#rev-share-btn{font-family:'Courier New',monospace;font-size:11px;letter-spacing:3px;padding:13px 24px;border:1px solid rgba(0,255,65,0.4);color:#00ff41;background:rgba(0,255,65,0.04);cursor:pointer;width:100%;transition:.2s;}
+#rev-share-btn:hover{background:rgba(0,255,65,0.12);}
+@keyframes rev-share-pulse{0%,100%{box-shadow:none}50%{box-shadow:0 0 22px rgba(0,255,65,0.55),0 0 44px rgba(0,255,65,0.18)}}
+#rev-hint{font-size:9px;letter-spacing:3.5px;color:rgba(0,255,65,0.5);text-align:center;padding-top:4px;}
+@keyframes rev-hint-show{0%{opacity:0}10%{opacity:1}75%{opacity:1}100%{opacity:0}}
+#rev-skip{position:fixed;bottom:20px;right:22px;font-family:'Courier New',monospace;font-size:10px;letter-spacing:2px;color:rgba(255,255,255,0.2);background:none;border:none;cursor:pointer;padding:8px 14px;transition:.15s;z-index:10000;}
+#rev-skip:hover{color:rgba(255,255,255,0.6);}
+
 /* ── Constellation mode ──────────────────── */
 #constellation-btn{background:none;border:1px solid rgba(0,255,65,0.18);color:rgba(0,255,65,0.38);font-family:inherit;font-size:10px;letter-spacing:2px;padding:8px 16px;cursor:pointer;transition:.15s;white-space:nowrap;}
 #constellation-btn:hover{border-color:rgba(0,255,65,0.5);color:var(--green);}
@@ -765,6 +799,31 @@ body::before{content:'';position:fixed;inset:0;background:repeating-linear-gradi
     <div class="cl-item"><span class="cl-dot" style="width:10px;height:10px;background:#00d4ff;box-shadow:0 0 5px #00d4ff;"></span>AGENT</div>
     <div class="cl-item"><span class="cl-dot" style="width:7px;height:7px;background:#00ff41;box-shadow:0 0 4px #00ff41;"></span>OPERATIVE</div>
   </div>
+</div>
+
+<div id="reveal-overlay">
+  <div id="rev-inner">
+    <div id="rev-terminal">
+      <div id="rev-lines"></div>
+      <div id="rev-cursor">_</div>
+    </div>
+    <div id="rev-card-stage">
+      <canvas id="rev-canvas"></canvas>
+      <svg id="rev-border-svg" xmlns="http://www.w3.org/2000/svg"><rect id="rev-border-rect" x="2" y="2" fill="none"/></svg>
+      <div id="rev-sparks"></div>
+      <div id="rev-flash"></div>
+      <div id="rev-shockwave"></div>
+      <div id="rev-shimmer"></div>
+    </div>
+    <div id="rev-bottom">
+      <div id="rev-comment"><span id="rev-comment-prefix">// DESTINY: </span><span id="rev-comment-text"></span><span id="rev-comment-cur">_</span></div>
+      <div id="rev-actions">
+        <button id="rev-share-btn" onclick="skipReveal();shareMyCard();">⬡ SHARE YOUR CARD</button>
+        <div id="rev-hint">▶ SCREEN RECORD THIS ◀</div>
+      </div>
+    </div>
+  </div>
+  <button id="rev-skip" onclick="skipReveal()">SKIP →</button>
 </div>
 
 <div id="modal-backdrop" onclick="closeModal()"></div>
@@ -1999,6 +2058,7 @@ async function load(){
         myHero=await mr.json();
         populateMyCard(myHero);
         initPreviewTilt();
+        runReveal(myHero);
         document.getElementById('my-section').style.display='block';
         document.getElementById('wall-div').style.display='block';
       } else {
@@ -2034,6 +2094,251 @@ async function load(){
   }catch(e){
     document.getElementById('loading').textContent='// FAILED TO LOAD — CHECK CONNECTION';
   }
+}
+
+// ── Reveal Animation ──────────────────────────────────────────────────────
+
+function skipReveal(){
+  var ov=document.getElementById('reveal-overlay');
+  ov.style.transition='opacity .35s';ov.style.opacity='0';
+  setTimeout(function(){ov.style.display='none';ov.style.transition='';ov.style.opacity='';},360);
+  if(window._revHumOsc){try{window._revHumOsc.stop();}catch(e){}window._revHumOsc=null;}
+}
+
+var _revAc=null;
+function _getAc(){
+  if(!_revAc)_revAc=new(window.AudioContext||window.webkitAudioContext)();
+  if(_revAc.state==='suspended')_revAc.resume();
+  return _revAc;
+}
+function _sfxHum(){
+  try{
+    var c=_getAc();
+    var osc=c.createOscillator();var g=c.createGain();
+    osc.connect(g);g.connect(c.destination);
+    osc.frequency.value=52;osc.type='sine';
+    g.gain.setValueAtTime(0,c.currentTime);
+    g.gain.linearRampToValueAtTime(0.035,c.currentTime+1.2);
+    g.gain.linearRampToValueAtTime(0.055,c.currentTime+3);
+    osc.start();window._revHumOsc=osc;
+  }catch(e){}
+}
+function _sfxImpact(){
+  try{
+    var c=_getAc();
+    var sr=c.sampleRate;
+    var buf=c.createBuffer(1,Math.floor(sr*0.22),sr);
+    var d=buf.getChannelData(0);
+    for(var i=0;i<d.length;i++)d[i]=(Math.random()*2-1)*Math.max(0,Math.pow(1-i/d.length,3));
+    var src=c.createBufferSource();src.buffer=buf;
+    var g=c.createGain();g.gain.value=0.55;
+    var f=c.createBiquadFilter();f.type='lowpass';f.frequency.value=160;
+    src.connect(f);f.connect(g);g.connect(c.destination);src.start();
+  }catch(e){}
+}
+function _sfxClick(){
+  try{
+    var c=_getAc();
+    var o=c.createOscillator();var g=c.createGain();
+    o.connect(g);g.connect(c.destination);
+    o.frequency.value=1300+Math.random()*200;
+    g.gain.setValueAtTime(0.06,c.currentTime);
+    g.gain.exponentialRampToValueAtTime(0.001,c.currentTime+0.045);
+    o.start();o.stop(c.currentTime+0.045);
+  }catch(e){}
+}
+function _sfxConfirm(){
+  try{
+    var c=_getAc();
+    [440,554,659,880].forEach(function(freq,i){
+      var o=c.createOscillator();var g=c.createGain();
+      o.connect(g);g.connect(c.destination);
+      o.frequency.value=freq;o.type='sine';
+      var t=c.currentTime+i*0.06;
+      g.gain.setValueAtTime(0,t);
+      g.gain.linearRampToValueAtTime(0.045,t+0.06);
+      g.gain.exponentialRampToValueAtTime(0.001,t+0.9);
+      o.start(t);o.stop(t+0.9);
+    });
+  }catch(e){}
+}
+
+function _revWait(ms){return new Promise(function(r){setTimeout(r,ms);});}
+function _typeInto(el,text,speed){
+  return new Promise(function(resolve){
+    var i=0;
+    function tick(){
+      if(i>=text.length){resolve();return;}
+      el.textContent+=text[i++];
+      _sfxClick();
+      setTimeout(tick,speed+Math.random()*speed*0.25);
+    }
+    setTimeout(tick,0);
+  });
+}
+function _spawnSparks(container,th){
+  container.innerHTML='';
+  for(var i=0;i<14;i++){
+    var angle=(360/14)*i+(Math.random()*12-6);
+    var rad=angle*Math.PI/180;
+    var dist=55+Math.random()*45;
+    var sp=document.createElement('div');
+    sp.className='rev-spark';
+    var sz=(2+Math.random()*2.5)+'px';
+    sp.style.cssText='width:'+sz+';height:'+sz+';background:'+th+';box-shadow:0 0 5px '+th+';';
+    sp.style.setProperty('--tx',Math.round(Math.cos(rad)*dist)+'px');
+    sp.style.setProperty('--ty',Math.round(Math.sin(rad)*dist)+'px');
+    sp.style.animation='rev-spark-fly '+(0.4+Math.random()*0.3)+'s ease-out '+(Math.random()*0.08)+'s forwards';
+    container.appendChild(sp);
+  }
+}
+
+async function _fetchComment(h){
+  try{
+    var emblParts=(h.emblem||'hexagon').split('|');
+    var bgParts=(h.bg_pattern||'none').split('|');
+    var r=await fetch(BACKEND+'/api/heroes/reveal-comment',{
+      method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({
+        codename:h.codename,emblem:emblParts[0],theme:h.theme,
+        bg_pattern:bgParts[0],banner_style:bgParts[1]||'clean',
+        fx:h.fx||'none',rank:h.rank
+      })
+    });
+    if(r.ok){var d=await r.json();return d.comment||'';}
+  }catch(e){}
+  return '';
+}
+
+async function runReveal(h){
+  var key='rev3_'+h.serial;
+  if(localStorage.getItem(key))return;
+  localStorage.setItem(key,'1');
+
+  var th=THEME_HEX[h.theme||'green']||'#00ff41';
+
+  var ov=document.getElementById('reveal-overlay');
+  var linesEl=document.getElementById('rev-lines');
+  var cursorEl=document.getElementById('rev-cursor');
+  var terminal=document.getElementById('rev-terminal');
+  var stage=document.getElementById('rev-card-stage');
+  var revCv=document.getElementById('rev-canvas');
+  var svgEl=document.getElementById('rev-border-svg');
+  var rectEl=document.getElementById('rev-border-rect');
+  var sparksEl=document.getElementById('rev-sparks');
+  var flashEl=document.getElementById('rev-flash');
+  var waveEl=document.getElementById('rev-shockwave');
+  var shimEl=document.getElementById('rev-shimmer');
+  var bottomEl=document.getElementById('rev-bottom');
+  var commentWrap=document.getElementById('rev-comment');
+  var commentEl=document.getElementById('rev-comment-text');
+  var commentCur=document.getElementById('rev-comment-cur');
+  var actionsEl=document.getElementById('rev-actions');
+  var hintEl=document.getElementById('rev-hint');
+  var skipBtn=document.getElementById('rev-skip');
+
+  // Reset
+  linesEl.innerHTML='';commentEl.textContent='';
+  terminal.style.cssText='';stage.style.display='none';
+  bottomEl.style.cssText='display:none;opacity:0;';
+  commentWrap.style.display='none';actionsEl.style.display='none';
+  commentCur.style.display='inline';
+  flashEl.style.cssText='position:absolute;inset:0;opacity:0;pointer-events:none;';
+  waveEl.style.cssText='position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:0;height:0;border-radius:50%;border:2px solid '+th+';box-shadow:0 0 24px '+th+'66;opacity:0;pointer-events:none;';
+  shimEl.style.cssText='position:absolute;inset:0;pointer-events:none;background:linear-gradient(115deg,transparent 15%,rgba(255,255,255,0.07) 42%,rgba(255,255,255,0.20) 50%,rgba(255,255,255,0.07) 58%,transparent 85%);background-size:300% 100%;opacity:0;';
+  stage.style.animation='';
+  cursorEl.style.color=th;
+  skipBtn.textContent='SKIP →';
+
+  // Start comment fetch in parallel
+  var commentP=_fetchComment(h);
+
+  // Show overlay
+  ov.style.display='flex';
+  _sfxHum();
+
+  // ── Beat 1: Terminal ─────────────────────────────────────────────────
+  var lines=['> SCANNING CREDENTIALS...','> CLEARANCE GRANTED','> GENERATING FIELD IDENTITY...','> ENCRYPTION LEVEL: MAXIMUM'];
+  for(var li=0;li<lines.length;li++){
+    var ld=document.createElement('div');ld.className='rev-line';ld.style.color=li===1?th:'rgba(0,255,65,0.65)';
+    linesEl.appendChild(ld);
+    await _typeInto(ld,lines[li],36);
+    await _revWait(li===1?160:60);
+  }
+  await _revWait(260);
+
+  // ── Beat 2: Card border trace ────────────────────────────────────────
+  terminal.style.transition='opacity .28s';terminal.style.opacity='0';
+  await _revWait(300);
+  terminal.style.display='none';
+
+  var src=buildShareCanvas(h);
+  var CW=src.width,CH=src.height;
+  revCv.width=CW;revCv.height=CH;
+  revCv.getContext('2d').drawImage(src,0,0);
+
+  var perim=2*(CW-4+CH-4);
+  svgEl.setAttribute('viewBox','0 0 '+CW+' '+CH);
+  rectEl.setAttribute('width',CW-4);rectEl.setAttribute('height',CH-4);
+  rectEl.setAttribute('stroke',th);rectEl.setAttribute('stroke-width','2.5');
+  rectEl.setAttribute('stroke-dasharray',perim);
+  rectEl.style.transition='none';rectEl.setAttribute('stroke-dashoffset',perim);
+
+  stage.style.display='inline-block';
+  revCv.style.cssText='display:block;width:min(560px,calc(100vw - 40px));height:auto;opacity:0;transition:opacity .35s;';
+  await _revWait(40);
+  revCv.style.opacity='1';
+  await _revWait(200);
+
+  rectEl.style.transition='stroke-dashoffset 1s linear';
+  rectEl.setAttribute('stroke-dashoffset','0');
+  setTimeout(function(){_spawnSparks(sparksEl,th);},1060);
+  await _revWait(1350);
+
+  // ── Beat 3: Pattern pulse ────────────────────────────────────────────
+  revCv.style.transition='filter .22s';
+  revCv.style.filter='brightness(1.6) saturate(2)';
+  await _revWait(220);revCv.style.filter='brightness(1) saturate(1)';
+  revCv.style.transition='filter .55s';
+  await _revWait(580);
+
+  // ── Beat 4: Emblem slam ──────────────────────────────────────────────
+  flashEl.style.background=th;
+  flashEl.style.animation='rev-flash-pop .38s ease-out forwards';
+  waveEl.style.animation='rev-wave .75s ease-out forwards';
+  stage.style.animation='rev-shake-anim .32s ease-out';
+  _sfxImpact();
+  if(window._revHumOsc){try{setTimeout(function(){window._revHumOsc&&window._revHumOsc.stop();window._revHumOsc=null;},350);}catch(e){}}
+  await _revWait(780);
+  stage.style.animation='';
+
+  // ── Beat 5: Shimmer + confirm tone ──────────────────────────────────
+  shimEl.style.animation='rev-shimmer-pass .95s ease-in-out forwards';
+  _sfxConfirm();
+  await _revWait(950);
+
+  // ── Beat 6: DESTINY comment ──────────────────────────────────────────
+  var comment=await commentP;
+  if(!comment)comment='Identity locked. The signal chose you. Welcome to the registry.';
+
+  bottomEl.style.display='block';
+  await _revWait(20);
+  bottomEl.style.transition='opacity .3s';bottomEl.style.opacity='1';
+  commentWrap.style.display='block';
+  await _revWait(300);
+  await _typeInto(commentEl,comment,30);
+  commentCur.style.display='none';
+  await _revWait(380);
+
+  // ── After: share + hint ──────────────────────────────────────────────
+  actionsEl.style.display='flex';
+  var shareBtn=document.getElementById('rev-share-btn');
+  shareBtn.style.borderColor=th+'88';shareBtn.style.color=th;
+  shareBtn.style.boxShadow='';
+  shareBtn.style.animation='rev-share-pulse 1.5s ease-in-out 4';
+  hintEl.style.color=th+'99';
+  hintEl.style.animation='rev-hint-show 3.5s ease-out forwards';
+  skipBtn.textContent='DONE →';
 }
 
 load();

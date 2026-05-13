@@ -1072,6 +1072,39 @@ app.post('/api/admin/stats', jsonSmall, async function(req, res) {
   }
 });
 
+// ── /api/heroes/reveal-comment ────────────────────────────────────────────
+var revealLimiter = new Map();
+app.post('/api/heroes/reveal-comment', jsonSmall, async function(req, res) {
+  var ip = req.ip || 'unknown';
+  var now = Date.now();
+  if ((now - (revealLimiter.get(ip) || 0)) < 30000) return res.status(429).json({ error: 'rate_limited' });
+  revealLimiter.set(ip, now);
+
+  var body = req.body || {};
+  var codename    = String(body.codename    || 'UNKNOWN').slice(0, 30);
+  var emblem      = String(body.emblem      || 'hexagon').slice(0, 20);
+  var theme       = String(body.theme       || 'green').slice(0, 12);
+  var bgPattern   = String(body.bg_pattern  || 'none').slice(0, 20);
+  var bannerStyle = String(body.banner_style|| 'clean').slice(0, 20);
+  var fx          = String(body.fx          || 'none').slice(0, 20);
+  var rank        = String(body.rank        || 'OPERATIVE').slice(0, 20);
+
+  try {
+    var msg = await client.messages.create({
+      model: 'claude-haiku-4-5-20251001',
+      max_tokens: 80,
+      messages: [{
+        role: 'user',
+        content: 'A hero just received their DESTINY terminal card. Write ONE punchy comment (max 22 words) on their specific choices. Dry, slightly intimidating, cool. Reference their actual picks directly. No quotes.\n\nCallsign: ' + codename + '\nEmblem: ' + emblem + '\nColor theme: ' + theme + '\nBackground: ' + bgPattern + '\nBanner: ' + bannerStyle + '\nFX: ' + fx + '\nRank: ' + rank
+      }]
+    });
+    var comment = ((msg.content[0] && msg.content[0].text) || '').trim().replace(/^["""'']+|["""'']+$/g, '');
+    res.json({ comment: comment });
+  } catch (e) {
+    res.status(500).json({ error: 'ai_error' });
+  }
+});
+
 var PORT = process.env.PORT || 3001;
 app.listen(PORT, function() {
   console.log('Chat server running on http://localhost:' + PORT);
