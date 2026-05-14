@@ -445,17 +445,6 @@
       background:repeating-linear-gradient(0deg,transparent,transparent 3px,rgba(0,255,65,0.015) 3px,rgba(0,255,65,0.015) 4px);
       z-index:0;
     }
-    /* Top label bar */
-    .codec-label {
-      position:absolute;top:0;left:0;right:0;height:18px;
-      background:rgba(0,255,65,0.07);
-      border-bottom:1px solid rgba(0,255,65,0.12);
-      display:flex;align-items:center;justify-content:space-between;
-      padding:0 10px;
-      font-size:8px;letter-spacing:3px;color:rgba(0,255,65,0.5);
-    }
-    .codec-label-left { color:rgba(0,255,65,0.55);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:52%; }
-    .codec-label-right { color:rgba(255,42,0,0.5);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:42%; }
     .codec-model-tag { color:rgba(255,90,60,0.85); }
 
     /* Share card button in help overlay */
@@ -476,7 +465,7 @@
     /* Portrait column */
     .codec-portrait-col {
       flex-shrink:0;display:flex;flex-direction:column;
-      align-items:center;gap:7px;margin-top:20px;position:relative;z-index:1;
+      align-items:center;gap:7px;position:relative;z-index:1;
     }
     .codec-portrait-frame {
       width:58px;height:58px;position:relative;
@@ -533,7 +522,7 @@
     @keyframes wave-pulse { from{height:2px;opacity:0.4} to{height:13px;opacity:1} }
 
     /* Content column */
-    .codec-content { flex:1;min-width:0;position:relative;z-index:1;margin-top:20px; }
+    .codec-content { flex:1;min-width:0;position:relative;z-index:1; }
     .codec-head {
       display:flex;align-items:center;gap:8px;margin-bottom:7px;
     }
@@ -595,13 +584,7 @@
       content:'';position:absolute;inset:0;pointer-events:none;
       background:repeating-linear-gradient(0deg,transparent,transparent 3px,rgba(255,170,0,0.012) 3px,rgba(255,170,0,0.012) 4px);
     }
-    .think-label {
-      position:absolute;top:0;left:0;right:0;height:18px;
-      background:rgba(255,170,0,0.07);border-bottom:1px solid rgba(255,170,0,0.12);
-      display:flex;align-items:center;justify-content:space-between;
-      padding:0 10px;font-size:8px;letter-spacing:3px;color:rgba(255,170,0,0.45);
-    }
-    .think-portrait-col { flex-shrink:0;display:flex;flex-direction:column;align-items:center;gap:7px;margin-top:20px;position:relative;z-index:1; }
+    .think-portrait-col { flex-shrink:0;display:flex;flex-direction:column;align-items:center;gap:7px;position:relative;z-index:1; }
     .think-portrait-frame { width:58px;height:58px;position:relative; }
     .think-portrait-img {
       width:58px;height:58px;
