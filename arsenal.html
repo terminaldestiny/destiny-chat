@@ -34,16 +34,6 @@ body::before{content:'';position:fixed;inset:0;background:repeating-linear-gradi
 @keyframes ptcl-rise{0%{top:108%;opacity:0;}8%{opacity:1;}88%{opacity:.35;}100%{top:-4%;opacity:0;}}
 
 /* ── Intro overlay ── */
-#intro{position:fixed;inset:0;z-index:200;background:var(--bg);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;pointer-events:none;}
-#intro.out{opacity:0;transition:opacity 0.55s ease;}
-.il{font-size:11px;letter-spacing:3px;opacity:0;animation:il-appear 0.4s ease forwards;}
-.il.g{color:rgba(0,255,65,0.8);}
-.il.d{color:rgba(0,255,65,0.35);}
-.il.a{color:rgba(255,170,0,0.7);}
-@keyframes il-appear{from{opacity:0;letter-spacing:6px;}to{opacity:1;letter-spacing:3px;}}
-#intro-bar{width:200px;height:2px;background:rgba(0,255,65,0.1);margin-top:20px;opacity:0;animation:il-appear 0.4s ease 1.0s forwards;}
-#intro-bar-fill{height:100%;width:0%;background:var(--green);animation:bar-load 0.9s ease 1.1s forwards;}
-@keyframes bar-load{from{width:0%;}to{width:100%;}}
 
 /* ── Header ── */
 #hdr{position:sticky;top:0;z-index:30;background:rgba(3,12,21,0.97);border-bottom:1px solid rgba(0,255,65,0.12);padding:12px 20px;display:flex;align-items:center;gap:14px;backdrop-filter:blur(12px);}
@@ -59,14 +49,14 @@ body::before{content:'';position:fixed;inset:0;background:repeating-linear-gradi
 #hero-section{position:relative;z-index:1;padding:64px 24px 52px;text-align:center;overflow:hidden;}
 #classified-bg{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;pointer-events:none;z-index:0;overflow:hidden;}
 #classified-text{font-size:clamp(60px,14vw,160px);font-weight:bold;letter-spacing:clamp(10px,3vw,40px);color:rgba(0,255,65,0.018);white-space:nowrap;transform:rotate(-8deg);user-select:none;}
-.hero-eyebrow{font-size:9px;letter-spacing:6px;color:rgba(0,255,65,0.4);margin-bottom:16px;position:relative;z-index:1;animation:fade-up 0.8s ease 1.8s both;}
-.hero-h1{font-size:clamp(32px,8vw,64px);font-weight:bold;letter-spacing:clamp(4px,2vw,12px);color:rgba(255,255,255,0.94);line-height:1.1;margin-bottom:18px;position:relative;z-index:1;animation:fade-up 0.8s ease 1.95s both;}
+.hero-eyebrow{font-size:9px;letter-spacing:6px;color:rgba(0,255,65,0.4);margin-bottom:16px;position:relative;z-index:1;animation:fade-up 0.8s ease 0.1s both;}
+.hero-h1{font-size:clamp(32px,8vw,64px);font-weight:bold;letter-spacing:clamp(4px,2vw,12px);color:rgba(255,255,255,0.94);line-height:1.1;margin-bottom:18px;position:relative;z-index:1;animation:fade-up 0.8s ease 0.25s both;}
 .hero-h1 span{color:var(--amber);text-shadow:0 0 30px rgba(255,170,0,0.4);}
-.hero-sub{font-size:13px;letter-spacing:0.8px;color:rgba(255,255,255,0.32);max-width:580px;margin:0 auto 36px;line-height:1.9;position:relative;z-index:1;animation:fade-up 0.8s ease 2.1s both;}
+.hero-sub{font-size:13px;letter-spacing:0.8px;color:rgba(255,255,255,0.32);max-width:580px;margin:0 auto 36px;line-height:1.9;position:relative;z-index:1;animation:fade-up 0.8s ease 0.4s both;}
 @keyframes fade-up{from{opacity:0;transform:translateY(14px);}to{opacity:1;transform:translateY(0);}}
 
 /* tier legend */
-#tier-legend{display:flex;gap:16px;justify-content:center;flex-wrap:wrap;position:relative;z-index:1;animation:fade-up 0.8s ease 2.25s both;}
+#tier-legend{display:flex;gap:16px;justify-content:center;flex-wrap:wrap;position:relative;z-index:1;animation:fade-up 0.8s ease 0.55s both;}
 .tl-badge{display:flex;align-items:center;gap:8px;font-size:9px;letter-spacing:2.5px;padding:7px 16px;border:1px solid;cursor:default;}
 .tl-dot{width:5px;height:5px;border-radius:50%;flex-shrink:0;}
 .tl-essential{color:var(--green);border-color:rgba(0,255,65,0.22);background:rgba(0,255,65,0.04);}
@@ -193,19 +183,95 @@ body::before{content:'';position:fixed;inset:0;background:repeating-linear-gradi
 /* ── Destiny watermark in hero ── */
 #watermark-wrap{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;pointer-events:none;z-index:0;overflow:hidden;}
 #watermark{font-size:clamp(56px,14vw,150px);font-weight:bold;letter-spacing:clamp(8px,3vw,36px);color:rgba(0,255,65,0.016);white-space:nowrap;transform:rotate(-8deg);user-select:none;}
+
+/* ══════════════════════════════════════════════════
+   LOADOUTS
+══════════════════════════════════════════════════ */
+#loadouts{position:relative;z-index:1;padding:0 24px 32px;}
+.lo-hdr{text-align:center;padding:60px 0 44px;}
+.lo-eye{font-size:9px;letter-spacing:5px;color:rgba(0,255,65,.38);margin-bottom:14px;}
+.lo-h2{font-size:clamp(20px,4vw,36px);letter-spacing:clamp(6px,2vw,16px);font-weight:bold;color:rgba(255,255,255,.88);margin-bottom:10px;text-transform:uppercase;}
+.lo-h2 em{color:var(--green);font-style:normal;text-shadow:0 0 22px rgba(0,255,65,.5);}
+.lo-desc{font-size:11px;letter-spacing:1.8px;color:rgba(255,255,255,.3);max-width:480px;margin:0 auto;line-height:1.9;}
+.lo-rule{width:56px;height:1px;background:linear-gradient(90deg,transparent,rgba(0,255,65,.28),transparent);margin:22px auto 0;}
+
+.lo-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:18px;}
+@media(max-width:720px){.lo-grid{grid-template-columns:1fr;}}
+
+/* Card shell */
+.lc{background:rgba(3,12,21,.75);border:1px solid rgba(255,255,255,.055);position:relative;display:flex;flex-direction:column;transition:border-color .25s,box-shadow .25s;overflow:hidden;}
+.lc::before{content:'';position:absolute;top:6px;right:6px;width:10px;height:10px;border-top:1px solid var(--lc-t);border-right:1px solid var(--lc-t);opacity:.3;pointer-events:none;z-index:2;}
+.lc::after{content:'';position:absolute;bottom:6px;left:6px;width:10px;height:10px;border-bottom:1px solid var(--lc-t);border-left:1px solid var(--lc-t);opacity:.2;pointer-events:none;z-index:2;}
+.lc:hover{border-color:var(--lc-c);box-shadow:0 0 30px var(--lc-cg),inset 0 0 80px rgba(0,0,0,.15);}
+
+/* Color themes */
+.lc-green{--lc-t:#00ff41;--lc-c:rgba(0,255,65,.4);--lc-cg:rgba(0,255,65,.09);--lc-tb:rgba(0,255,65,.7);}
+.lc-cyan{--lc-t:#00d4ff;--lc-c:rgba(0,212,255,.4);--lc-cg:rgba(0,212,255,.09);--lc-tb:rgba(0,212,255,.7);}
+.lc-amber{--lc-t:#ffaa00;--lc-c:rgba(255,170,0,.4);--lc-cg:rgba(255,170,0,.09);--lc-tb:rgba(255,170,0,.7);}
+.lc-purple{--lc-t:#cc44ff;--lc-c:rgba(204,68,255,.4);--lc-cg:rgba(204,68,255,.09);--lc-tb:rgba(204,68,255,.7);}
+.lc-red{--lc-t:#ff2d55;--lc-c:rgba(255,45,85,.4);--lc-cg:rgba(255,45,85,.09);--lc-tb:rgba(255,45,85,.7);}
+
+.lc-topbar{height:2px;background:linear-gradient(90deg,var(--lc-t) 0%,rgba(0,0,0,0) 75%);flex-shrink:0;}
+
+/* Head */
+.lc-head{padding:16px 18px 0;display:flex;align-items:center;gap:10px;}
+.lc-num{font-size:9px;letter-spacing:3px;color:var(--lc-t);opacity:.48;}
+.lc-diff{font-size:7.5px;letter-spacing:2px;padding:2px 8px;border:1px solid var(--lc-t);color:var(--lc-t);opacity:.4;margin-left:auto;}
+.lc-title{padding:9px 18px 0;font-size:14px;letter-spacing:4.5px;font-weight:bold;color:var(--lc-t);text-shadow:0 0 20px var(--lc-tb);}
+.lc-scene{padding:7px 18px 0;font-size:10px;letter-spacing:1.2px;color:rgba(255,255,255,.33);line-height:1.75;}
+
+/* Flow diagram */
+.lc-flow{margin:16px 18px 0;padding:13px 10px 10px;background:rgba(0,0,0,.4);border:1px solid rgba(255,255,255,.04);display:flex;align-items:flex-start;}
+.lc-node{display:flex;flex-direction:column;align-items:center;gap:4px;width:60px;flex-shrink:0;}
+.lc-ni{width:32px;height:32px;border:1px solid var(--lc-t);background:rgba(0,0,0,.5);display:flex;align-items:center;justify-content:center;font-size:13px;flex-shrink:0;position:relative;}
+.lc-ni::after{content:'';position:absolute;inset:0;background:var(--lc-t);opacity:0;transition:.2s;}
+.lc:hover .lc-ni::after{opacity:.05;}
+.lc-nn{font-size:6.5px;letter-spacing:1px;color:rgba(255,255,255,.52);text-align:center;line-height:1.35;max-width:56px;}
+.lc-nv{font-size:6.5px;letter-spacing:2px;color:var(--lc-t);opacity:.58;text-align:center;}
+/* Connector */
+.lc-con{flex:1;height:2px;margin-top:15px;position:relative;overflow:visible;background:rgba(255,255,255,.07);}
+.lc-con::before{content:'';position:absolute;inset:0;background:linear-gradient(90deg,var(--lc-t),transparent);opacity:.22;}
+.lc-dot{position:absolute;top:50%;transform:translateY(-50%);width:6px;height:6px;border-radius:50%;background:var(--lc-t);box-shadow:0 0 8px var(--lc-t),0 0 16px var(--lc-tb);animation:lc-go 2.5s ease-in-out infinite;}
+.lc-con:nth-child(2) .lc-dot{animation-delay:0s;}
+.lc-con:nth-child(4) .lc-dot{animation-delay:.83s;}
+.lc-con:nth-child(6) .lc-dot{animation-delay:1.66s;}
+@keyframes lc-go{0%{left:-3px;opacity:0;}10%{opacity:1;}90%{opacity:1;}100%{left:calc(100% + 3px);opacity:0;}}
+
+/* Intel block */
+.lc-intel{margin:14px 18px 0;padding:10px 13px;border-left:2px solid var(--lc-t);background:rgba(0,0,0,.32);}
+.lc-iey{font-size:7.5px;letter-spacing:3px;color:var(--lc-t);opacity:.45;margin-bottom:5px;}
+.lc-iq{font-size:10.5px;letter-spacing:.4px;color:rgba(255,255,255,.58);line-height:1.8;font-style:italic;}
+
+/* Footer */
+.lc-foot{padding:14px 18px 16px;display:flex;align-items:center;justify-content:space-between;border-top:1px solid rgba(255,255,255,.04);margin-top:auto;}
+.lc-eta{font-size:8px;letter-spacing:1.5px;color:rgba(255,255,255,.22);}
+.lc-eta strong{display:block;color:var(--lc-t);opacity:.62;font-size:9px;letter-spacing:2px;margin-bottom:2px;}
+.lc-btn{font-size:8px;letter-spacing:2px;padding:8px 14px;border:1px solid var(--lc-t);background:transparent;color:var(--lc-t);cursor:pointer;font-family:inherit;position:relative;overflow:hidden;flex-shrink:0;}
+.lc-btn::before{content:'';position:absolute;inset:0;background:var(--lc-t);transform:translateX(-101%);transition:transform .2s ease;z-index:0;}
+.lc-btn:hover::before{transform:translateX(0);}
+.lc-btn-t{position:relative;z-index:1;display:block;transition:color .15s;}
+.lc-btn:hover .lc-btn-t{color:#000;}
+
+/* Tool card highlight / dim states */
+.tc.lc-hi{border-color:rgba(0,255,65,.55)!important;box-shadow:0 0 24px rgba(0,255,65,.12),0 0 6px rgba(0,255,65,.28)!important;position:relative;z-index:2;}
+.tc.lc-dim{opacity:.12;filter:grayscale(.65);}
+
+/* Loadout banner */
+#lo-banner{display:none;background:rgba(0,8,18,.92);border:1px solid rgba(0,255,65,.12);border-left:3px solid var(--green);padding:10px 16px;margin-bottom:14px;align-items:center;gap:10px;font-size:9px;letter-spacing:2px;color:rgba(255,255,255,.36);}
+#lo-banner.on{display:flex;}
+#lo-bn{color:var(--green);font-weight:bold;letter-spacing:3px;}
+#lo-bc{color:rgba(0,255,65,.5);}
+#lo-bx{margin-left:auto;cursor:pointer;padding:4px 10px;border:1px solid rgba(255,255,255,.08);color:rgba(255,255,255,.26);transition:.15s;letter-spacing:2px;}
+#lo-bx:hover{color:rgba(255,45,85,.8);border-color:rgba(255,45,85,.3);}
+
+/* Section end separator */
+#lo-sep{display:flex;align-items:center;gap:16px;padding:32px 24px 0;position:relative;z-index:1;}
+.lo-sl{flex:1;height:1px;background:linear-gradient(90deg,transparent,rgba(255,255,255,.06),transparent);}
+.lo-st{font-size:9px;letter-spacing:4px;color:rgba(255,255,255,.09);white-space:nowrap;}
 </style>
 </head>
 <body>
 
-<!-- ── Intro sequence ───────────────────────── -->
-<div id="intro">
-  <div class="il d" style="animation-delay:.05s">// TERMINAL DESTINY · ARSENAL DATABASE</div>
-  <div class="il d" style="animation-delay:.28s">// CLASSIFICATION: FIELD OPERATIVE CLEARANCE</div>
-  <div class="il d" style="animation-delay:.52s">// LOADING TOOL MANIFEST ········</div>
-  <div class="il g" style="animation-delay:.80s">// 22 TOOLS CATALOGUED · DESTINY APPROVED</div>
-  <div class="il a" style="animation-delay:1.05s">// ZERO PAID PLACEMENTS · ZERO APOLOGIES</div>
-  <div id="intro-bar"><div id="intro-bar-fill"></div></div>
-</div>
 
 <!-- ── BG layers ──────────────────────────── -->
 <canvas id="bg-matrix"></canvas>
@@ -229,7 +295,7 @@ body::before{content:'';position:fixed;inset:0;background:repeating-linear-gradi
 <!-- ── Header ────────────────────────────── -->
 <header id="hdr">
   <a href="/" id="back-link">← TERMINAL</a>
-  <span id="hdr-title">// FIELD ARSENAL</span>
+  <span id="hdr-title">// ARSENAL</span>
   <div id="hdr-right">
     <span id="hdr-count">22 TOOLS CATALOGUED</span>
     <div id="hdr-dot"></div>
@@ -240,8 +306,8 @@ body::before{content:'';position:fixed;inset:0;background:repeating-linear-gradi
 <section id="hero-section">
   <div id="watermark-wrap"><span id="watermark">CLASSIFIED</span></div>
   <div class="hero-eyebrow">// DESTINY'S APPROVED LOADOUT · UPDATED MAY 2026</div>
-  <h1 class="hero-h1">FIELD <span>ARSENAL</span></h1>
-  <p class="hero-sub">Every tool I've cleared for deployment. Not a sponsored list. Not a listicle.<br>These are the things that actually matter when you're building in the dark and shipping before sunrise.</p>
+  <h1 class="hero-h1"><span>ARSENAL</span></h1>
+  <p class="hero-sub">Every tool I've cleared for deployment. These are the things that actually matter when you're building in the dark and shipping before sunrise.</p>
   <div id="tier-legend">
     <div class="tl-badge tl-essential"><div class="tl-dot"></div>ESSENTIAL</div>
     <div class="tl-badge tl-solid"><div class="tl-dot"></div>SOLID</div>
@@ -255,6 +321,176 @@ body::before{content:'';position:fixed;inset:0;background:repeating-linear-gradi
   <div class="s-item"><span class="s-val s-e">7</span><span class="s-lbl">ESSENTIAL</span></div>
   <div class="s-item"><span class="s-val s-so">10</span><span class="s-lbl">SOLID</span></div>
   <div class="s-item"><span class="s-val s-si">5</span><span class="s-lbl">SITUATIONAL</span></div>
+</div>
+
+<!-- ── LOADOUTS ───────────────────────────── -->
+<section id="loadouts">
+  <div class="lo-hdr">
+    <div class="lo-eye">// PRE-BUILT CONFIGURATIONS · DESTINY APPROVED</div>
+    <div class="lo-h2">FIELD <em>LOADOUTS</em></div>
+    <p class="lo-desc">Six complete tool stacks, battle-tested in production. Pick a mission. Click VIEW STACK. See exactly which tools fire.</p>
+    <div class="lo-rule"></div>
+  </div>
+  <div class="lo-grid">
+
+    <!-- 01 · THE AI BUILDER -->
+    <div class="lc lc-green" data-tools="CLAUDE CODE,RAILWAY,SUPABASE,RESEND">
+      <div class="lc-topbar"></div>
+      <div class="lc-head"><span class="lc-num">LOADOUT 01</span><span class="lc-diff">BEGINNER FRIENDLY</span></div>
+      <div class="lc-title">THE AI BUILDER</div>
+      <div class="lc-scene">You want to ship a real AI-powered product. No DevOps team. No funding. Just you and a deadline that already passed.</div>
+      <div class="lc-flow">
+        <div class="lc-node"><div class="lc-ni">🤖</div><span class="lc-nn">CLAUDE CODE</span><span class="lc-nv">BUILD</span></div>
+        <div class="lc-con"><span class="lc-dot"></span></div>
+        <div class="lc-node"><div class="lc-ni">🚂</div><span class="lc-nn">RAILWAY</span><span class="lc-nv">DEPLOY</span></div>
+        <div class="lc-con"><span class="lc-dot"></span></div>
+        <div class="lc-node"><div class="lc-ni">⚡</div><span class="lc-nn">SUPABASE</span><span class="lc-nv">STORE</span></div>
+        <div class="lc-con"><span class="lc-dot"></span></div>
+        <div class="lc-node"><div class="lc-ni">✉️</div><span class="lc-nn">RESEND</span><span class="lc-nv">NOTIFY</span></div>
+      </div>
+      <div class="lc-intel">
+        <div class="lc-iey">// DESTINY INTEL</div>
+        <div class="lc-iq">"Code it, deploy it, store it, send it. This is the exact stack Terminal Destiny runs on. Zero DevOps overhead. Zero excuses."</div>
+      </div>
+      <div class="lc-foot">
+        <div class="lc-eta"><strong>48H TO FIRST DEPLOY</strong>ESTIMATED LAUNCH TIME</div>
+        <button class="lc-btn" onclick="activateLoadout(this)"><span class="lc-btn-t">◆ VIEW STACK</span></button>
+      </div>
+    </div>
+
+    <!-- 02 · THE SOLANA TRADER -->
+    <div class="lc lc-cyan" data-tools="PHANTOM,JUPITER,DEXSCREENER,BIRDEYE">
+      <div class="lc-topbar"></div>
+      <div class="lc-head"><span class="lc-num">LOADOUT 02</span><span class="lc-diff">BEGINNER FRIENDLY</span></div>
+      <div class="lc-title">THE SOLANA TRADER</div>
+      <div class="lc-scene">You're trading on-chain and you need a complete loop — identity, best execution, live charts, and wallet intelligence — without paying for noise.</div>
+      <div class="lc-flow">
+        <div class="lc-node"><div class="lc-ni">👻</div><span class="lc-nn">PHANTOM</span><span class="lc-nv">IDENTITY</span></div>
+        <div class="lc-con"><span class="lc-dot"></span></div>
+        <div class="lc-node"><div class="lc-ni">🪐</div><span class="lc-nn">JUPITER</span><span class="lc-nv">TRADE</span></div>
+        <div class="lc-con"><span class="lc-dot"></span></div>
+        <div class="lc-node"><div class="lc-ni">📡</div><span class="lc-nn">DEXSCREENER</span><span class="lc-nv">MONITOR</span></div>
+        <div class="lc-con"><span class="lc-dot"></span></div>
+        <div class="lc-node"><div class="lc-ni">🦅</div><span class="lc-nn">BIRDEYE</span><span class="lc-nv">TRACK</span></div>
+      </div>
+      <div class="lc-intel">
+        <div class="lc-iey">// DESTINY INTEL</div>
+        <div class="lc-iq">"Wallet, best prices, live charts, wallet intelligence. The complete on-chain loop. Nothing else is required. Stop adding tools."</div>
+      </div>
+      <div class="lc-foot">
+        <div class="lc-eta"><strong>30MIN TO LIVE</strong>ESTIMATED SETUP TIME</div>
+        <button class="lc-btn" onclick="activateLoadout(this)"><span class="lc-btn-t">◆ VIEW STACK</span></button>
+      </div>
+    </div>
+
+    <!-- 03 · THE FAST SHIPPER -->
+    <div class="lc lc-amber" data-tools="V0.DEV,VERCEL,STRIPE,CLOUDFLARE">
+      <div class="lc-topbar"></div>
+      <div class="lc-head"><span class="lc-num">LOADOUT 03</span><span class="lc-diff">BEGINNER FRIENDLY</span></div>
+      <div class="lc-title">THE FAST SHIPPER</div>
+      <div class="lc-scene">It's Friday. You want something live and earning by Sunday. No backend. No waiting. Four tools and one aggressive weekend.</div>
+      <div class="lc-flow">
+        <div class="lc-node"><div class="lc-ni">🎨</div><span class="lc-nn">V0.DEV</span><span class="lc-nv">DESIGN</span></div>
+        <div class="lc-con"><span class="lc-dot"></span></div>
+        <div class="lc-node"><div class="lc-ni">▲</div><span class="lc-nn">VERCEL</span><span class="lc-nv">HOST</span></div>
+        <div class="lc-con"><span class="lc-dot"></span></div>
+        <div class="lc-node"><div class="lc-ni">💳</div><span class="lc-nn">STRIPE</span><span class="lc-nv">EARN</span></div>
+        <div class="lc-con"><span class="lc-dot"></span></div>
+        <div class="lc-node"><div class="lc-ni">🌐</div><span class="lc-nn">CLOUDFLARE</span><span class="lc-nv">PROTECT</span></div>
+      </div>
+      <div class="lc-intel">
+        <div class="lc-iey">// DESTINY INTEL</div>
+        <div class="lc-iq">"Generate UI, deploy globally, take payments, add security. Four tools, one weekend, something real that earns. This is the shortest path to revenue."</div>
+      </div>
+      <div class="lc-foot">
+        <div class="lc-eta"><strong>48H TO FIRST $</strong>FASTEST REVENUE PATH</div>
+        <button class="lc-btn" onclick="activateLoadout(this)"><span class="lc-btn-t">◆ VIEW STACK</span></button>
+      </div>
+    </div>
+
+    <!-- 04 · THE SOLO FOUNDER -->
+    <div class="lc lc-purple" data-tools="CLAUDE CODE,SUPABASE,STRIPE,RESEND">
+      <div class="lc-topbar"></div>
+      <div class="lc-head"><span class="lc-num">LOADOUT 04</span><span class="lc-diff">INTERMEDIATE</span></div>
+      <div class="lc-title">THE SOLO FOUNDER</div>
+      <div class="lc-scene">One person, production-grade product. No team. No investors. AI builds it, Postgres holds it, Stripe earns it, Resend keeps it alive.</div>
+      <div class="lc-flow">
+        <div class="lc-node"><div class="lc-ni">🤖</div><span class="lc-nn">CLAUDE CODE</span><span class="lc-nv">CODE</span></div>
+        <div class="lc-con"><span class="lc-dot"></span></div>
+        <div class="lc-node"><div class="lc-ni">⚡</div><span class="lc-nn">SUPABASE</span><span class="lc-nv">DATA</span></div>
+        <div class="lc-con"><span class="lc-dot"></span></div>
+        <div class="lc-node"><div class="lc-ni">💳</div><span class="lc-nn">STRIPE</span><span class="lc-nv">EARN</span></div>
+        <div class="lc-con"><span class="lc-dot"></span></div>
+        <div class="lc-node"><div class="lc-ni">✉️</div><span class="lc-nn">RESEND</span><span class="lc-nv">ENGAGE</span></div>
+      </div>
+      <div class="lc-intel">
+        <div class="lc-iey">// DESTINY INTEL</div>
+        <div class="lc-iq">"This is the full loop. AI codes it, Postgres stores it, Stripe pays you, Resend retains them. One person can run this in production indefinitely."</div>
+      </div>
+      <div class="lc-foot">
+        <div class="lc-eta"><strong>1 WEEK TO LAUNCH</strong>FULL PRODUCT CYCLE</div>
+        <button class="lc-btn" onclick="activateLoadout(this)"><span class="lc-btn-t">◆ VIEW STACK</span></button>
+      </div>
+    </div>
+
+    <!-- 05 · THE RESEARCHER -->
+    <div class="lc lc-cyan" data-tools="PERPLEXITY,TAVILY,DEXSCREENER,NOTION">
+      <div class="lc-topbar"></div>
+      <div class="lc-head"><span class="lc-num">LOADOUT 05</span><span class="lc-diff">INTERMEDIATE</span></div>
+      <div class="lc-title">THE RESEARCHER</div>
+      <div class="lc-scene">You need to know everything before anyone else does. Web intel, agent-ready APIs, on-chain verification, one place to capture it all.</div>
+      <div class="lc-flow">
+        <div class="lc-node"><div class="lc-ni">🔍</div><span class="lc-nn">PERPLEXITY</span><span class="lc-nv">SEARCH</span></div>
+        <div class="lc-con"><span class="lc-dot"></span></div>
+        <div class="lc-node"><div class="lc-ni">🕸️</div><span class="lc-nn">TAVILY</span><span class="lc-nv">API</span></div>
+        <div class="lc-con"><span class="lc-dot"></span></div>
+        <div class="lc-node"><div class="lc-ni">📡</div><span class="lc-nn">DEXSCREENER</span><span class="lc-nv">ON-CHAIN</span></div>
+        <div class="lc-con"><span class="lc-dot"></span></div>
+        <div class="lc-node"><div class="lc-ni">📓</div><span class="lc-nn">NOTION</span><span class="lc-nv">CAPTURE</span></div>
+      </div>
+      <div class="lc-intel">
+        <div class="lc-iey">// DESTINY INTEL</div>
+        <div class="lc-iq">"Search the web, wire it to your agents via API, verify on-chain, capture the insight. Most people act first. You act last. You win."</div>
+      </div>
+      <div class="lc-foot">
+        <div class="lc-eta"><strong>1H TO FULL INTEL</strong>SETUP TO FIRST SIGNAL</div>
+        <button class="lc-btn" onclick="activateLoadout(this)"><span class="lc-btn-t">◆ VIEW STACK</span></button>
+      </div>
+    </div>
+
+    <!-- 06 · THE TOKEN BUILDER -->
+    <div class="lc lc-red" data-tools="PHANTOM,HELIUS,DEXSCREENER,BIRDEYE">
+      <div class="lc-topbar"></div>
+      <div class="lc-head"><span class="lc-num">LOADOUT 06</span><span class="lc-diff">ADVANCED</span></div>
+      <div class="lc-title">THE TOKEN BUILDER</div>
+      <div class="lc-scene">You're building serious Solana infrastructure. You need identity that holds, RPC that doesn't drop, live market data, and deep wallet analytics.</div>
+      <div class="lc-flow">
+        <div class="lc-node"><div class="lc-ni">👻</div><span class="lc-nn">PHANTOM</span><span class="lc-nv">WALLET</span></div>
+        <div class="lc-con"><span class="lc-dot"></span></div>
+        <div class="lc-node"><div class="lc-ni">☀️</div><span class="lc-nn">HELIUS</span><span class="lc-nv">RPC</span></div>
+        <div class="lc-con"><span class="lc-dot"></span></div>
+        <div class="lc-node"><div class="lc-ni">📡</div><span class="lc-nn">DEXSCREENER</span><span class="lc-nv">MARKET</span></div>
+        <div class="lc-con"><span class="lc-dot"></span></div>
+        <div class="lc-node"><div class="lc-ni">🦅</div><span class="lc-nn">BIRDEYE</span><span class="lc-nv">ANALYTICS</span></div>
+      </div>
+      <div class="lc-intel">
+        <div class="lc-iey">// DESTINY INTEL</div>
+        <div class="lc-iq">"Identity, real RPC that won't drop under load, live market data, deep wallet analytics. Everything else is optional. This stack is not."</div>
+      </div>
+      <div class="lc-foot">
+        <div class="lc-eta"><strong>1 WEEK TO MAINNET</strong>PRODUCTION SOLANA BUILD</div>
+        <button class="lc-btn" onclick="activateLoadout(this)"><span class="lc-btn-t">◆ VIEW STACK</span></button>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- ── Section separator ──────────────────── -->
+<div id="lo-sep">
+  <div class="lo-sl"></div>
+  <span class="lo-st">// FULL TOOL CATALOG</span>
+  <div class="lo-sl"></div>
 </div>
 
 <!-- ── Filter tabs ───────────────────────── -->
@@ -271,6 +507,13 @@ body::before{content:'';position:fixed;inset:0;background:repeating-linear-gradi
 
 <!-- ── Cards grid ─────────────────────────── -->
 <div id="grid-wrap">
+<div id="lo-banner">
+  <span>// ACTIVE LOADOUT:</span>
+  <span id="lo-bn"></span>
+  <span>·</span>
+  <span id="lo-bc"></span>
+  <span id="lo-bx" onclick="clearLoadout()">CLEAR ×</span>
+</div>
 <div id="cards-grid">
 
   <!-- ===== AI CODING ===== -->
@@ -699,15 +942,46 @@ document.getElementById('filter-tabs').addEventListener('click',function(e){
   document.getElementById('no-results').style.display=n?'none':'block';
 });
 
-// Intro fade
-window.addEventListener('load',function(){
+
+// Loadout activation
+function activateLoadout(btn){
+  var card=btn.closest('.lc');
+  var name=card.querySelector('.lc-title').textContent.trim();
+  var tools=card.dataset.tools.split(',').map(function(t){return t.trim().toUpperCase();});
+
+  clearLoadout(true);
+
+  // Reset filter to ALL
+  document.querySelectorAll('.ftab').forEach(function(t){t.classList.remove('active');});
+  document.querySelector('.ftab[data-cat="all"]').classList.add('active');
+  document.querySelectorAll('.tc').forEach(function(c){c.style.display='flex';});
+  document.getElementById('no-results').style.display='none';
+
+  // Highlight / dim tool cards
+  var count=0;
+  document.querySelectorAll('.tc').forEach(function(tc){
+    var el=tc.querySelector('.tc-name');
+    var nm=el?el.textContent.trim().toUpperCase():'';
+    var match=tools.indexOf(nm)!==-1;
+    if(match){tc.classList.add('lc-hi');tc.classList.remove('lc-dim');count++;}
+    else{tc.classList.add('lc-dim');tc.classList.remove('lc-hi');}
+  });
+
+  // Show banner
+  document.getElementById('lo-bn').textContent=name;
+  document.getElementById('lo-bc').textContent=count+' TOOLS HIGHLIGHTED';
+  document.getElementById('lo-banner').classList.add('on');
+
+  // Scroll to grid
   setTimeout(function(){
-    var intro=document.getElementById('intro');
-    if(!intro)return;
-    intro.classList.add('out');
-    setTimeout(function(){intro.remove();},600);
-  },1800);
-});
+    document.getElementById('filter-wrap').scrollIntoView({behavior:'smooth',block:'start'});
+  },120);
+}
+
+function clearLoadout(silent){
+  document.querySelectorAll('.tc').forEach(function(tc){tc.classList.remove('lc-hi','lc-dim');});
+  document.getElementById('lo-banner').classList.remove('on');
+}
 </script>
 
 <script>
