@@ -4,6 +4,14 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>HEROES — TERMINAL DESTINY</title>
+<link rel="manifest" href="/manifest.json">
+<meta name="theme-color" content="#030c15">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="DESTINY">
+<link rel="apple-touch-icon" href="/destiny.png">
+<meta name="description" content="The DESTINY hero registry — field units, rankings, and hero cards.">
 <style>
 :root{
   --green:#00ff41;--cyan:#00d4ff;--amber:#ffaa00;--red:#ff2a00;--purple:#cc44ff;
@@ -2575,6 +2583,13 @@ async function runReveal(h){
 
 load();
 setInterval(refreshHeroes,60000);
+</script>
+<script>
+if('serviceWorker' in navigator){
+  window.addEventListener('load',function(){
+    navigator.serviceWorker.register('/sw.js').catch(function(){});
+  });
+}
 </script>
 </body>
 </html>

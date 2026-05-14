@@ -4,6 +4,14 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
   <title>Terminal Destiny</title>
+  <link rel="manifest" href="/manifest.json">
+  <meta name="theme-color" content="#030c15">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="DESTINY">
+  <link rel="apple-touch-icon" href="/destiny.png">
+  <meta name="description" content="AI mentor for the crypto builder era. Chat with DESTINY, claim your hero card.">
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
     button,input,[onclick] { -webkit-tap-highlight-color:transparent; touch-action:manipulation; }
@@ -3199,6 +3207,13 @@ function _renderMenuHeroCard(h){
 
   var wrap=document.getElementById('mhc-wrap');
   if(wrap)wrap.style.display='block';
+}
+</script>
+<script>
+if('serviceWorker' in navigator){
+  window.addEventListener('load',function(){
+    navigator.serviceWorker.register('/sw.js').catch(function(){});
+  });
 }
 </script>
 </body>

@@ -1,0 +1,29 @@
+{
+  "name": "Terminal Destiny",
+  "short_name": "DESTINY",
+  "description": "AI mentor for the crypto builder era. Chat with DESTINY, claim your hero card.",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "background_color": "#030c15",
+  "theme_color": "#030c15",
+  "categories": ["productivity", "finance", "social"],
+  "icons": [
+    {
+      "src": "destiny.png",
+      "sizes": "220x220",
+      "type": "image/png",
+      "purpose": "any"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Hero Wall",
+      "short_name": "Heroes",
+      "description": "View the community hero registry",
+      "url": "/heroes",
+      "icons": [{ "src": "destiny.png", "sizes": "220x220", "type": "image/png" }]
+    }
+  ]
+}
