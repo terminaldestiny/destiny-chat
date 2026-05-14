@@ -33,17 +33,47 @@ body::before{content:'';position:fixed;inset:0;background:repeating-linear-gradi
 
 /* ── No session ────────────────────────────── */
 #no-session{display:none;margin:24px 20px 0;position:relative;z-index:1;}
-.ns-bar{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:14px 20px;border:1px solid rgba(0,255,65,0.1);background:rgba(0,0,0,0.35);flex-wrap:wrap;}
-.ns-left{flex:1;min-width:200px;}
-.ns-eyebrow{font-size:9px;letter-spacing:3px;color:rgba(0,255,65,0.45);margin-bottom:5px;}
-.ns-headline{font-size:14px;font-weight:bold;letter-spacing:3px;color:rgba(255,255,255,0.82);margin-bottom:5px;}
-.ns-sub{font-size:11px;letter-spacing:1.5px;color:rgba(255,255,255,0.28);line-height:1.6;}
-.ns-perks{display:flex;gap:10px;align-items:center;flex-wrap:wrap;flex-shrink:0;}
-.ns-perk{font-size:18px;line-height:1;opacity:0.7;cursor:default;transition:.15s;}
-.ns-perk:hover{opacity:1;transform:scale(1.2);}
-.ns-cta{display:inline-block;font-size:10px;letter-spacing:3px;color:var(--cyan);border:1px solid rgba(0,212,255,0.35);padding:9px 20px;text-decoration:none;transition:.15s;white-space:nowrap;flex-shrink:0;}
-.ns-cta:hover{background:rgba(0,212,255,0.1);border-color:var(--cyan);color:#fff;}
-.ns-ghost-label{font-size:7px;letter-spacing:2.5px;color:rgba(255,255,255,0.18);padding:6px 20px 0;}
+.ns-wrap{display:flex;gap:0;border:1px solid rgba(0,255,65,0.15);background:rgba(0,0,0,0.5);position:relative;overflow:hidden;}
+.ns-wrap::before{content:'';position:absolute;top:10px;left:10px;width:16px;height:16px;border-top:1px solid rgba(0,255,65,0.5);border-left:1px solid rgba(0,255,65,0.5);pointer-events:none;z-index:2;}
+.ns-wrap::after{content:'';position:absolute;bottom:10px;right:10px;width:16px;height:16px;border-bottom:1px solid rgba(0,255,65,0.5);border-right:1px solid rgba(0,255,65,0.5);pointer-events:none;z-index:2;}
+
+/* ghost card */
+.ns-ghost{flex-shrink:0;width:220px;background:#030603;border-right:1px solid rgba(0,255,65,0.1);position:relative;overflow:hidden;display:flex;flex-direction:column;}
+@media(max-width:600px){.ns-ghost{display:none;}}
+.ns-ghost-bar{height:3px;background:linear-gradient(90deg,transparent,rgba(255,40,0,0.8),rgba(255,170,0,0.6),transparent);}
+.ns-ghost-scan{position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,rgba(0,255,65,0.4),transparent);animation:ns-scan 3s ease-in-out infinite;pointer-events:none;z-index:3;}
+@keyframes ns-scan{0%{top:0;opacity:0;}10%{opacity:1;}90%{opacity:1;}100%{top:100%;opacity:0;}}
+.ns-ghost-inner{padding:14px 16px;flex:1;display:flex;flex-direction:column;gap:10px;position:relative;}
+.ns-ghost-serial{font-size:8px;letter-spacing:3px;color:rgba(255,170,0,0.6);}
+.ns-ghost-redact{height:10px;background:rgba(255,255,255,0.06);border-radius:1px;}
+.ns-ghost-redact.wide{width:90%;}
+.ns-ghost-redact.mid{width:60%;}
+.ns-ghost-redact.short{width:40%;}
+.ns-ghost-redact.tall{height:36px;}
+.ns-ghost-stamp{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;pointer-events:none;}
+.ns-ghost-stamp-inner{border:2px solid rgba(255,40,0,0.4);padding:6px 12px;transform:rotate(-12deg);font-size:9px;letter-spacing:4px;color:rgba(255,40,0,0.5);font-weight:bold;white-space:nowrap;animation:ns-stamp-pulse 2.5s ease-in-out infinite;}
+@keyframes ns-stamp-pulse{0%,100%{opacity:0.4;}50%{opacity:0.8;}}
+.ns-ghost-slot{margin-top:auto;padding-top:10px;border-top:1px solid rgba(0,255,65,0.08);font-size:7px;letter-spacing:2.5px;color:rgba(0,255,65,0.35);display:flex;align-items:center;gap:6px;}
+.ns-ghost-dot{width:5px;height:5px;border-radius:50%;background:rgba(0,255,65,0.4);animation:ns-blink 1.4s ease-in-out infinite;}
+@keyframes ns-blink{0%,100%{opacity:0.3;}50%{opacity:1;}}
+
+/* right panel */
+.ns-right{flex:1;padding:28px 32px;display:flex;flex-direction:column;gap:20px;justify-content:center;}
+@media(max-width:600px){.ns-right{padding:24px 20px;}}
+.ns-eyebrow{font-size:8px;letter-spacing:4px;color:rgba(255,40,0,0.6);}
+.ns-headline{font-size:18px;font-weight:bold;letter-spacing:3px;color:rgba(255,255,255,0.92);line-height:1.3;}
+@media(max-width:600px){.ns-headline{font-size:14px;}}
+.ns-sub{font-size:11px;letter-spacing:1px;color:rgba(255,255,255,0.35);line-height:1.7;max-width:400px;}
+.ns-perks{display:flex;flex-direction:column;gap:8px;}
+.ns-perk{font-size:10px;letter-spacing:2px;color:rgba(255,255,255,0.5);display:flex;align-items:center;gap:10px;}
+.ns-perk-dot{width:4px;height:4px;border-radius:50%;background:rgba(0,255,65,0.6);flex-shrink:0;}
+.ns-perk strong{color:rgba(255,255,255,0.8);}
+.ns-actions{display:flex;gap:12px;flex-wrap:wrap;margin-top:4px;}
+.ns-cta-primary{display:inline-block;font-size:10px;letter-spacing:3px;color:#000;background:var(--green);padding:11px 24px;text-decoration:none;font-weight:bold;transition:.15s;white-space:nowrap;}
+.ns-cta-primary:hover{background:#00ff41;box-shadow:0 0 20px rgba(0,255,65,0.4);}
+.ns-cta-secondary{display:inline-block;font-size:10px;letter-spacing:3px;color:rgba(255,255,255,0.5);border:1px solid rgba(255,255,255,0.15);padding:11px 24px;text-decoration:none;transition:.15s;white-space:nowrap;}
+.ns-cta-secondary:hover{border-color:rgba(255,255,255,0.4);color:rgba(255,255,255,0.9);}
+.ns-ghost-label{font-size:7px;letter-spacing:2.5px;color:rgba(255,255,255,0.12);padding:8px 20px;border-top:1px solid rgba(255,255,255,0.04);}
 
 /* ── My section ────────────────────────────── */
 #my-section{display:none;padding:28px 20px 0;position:relative;z-index:1;}
@@ -551,21 +581,52 @@ body::before{content:'';position:fixed;inset:0;background:repeating-linear-gradi
 <div id="ticker-wrap"><div id="ticker-inner"></div></div>
 
 <div id="no-session">
-  <div class="ns-bar">
-    <div class="ns-left">
-      <div class="ns-eyebrow">GHOST MODE — READ ONLY</div>
-      <div class="ns-headline">YOUR HERO CARD IS UNCLAIMED</div>
-      <div class="ns-sub">Hold 250K+ $DESTINY to unlock your field identity — custom emblem, rank, banner &amp; a permanent slot in the registry.</div>
+  <div class="ns-wrap">
+    <!-- ghost card -->
+    <div class="ns-ghost">
+      <div class="ns-ghost-bar"></div>
+      <div class="ns-ghost-scan"></div>
+      <div class="ns-ghost-inner">
+        <div class="ns-ghost-serial" id="ns-serial">TD-??? // SLOT RESERVED</div>
+        <div style="height:6px"></div>
+        <div class="ns-ghost-redact wide"></div>
+        <div class="ns-ghost-redact mid"></div>
+        <div style="height:4px"></div>
+        <div class="ns-ghost-redact tall wide"></div>
+        <div style="height:4px"></div>
+        <div class="ns-ghost-redact short"></div>
+        <div class="ns-ghost-redact mid"></div>
+        <div class="ns-ghost-redact wide"></div>
+        <div class="ns-ghost-stamp">
+          <div class="ns-ghost-stamp-inner">CLASSIFIED</div>
+        </div>
+        <div class="ns-ghost-slot">
+          <div class="ns-ghost-dot"></div>
+          <span>AWAITING OPERATIVE</span>
+        </div>
+      </div>
     </div>
-    <div class="ns-perks" title="Emblems · Badges · Rank · Custom card">
-      <span class="ns-perk" title="30 custom emblems">⬡</span>
-      <span class="ns-perk" title="Earn badges">🎖</span>
-      <span class="ns-perk" title="Rank system">👑</span>
-      <span class="ns-perk" title="Banner FX">◈</span>
+    <!-- right panel -->
+    <div class="ns-right">
+      <div>
+        <div class="ns-eyebrow">GHOST MODE — READ ONLY</div>
+        <div class="ns-headline">YOUR FIELD IDENTITY<br>IS UNCLAIMED</div>
+      </div>
+      <div class="ns-sub">Hold 250,000+ $DESTINY and your slot is permanent. A serial number, a custom card, a name in the registry. Everyone else sees a ghost.</div>
+      <div class="ns-perks">
+        <div class="ns-perk"><div class="ns-perk-dot"></div><span><strong>Permanent serial number</strong> — yours forever</span></div>
+        <div class="ns-perk"><div class="ns-perk-dot"></div><span><strong>30 custom emblems</strong>, rank, banner FX, background</span></div>
+        <div class="ns-perk"><div class="ns-perk-dot"></div><span><strong>Listed in the field roster</strong> — visible to all</span></div>
+        <div class="ns-perk"><div class="ns-perk-dot"></div><span><strong>DESTINY terminal access</strong> — 30 messages/day</span></div>
+        <div class="ns-perk"><div class="ns-perk-dot"></div><span><strong>500K+</strong> unlocks Sonnet AI upgrade</span></div>
+      </div>
+      <div class="ns-actions">
+        <a href="https://jup.ag/swap/SOL-3AwkJnZL7xrf8ffUwEsSkKndQkPSj2vfR3CqvyFpk8UP" target="_blank" rel="noopener" class="ns-cta-primary">BUY $DESTINY</a>
+        <a href="/" class="ns-cta-secondary" onclick="sessionStorage.setItem('skip_boot','1')">ENTER TERMINAL →</a>
+      </div>
     </div>
-    <a href="/" class="ns-cta" onclick="sessionStorage.setItem('skip_boot','1')">→ ENTER TERMINAL</a>
   </div>
-  <div class="ns-ghost-label">BROWSING THE FIELD ROSTER AS A GHOST · CARDS ARE READ-ONLY</div>
+  <div class="ns-ghost-label">BROWSING THE FIELD ROSTER AS A GHOST · CONNECT WALLET TO CLAIM YOUR SLOT</div>
 </div>
 
 <div id="my-section">
@@ -2142,6 +2203,11 @@ async function load(){
 
     populateStats(allHeroes);
 
+    var nsSerial=document.getElementById('ns-serial');
+    if(nsSerial&&allHeroes.length){
+      var nextSerial=Math.max.apply(null,allHeroes.map(function(h){return h.serial||0;}))+1;
+      nsSerial.textContent='TD-'+String(nextSerial).padStart(3,'0')+' // SLOT RESERVED';
+    }
 
     buildTicker(allHeroes);
     renderGrid();
