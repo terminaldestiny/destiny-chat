@@ -6,6 +6,7 @@ var crypto = require('crypto');
 var nacl = require('tweetnacl');
 var bs58 = require('bs58');
 var { createClient } = require('@supabase/supabase-js');
+var { Telegraf } = require('telegraf');
 
 var app = express();
 app.set('trust proxy', 1);
@@ -1111,3 +1112,84 @@ app.listen(PORT, function() {
   console.log('Chat server running on http://localhost:' + PORT);
   console.log('API key:', process.env.ANTHROPIC_API_KEY ? 'SET' : 'MISSING');
 });
+
+// ── Telegram bot ──────────────────────────────────────────────────────────
+if (process.env.TELEGRAM_BOT_TOKEN) {
+  var tgBot = new Telegraf(process.env.TELEGRAM_BOT_TOKEN);
+
+  // Short in-memory context per chat (last 10 turns, resets on restart)
+  var tgHistory = new Map();
+  var TG_MAX_HISTORY = 10;
+
+  setInterval(function() {
+    // Clean up chats idle for 2 hours
+    var cutoff = Date.now() - 7200000;
+    tgHistory.forEach(function(v, k) { if (v.ts < cutoff) tgHistory.delete(k); });
+  }, 900000);
+
+  tgBot.on('text', async function(ctx) {
+    var userId   = String(ctx.from.id);
+    var message  = (ctx.message.text || '').trim().slice(0, 2000);
+    var limitKey = 'tg:' + userId;
+
+    if (!message) return;
+
+    // Commands
+    if (message === '/start') {
+      return ctx.reply(
+        '// DESTINY ONLINE\n\nI\'m DESTINY — AI crypto intelligence. Ask me anything about crypto, DeFi, tokens, or building in the space.\n\nNo financial advice. Just real answers.'
+      );
+    }
+    if (message === '/help') {
+      return ctx.reply(
+        '// AVAILABLE\n\nJust talk to me. Ask about tokens, market cycles, DeFi, scam detection, AI agents, or anything in the crypto space.\n\nVisit terminaldestiny.com to connect your wallet and unlock hero status.'
+      );
+    }
+
+    // Rate limit — 20 messages/day (recruit tier)
+    if (!checkChatLimit(limitKey, RECRUIT_DAILY_LIMIT)) {
+      return ctx.reply('Signal exhausted. Return tomorrow.');
+    }
+
+    // Build messages with short in-memory context
+    var hist = tgHistory.get(userId) || { turns: [], ts: Date.now() };
+    hist.ts = Date.now();
+    var messages = hist.turns.slice(-(TG_MAX_HISTORY * 2));
+    messages.push({ role: 'user', content: message });
+
+    try {
+      await ctx.sendChatAction('typing');
+      var msg = await client.messages.create({
+        model: 'claude-haiku-4-5-20251001',
+        max_tokens: 500,
+        system: DESTINY_CHAT_PROMPT,
+        messages: messages
+      });
+      var reply = (msg.content && msg.content[0] && msg.content[0].text)
+        ? msg.content[0].text.trim()
+        : 'Signal unclear. Try again.';
+
+      // Update in-memory history
+      hist.turns.push({ role: 'user', content: message });
+      hist.turns.push({ role: 'assistant', content: reply });
+      if (hist.turns.length > TG_MAX_HISTORY * 2) hist.turns = hist.turns.slice(-(TG_MAX_HISTORY * 2));
+      tgHistory.set(userId, hist);
+
+      await ctx.reply(reply);
+    } catch (e) {
+      console.error('TG bot error:', e.message);
+      ctx.reply('Static on the line. Try again.').catch(function() {});
+    }
+  });
+
+  tgBot.launch().then(function() {
+    console.log('Telegram bot: online');
+  }).catch(function(e) {
+    console.error('Telegram bot failed to start:', e.message);
+  });
+
+  process.once('SIGINT',  function() { tgBot.stop('SIGINT');  });
+  process.once('SIGTERM', function() { tgBot.stop('SIGTERM'); });
+} else {
+  console.log('Telegram bot: TELEGRAM_BOT_TOKEN not set, skipping');
+}
