@@ -379,7 +379,7 @@
     #id-block { display:flex;flex-direction:column;gap:3px; }
     #id-name { font-size:20px;font-weight:900;letter-spacing:6px;text-shadow:0 0 12px var(--green),0 0 28px rgba(0,255,65,0.22); }
     #id-sub { display:flex;align-items:center;gap:7px;font-size:9px;letter-spacing:2px;color:rgba(0,255,65,0.42); }
-    #price-ticker { font-size:9px;letter-spacing:1.5px;color:rgba(0,255,65,0.55);white-space:nowrap;cursor:default;transition:color 0.6s; }
+    #price-ticker { font-size:8px;letter-spacing:0.8px;color:rgba(0,255,65,0.55);white-space:nowrap;cursor:default;transition:color 0.6s; }
     #price-ticker.price-up { color:rgba(0,255,65,0.9); }
     #price-ticker.price-down { color:rgba(255,100,100,0.7); }
     #id-freq { color:rgba(255,42,0,0.65);letter-spacing:1.5px; }
@@ -2113,6 +2113,21 @@ function scanLine(){
 }
 
 // ── Live price ticker ─────────────────────────────────────────────────────
+var PRICE_SUBS='₀₁₂₃₄₅₆₇₈₉';
+function _fmtPrice(price){
+  if(!price||price<=0)return '$DESTINY';
+  if(price>=0.01)return '$'+(price>=1?price.toFixed(2):price.toFixed(4));
+  var exp=Math.floor(Math.log10(price));
+  var mantissa=price/Math.pow(10,exp);
+  var sigStr=mantissa.toFixed(2).replace('.',''); // 3 digits, e.g. '318'
+  var zeros=-exp-1; // leading zeros after decimal point
+  if(zeros>=3){
+    var sub=String(zeros).split('').map(function(d){return PRICE_SUBS[+d];}).join('');
+    return '$0.0'+sub+sigStr;
+  }
+  return '$'+price.toFixed(zeros+4);
+}
+
 var _lastPriceFetch=0;
 function fetchPrice(){
   if(Date.now()-_lastPriceFetch<290000)return;
@@ -2124,9 +2139,8 @@ function fetchPrice(){
       if(!el||!d.price)return;
       var price=parseFloat(d.price);
       var change=parseFloat(d.change24h||0);
-      var priceStr=price<0.000001?price.toExponential(2):price<0.001?price.toFixed(8):price<1?price.toFixed(6):price.toFixed(4);
       var changeStr=(change>=0?'+':'')+change.toFixed(1)+'%';
-      el.textContent='⬡ $'+priceStr+' · '+changeStr;
+      el.textContent='⬡ '+_fmtPrice(price)+' · '+changeStr;
       el.className=change>=0?'price-up':'price-down';
     })
     .catch(function(){});
