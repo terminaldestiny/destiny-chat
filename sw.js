@@ -1,5 +1,5 @@
 var CACHE = 'destiny-v1';
-var PRECACHE = ['/', '/heroes', '/arsenal', '/destiny.png', '/manifest.json'];
+var PRECACHE = ['/', '/heroes', '/arsenal', '/lore', '/destiny.png', '/manifest.json'];
 
 self.addEventListener('install', function(e) {
   e.waitUntil(

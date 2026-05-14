@@ -752,6 +752,10 @@
     .help-nav-btn-dex .help-nav-lbl { color:var(--green); }
     .help-nav-btn-dex .help-nav-desc { color:rgba(0,255,65,0.45); }
     .help-nav-btn-dex:hover { border-color:var(--green);background:rgba(0,255,65,0.07);box-shadow:0 0 18px rgba(0,255,65,0.1); }
+    .help-nav-btn-lore { border-color:rgba(255,42,0,0.28);background:rgba(255,42,0,0.03); }
+    .help-nav-btn-lore .help-nav-lbl { color:var(--red); }
+    .help-nav-btn-lore .help-nav-desc { color:rgba(255,42,0,0.45); }
+    .help-nav-btn-lore:hover { border-color:var(--red);background:rgba(255,42,0,0.07);box-shadow:0 0 18px rgba(255,42,0,0.12); }
     .help-nav-btn-heroes { border-color:rgba(255,170,0,0.35);background:rgba(255,170,0,0.03); }
     .help-nav-btn-heroes .help-nav-lbl { color:var(--amber); }
     .help-nav-btn-heroes .help-nav-desc { color:rgba(255,170,0,0.45); }
@@ -1180,6 +1184,10 @@
     <a href="/arsenal" class="help-nav-btn help-nav-btn-dex">
       <span class="help-nav-lbl">⬡ ARSENAL</span>
       <span class="help-nav-desc">22 approved tools</span>
+    </a>
+    <a href="/lore" class="help-nav-btn help-nav-btn-lore">
+      <span class="help-nav-lbl">☠ LORE</span>
+      <span class="help-nav-desc">Classified intel</span>
     </a>
     <a href="https://dream-production-0bfd.up.railway.app/" target="_blank" rel="noopener" class="help-nav-btn">
       <span class="help-nav-lbl">⬡ DREAM 🌍</span>
@@ -1872,7 +1880,8 @@ function runBoot(){
     setTimeout(next,130+Math.random()*70);
   })();
 }
-if(sessionStorage.getItem('skip_boot')){sessionStorage.removeItem('skip_boot');initBoot();bootEl.style.display='none';finishBoot();}else{setTimeout(runBoot,200);}
+var _fromInternal=(function(){try{return document.referrer&&new URL(document.referrer).origin===location.origin;}catch(e){return false;}})();
+if(sessionStorage.getItem('skip_boot')||_fromInternal){sessionStorage.removeItem('skip_boot');initBoot();bootEl.style.display='none';finishBoot();}else{setTimeout(runBoot,200);}
 
 // ── Storage ───────────────────────────────────────────────────────
 function getVid(){var id=localStorage.getItem('destiny_vid');if(!id){id=(crypto.randomUUID?crypto.randomUUID():'v'+Math.random().toString(36).slice(2)+Date.now().toString(36));localStorage.setItem('destiny_vid',id);}return id;}
