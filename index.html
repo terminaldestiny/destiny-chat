@@ -2006,20 +2006,6 @@ function addDestiny(text,typewriter,modelTag){
   var w=document.createElement('div');w.className='msg';
   var cw=document.createElement('div');cw.className='codec-wrap';
 
-  // Top label bar
-  var lbl=document.createElement('div');lbl.className='codec-label';
-  var ll=document.createElement('span');ll.className='codec-label-left';ll.textContent='HERO TRANSMISSION';
-  var lr=document.createElement('span');lr.className='codec-label-right';
-  var MODEL_DISPLAY={sonnet:'SONNET 4.6',haiku:'HAIKU 4.5'};
-  var freqSpan=document.createElement('span');freqSpan.className='codec-freq-tag';freqSpan.textContent='FREQ 140.85';
-  if(modelTag){
-    var sep=document.createElement('span');sep.className='codec-freq-tag';sep.textContent=' · ';
-    var modSpan=document.createElement('span');modSpan.className='codec-model-tag';modSpan.textContent=MODEL_DISPLAY[modelTag]||modelTag.toUpperCase();
-    if(modelTag==='sonnet')modSpan.style.color='var(--cyan)';
-    lr.appendChild(freqSpan);lr.appendChild(sep);lr.appendChild(modSpan);
-  }else{lr.appendChild(freqSpan);}
-  lbl.appendChild(ll);lbl.appendChild(lr);cw.appendChild(lbl);
-
   // Portrait column
   var pc=document.createElement('div');pc.className='codec-portrait-col';
   var pf=document.createElement('div');pf.className='codec-portrait-frame';
@@ -2037,6 +2023,7 @@ function addDestiny(text,typewriter,modelTag){
   var cn=document.createElement('span');cn.className='codec-name';cn.textContent='DESTINY';
   var ct=document.createElement('span');ct.className='codec-ts';ct.textContent=ts();
   ch.appendChild(cn);ch.appendChild(ct);
+  if(modelTag){var MODEL_DISPLAY={sonnet:'SONNET 4.6',haiku:'HAIKU 4.5'};var modSpan=document.createElement('span');modSpan.className='codec-model-tag';modSpan.textContent=' · '+(MODEL_DISPLAY[modelTag]||modelTag.toUpperCase());if(modelTag==='sonnet')modSpan.style.color='var(--cyan)';ch.appendChild(modSpan);}
   var ctxt=document.createElement('div');ctxt.className='codec-text';
   cc.appendChild(ch);cc.appendChild(ctxt);cw.appendChild(cc);
   w.appendChild(cw);feed.appendChild(w);feed.scrollTop=feed.scrollHeight;
@@ -2070,11 +2057,6 @@ function addDestiny(text,typewriter,modelTag){
 function startDestinyStream(){
   var w=document.createElement('div');w.className='msg';
   var cw=document.createElement('div');cw.className='codec-wrap transmitting';
-  var lbl=document.createElement('div');lbl.className='codec-label';
-  var ll=document.createElement('span');ll.className='codec-label-left';ll.textContent='HERO TRANSMISSION';
-  var lr=document.createElement('span');lr.className='codec-label-right';
-  var freqSpan=document.createElement('span');freqSpan.className='codec-freq-tag';freqSpan.textContent='FREQ 140.85';
-  lr.appendChild(freqSpan);lbl.appendChild(ll);lbl.appendChild(lr);cw.appendChild(lbl);
   var pc=document.createElement('div');pc.className='codec-portrait-col';
   var pf=document.createElement('div');pf.className='codec-portrait-frame';
   var img=document.createElement('img');img.className='codec-portrait-img';img.src='destiny.png';img.alt='';img.draggable=false;
@@ -2099,14 +2081,7 @@ function startDestinyStream(){
       cw.classList.remove('transmitting');ctxt.classList.remove('tcur');
       ctxt.classList.add('glow-in','glitching');
       ctxt.style.animationDelay=GDELAYS[Math.floor(Math.random()*GDELAYS.length)];
-      if(modelTag){
-        var MODEL_DISPLAY={sonnet:'SONNET 4.6',haiku:'HAIKU 4.5'};
-        var sep=document.createElement('span');sep.className='codec-freq-tag';sep.textContent=' · ';
-        var modSpan=document.createElement('span');modSpan.className='codec-model-tag';
-        modSpan.textContent=MODEL_DISPLAY[modelTag]||modelTag.toUpperCase();
-        if(modelTag==='sonnet')modSpan.style.color='var(--cyan)';
-        lr.appendChild(sep);lr.appendChild(modSpan);
-      }
+      if(modelTag){var MODEL_DISPLAY={sonnet:'SONNET 4.6',haiku:'HAIKU 4.5'};var modSpan=document.createElement('span');modSpan.className='codec-model-tag';modSpan.textContent=' · '+(MODEL_DISPLAY[modelTag]||modelTag.toUpperCase());if(modelTag==='sonnet')modSpan.style.color='var(--cyan)';ch.appendChild(modSpan);}
       speakDestiny(ctxt.textContent);
     }
   };
@@ -2117,11 +2092,6 @@ var thinkEl=null;
 function showThink(){
   thinkEl=document.createElement('div');thinkEl.className='msg';
   var tw=document.createElement('div');tw.className='think-wrap';
-  // Label
-  var tl=document.createElement('div');tl.className='think-label';
-  var tll=document.createElement('span');tll.textContent='CODEC CONNECTING...';
-  var tlr=document.createElement('span');tlr.textContent='FREQ 140.85';
-  tl.appendChild(tll);tl.appendChild(tlr);tw.appendChild(tl);
   // Portrait
   var tpc=document.createElement('div');tpc.className='think-portrait-col';
   var tpf=document.createElement('div');tpf.className='think-portrait-frame';

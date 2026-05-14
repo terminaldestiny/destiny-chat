@@ -58,8 +58,8 @@ body::before{content:'';position:fixed;inset:0;background:repeating-linear-gradi
 @keyframes ns-blink{0%,100%{opacity:0.3;}50%{opacity:1;}}
 
 /* right panel */
-.ns-right{flex:1;padding:28px 32px;display:flex;flex-direction:column;gap:20px;justify-content:center;}
-@media(max-width:600px){.ns-right{padding:24px 20px;}}
+.ns-right{flex:1;padding:20px 26px;display:flex;flex-direction:column;gap:14px;justify-content:center;}
+@media(max-width:600px){.ns-right{padding:18px 16px;}}
 .ns-eyebrow{font-size:8px;letter-spacing:4px;color:rgba(255,40,0,0.6);}
 .ns-headline{font-size:18px;font-weight:bold;letter-spacing:3px;color:rgba(255,255,255,0.92);line-height:1.3;}
 @media(max-width:600px){.ns-headline{font-size:14px;}}
@@ -536,15 +536,18 @@ body::before{content:'';position:fixed;inset:0;background:repeating-linear-gradi
 #preview-card{cursor:pointer;}
 
 /* ── Ghost card ──────────────────────────── */
-.hcard-ghost{border-style:dashed!important;border-color:rgba(0,255,65,0.08)!important;}
-.hcard-ghost:hover{border-color:rgba(0,255,65,0.2)!important;box-shadow:0 4px 24px rgba(0,255,65,0.04)!important;transform:translateY(-4px);}
-.ghost-body{padding:24px 15px 22px;text-align:center;}
-.ghost-serial{font-size:8px;letter-spacing:2.5px;color:rgba(0,255,65,0.12);margin-bottom:14px;}
-.ghost-emblem{font-size:30px;color:rgba(255,255,255,0.05);margin-bottom:12px;line-height:1;}
-.ghost-label{font-size:10px;letter-spacing:3.5px;color:rgba(255,255,255,0.1);margin-bottom:6px;}
-.ghost-sub{font-size:7px;letter-spacing:1.5px;color:rgba(255,255,255,0.07);margin-bottom:18px;}
-.ghost-cta{display:inline-block;font-size:7px;letter-spacing:2.5px;color:rgba(0,212,255,0.28);border:1px solid rgba(0,212,255,0.13);padding:5px 14px;}
-.hcard-ghost:hover .ghost-cta{color:rgba(0,212,255,0.55);border-color:rgba(0,212,255,0.3);}
+.hcard-ghost{border-style:dashed!important;border-color:rgba(0,255,65,0.22)!important;background:rgba(0,255,65,0.012)!important;}
+.hcard-ghost:hover{border-color:rgba(0,255,65,0.5)!important;box-shadow:0 4px 32px rgba(0,255,65,0.08)!important;transform:translateY(-4px);background:rgba(0,255,65,0.025)!important;}
+.ghost-body{padding:28px 15px 24px;text-align:center;position:relative;}
+.ghost-serial{font-size:8px;letter-spacing:2.5px;color:rgba(255,170,0,0.55);margin-bottom:16px;}
+.ghost-emblem{font-size:34px;color:rgba(0,255,65,0.18);margin-bottom:14px;line-height:1;animation:ghost-pulse 2.4s ease-in-out infinite;}
+@keyframes ghost-pulse{0%,100%{opacity:0.4;}50%{opacity:1;}}
+.ghost-label{font-size:10px;letter-spacing:3.5px;color:rgba(255,255,255,0.55);margin-bottom:6px;font-weight:bold;}
+.ghost-sub{font-size:8px;letter-spacing:1.5px;color:rgba(0,255,65,0.45);margin-bottom:20px;}
+.ghost-cta{display:inline-block;font-size:8px;letter-spacing:2.5px;color:rgba(0,212,255,0.7);border:1px solid rgba(0,212,255,0.35);padding:6px 16px;transition:.15s;}
+.hcard-ghost:hover .ghost-cta{color:#00d4ff;border-color:rgba(0,212,255,0.7);box-shadow:0 0 12px rgba(0,212,255,0.15);}
+.ghost-scan{position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,rgba(0,255,65,0.3),transparent);animation:ghost-scan-line 3.5s ease-in-out infinite;pointer-events:none;}
+@keyframes ghost-scan-line{0%{top:0;opacity:0;}15%{opacity:1;}85%{opacity:1;}100%{top:100%;opacity:0;}}
 </style>
 </head>
 <body>
@@ -609,10 +612,9 @@ body::before{content:'';position:fixed;inset:0;background:repeating-linear-gradi
     <!-- right panel -->
     <div class="ns-right">
       <div>
-        <div class="ns-eyebrow">GHOST MODE — READ ONLY</div>
-        <div class="ns-headline">YOUR FIELD IDENTITY<br>IS UNCLAIMED</div>
+        <div class="ns-headline">YOUR HERO IDENTITY<br>IS UNCLAIMED</div>
       </div>
-      <div class="ns-sub">Hold 250,000+ $DESTINY and your slot is permanent. A serial number, a custom card, a name in the registry. Everyone else sees a ghost.</div>
+      <div class="ns-sub">Hold 250,000+ $DESTINY and your slot is permanent. A serial number, a custom card, a name in the registry.</div>
       <div class="ns-perks">
         <div class="ns-perk"><div class="ns-perk-dot"></div><span><strong>Permanent serial number</strong> — yours forever</span></div>
         <div class="ns-perk"><div class="ns-perk-dot"></div><span><strong>30 custom emblems</strong>, rank, banner FX, background</span></div>
@@ -2138,11 +2140,12 @@ function renderGhostCard(slotNum){
   var body=document.createElement('div');
   body.className='ghost-body';
   body.innerHTML=
-    '<div class="ghost-serial">'+fmtSerial(slotNum)+'</div>'
-    +'<div class="ghost-emblem">?</div>'
-    +'<div class="ghost-label">SLOT AVAILABLE</div>'
-    +'<div class="ghost-sub">500K+ $DESTINY REQUIRED</div>'
-    +'<div class="ghost-cta">→ CLAIM AT TERMINAL</div>';
+    '<div class="ghost-scan"></div>'
+    +'<div class="ghost-serial">'+fmtSerial(slotNum)+' // UNCLAIMED</div>'
+    +'<div class="ghost-emblem">⬡</div>'
+    +'<div class="ghost-label">YOUR SLOT</div>'
+    +'<div class="ghost-sub">HOLD 250K $DESTINY TO CLAIM</div>'
+    +'<div class="ghost-cta">→ ENTER TERMINAL</div>';
   card.appendChild(body);
   return card;
 }
