@@ -42,7 +42,7 @@ var DEV_ORIGINS = [
   'http://127.0.0.1:5500',
   'http://localhost:8080',
 ];
-var ALLOWED_ORIGINS = process.env.NODE_ENV !== 'production'
+var ALLOWED_ORIGINS = process.env.NODE_ENV === 'development'
   ? PROD_ORIGINS.concat(DEV_ORIGINS)
   : PROD_ORIGINS;
 
@@ -294,6 +294,7 @@ setInterval(function() {
   magicSendLog.forEach(function(ts, k)      { if (!ts.length || ts[ts.length-1] < now - 3600000) magicSendLog.delete(k); });
   scanLog.forEach(function(ts, k)           { if (!ts.length || ts[ts.length-1] < now - 60000) scanLog.delete(k); });
   adminLog.forEach(function(ts, k)          { if (!ts.length || ts[ts.length-1] < now - 60000) adminLog.delete(k); });
+  revealLimiter.forEach(function(ts, k)     { if (ts < now - 30000) revealLimiter.delete(k); });
   var today = getTodayUTC();
   Object.keys(chatLog).forEach(function(k) { if (chatLog[k].date !== today) delete chatLog[k]; });
   if (supabase) {
@@ -559,7 +560,7 @@ app.post('/api/verify', jsonSmall, async function(req, res) {
     var sessionToken = crypto.randomUUID();
     await createSession(sessionToken, wallet, tier, balance);
     if (tier === 'operative') {
-      var codename = (body.codename || '').toString().trim().slice(0, 32);
+      var codename = (body.codename || '').toString().trim().slice(0, 24).replace(/[^\x20-\x7E]/g, '');
       ensureHero(wallet, codename, balance);
     }
     res.json({ tier: tier, balance: balance, sessionToken: sessionToken, minTokens: MIN_TOKENS });
@@ -976,7 +977,7 @@ app.patch('/api/heroes/me', jsonSmall, async function(req, res) {
     updates.emblem = body.emblem;
   }
   if (body.codename !== undefined) {
-    var cn = body.codename.toString().trim().slice(0, 24);
+    var cn = body.codename.toString().trim().slice(0, 24).replace(/[^\x20-\x7E]/g, '');
     if (cn.length < 1) return res.status(400).json({ error: 'invalid_codename' });
     updates.codename = cn;
   }
@@ -1105,20 +1106,32 @@ app.post('/api/admin/stats', jsonSmall, async function(req, res) {
 
 // ── /api/heroes/reveal-comment ────────────────────────────────────────────
 var revealLimiter = new Map();
+var VALID_RANKS = ['RECRUIT','OPERATIVE','HERO','AGENT','COMMANDER','LEGEND'];
 app.post('/api/heroes/reveal-comment', jsonSmall, async function(req, res) {
   var ip = req.ip || 'unknown';
   var now = Date.now();
+  guardMapSize(revealLimiter, 10000);
   if ((now - (revealLimiter.get(ip) || 0)) < 30000) return res.status(429).json({ error: 'rate_limited' });
   revealLimiter.set(ip, now);
 
   var body = req.body || {};
-  var codename    = String(body.codename    || 'UNKNOWN').slice(0, 30);
-  var emblem      = String(body.emblem      || 'hexagon').slice(0, 20);
-  var theme       = String(body.theme       || 'green').slice(0, 12);
-  var bgPattern   = String(body.bg_pattern  || 'none').slice(0, 20);
-  var bannerStyle = String(body.banner_style|| 'clean').slice(0, 20);
-  var fx          = String(body.fx          || 'none').slice(0, 20);
-  var rank        = String(body.rank        || 'OPERATIVE').slice(0, 20);
+  var codename    = String(body.codename || 'UNKNOWN').slice(0, 24).replace(/[^\x20-\x7E]/g, '');
+  var emblemRaw   = String(body.emblem      || 'hexagon');
+  var theme       = String(body.theme       || 'green');
+  var bgPattern   = String(body.bg_pattern  || 'none');
+  var bannerStyle = String(body.banner_style|| 'clean');
+  var fx          = String(body.fx          || 'none');
+  var rank        = String(body.rank        || 'HERO');
+
+  // Validate all enum fields against whitelists — reject unknown values
+  var emblemKey = emblemRaw.split(':')[0];
+  if (!VALID_EMBLEMS.includes(emblemKey))                          return res.status(400).json({ error: 'invalid_emblem' });
+  if (!VALID_THEMES.includes(theme))                               return res.status(400).json({ error: 'invalid_theme' });
+  if (!VALID_PATTERNS.includes(bgPattern.split(':')[0]))           return res.status(400).json({ error: 'invalid_pattern' });
+  if (!VALID_BANNERS.includes(bannerStyle))                        return res.status(400).json({ error: 'invalid_banner' });
+  if (!VALID_FX.includes(fx))                                      return res.status(400).json({ error: 'invalid_fx' });
+  if (!VALID_RANKS.includes(rank))                                 return res.status(400).json({ error: 'invalid_rank' });
+  if (looksLikeInjection(codename))                                return res.status(400).json({ error: 'invalid_input' });
 
   try {
     var msg = await client.messages.create({
@@ -1126,7 +1139,7 @@ app.post('/api/heroes/reveal-comment', jsonSmall, async function(req, res) {
       max_tokens: 80,
       messages: [{
         role: 'user',
-        content: 'A hero just received their DESTINY terminal card. Write ONE punchy comment (max 22 words) on their specific choices. Dry, slightly intimidating, cool. Reference their actual picks directly. No quotes.\n\nCallsign: ' + codename + '\nEmblem: ' + emblem + '\nColor theme: ' + theme + '\nBackground: ' + bgPattern + '\nBanner: ' + bannerStyle + '\nFX: ' + fx + '\nRank: ' + rank
+        content: 'A hero just received their DESTINY terminal card. Write ONE punchy comment (max 22 words) on their specific choices. Dry, slightly intimidating, cool. Reference their actual picks directly. No quotes.\n\nCallsign: ' + codename + '\nEmblem: ' + emblemKey + '\nColor theme: ' + theme + '\nBackground: ' + bgPattern.split(':')[0] + '\nBanner: ' + bannerStyle + '\nFX: ' + fx + '\nRank: ' + rank
       }]
     });
     var comment = ((msg.content[0] && msg.content[0].text) || '').trim().replace(/^["""'']+|["""'']+$/g, '');

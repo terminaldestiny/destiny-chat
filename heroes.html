@@ -11,6 +11,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="DESTINY">
 <link rel="apple-touch-icon" href="/destiny.png">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; connect-src 'self' https://destiny-chat-production.up.railway.app; media-src 'self' blob:; worker-src 'self'; frame-ancestors 'none';">
 <meta name="description" content="The DESTINY hero registry — field units, rankings, and hero cards.">
 <style>
 :root{
@@ -1000,7 +1001,7 @@ var BADGE={
   'PHANTOM':        {icon:'🌑', tip:'PHANTOM — active on 30+ different days'},
   'SOVEREIGN':      {icon:'👑', tip:'SOVEREIGN — holds 10M+ $DESTINY'}
 };
-function bdgHtml(t){var b=BADGE[t];return '<span class="bdg" title="'+(b?b.tip:t)+'">'+(b?b.icon:'◈')+'</span>';}
+function bdgHtml(t){var b=BADGE[t];return '<span class="bdg" title="'+(b?b.tip:escHtml(t))+'">'+(b?b.icon:'◈')+'</span>';}
 var RANK_HEX={LEGEND:'#ffaa00',COMMANDER:'#cc44ff',AGENT:'#00d4ff',OPERATIVE:'#00ff41'};
 var RANK_RGBA={LEGEND:function(a){return 'rgba(255,170,0,'+a+')';},COMMANDER:function(a){return 'rgba(204,68,255,'+a+')';},AGENT:function(a){return 'rgba(0,212,255,'+a+')';},OPERATIVE:function(a){return 'rgba(0,255,65,'+a+')';}};
 var THEME_HEX={green:'#00ff41',cyan:'#00d4ff',amber:'#ffaa00',red:'#ff2a00',purple:'#cc44ff',blue:'#0088ff',pink:'#ff2288',orange:'#ff6600',solar:'#ffff00',jade:'#00ff99',flux:'#ff00cc',warp:'#9933ff',ghost:'#e0e0e0',ember:'#ff8800'};

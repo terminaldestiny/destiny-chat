@@ -350,7 +350,7 @@ function renderStats(d){
       '<td style="color:var(--dim);font-size:10px;">'+(i+1)+'</td>'+
       '<td class="codename-cell">'+esc(h.codename)+'</td>'+
       '<td class="wallet-cell">'+esc(h.wallet)+'</td>'+
-      '<td><span class="rank-badge rank-'+h.rank+'">'+h.rank+'</span></td>'+
+      '<td><span class="rank-badge rank-'+esc(h.rank)+'">'+esc(h.rank)+'</span></td>'+
       '<td class="num-cell">'+h.total_conversations+'</td>'+
       '<td class="num-cell">'+h.days_active+'</td>'+
       '<td class="time-cell">'+timeAgo(h.last_active_at)+'</td>';
