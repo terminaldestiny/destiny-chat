@@ -798,6 +798,35 @@ app.get('/api/scan/:address', function(req, res) {
     });
 });
 
+// ── /api/price ────────────────────────────────────────────────────────────
+var _priceCache = null;
+var _priceCacheTime = 0;
+app.get('/api/price', function(req, res) {
+  var now = Date.now();
+  if (_priceCache && now - _priceCacheTime < 300000) {
+    return res.json(_priceCache);
+  }
+  fetch('https://api.dexscreener.com/latest/dex/tokens/3AwkJnZL7xrf8ffUwEsSkKndQkPSj2vfR3CqvyFpk8UP')
+    .then(function(r) { return r.json(); })
+    .then(function(data) {
+      var pairs = (data.pairs || []).filter(function(p) { return p.chainId === 'solana'; });
+      if (!pairs.length) return res.status(404).json({ error: 'no_pairs' });
+      var pair = pairs.sort(function(a, b) {
+        return parseFloat(b.liquidity && b.liquidity.usd || 0) - parseFloat(a.liquidity && a.liquidity.usd || 0);
+      })[0];
+      var result = {
+        price: pair.priceUsd || '0',
+        change24h: pair.priceChange ? (pair.priceChange.h24 || 0) : 0,
+        volume24h: pair.volume ? (pair.volume.h24 || 0) : 0,
+        marketCap: pair.marketCap || 0
+      };
+      _priceCache = result;
+      _priceCacheTime = now;
+      res.json(result);
+    })
+    .catch(function() { res.status(500).json({ error: 'price_error' }); });
+});
+
 // ── /api/auth/link-email ──────────────────────────────────────────────────
 app.post('/api/auth/link-email', jsonSmall, async function(req, res) {
   var body         = req.body || {};
