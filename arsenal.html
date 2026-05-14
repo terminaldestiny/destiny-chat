@@ -1,0 +1,720 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>ARSENAL — TERMINAL DESTINY</title>
+<link rel="manifest" href="/manifest.json">
+<meta name="theme-color" content="#030c15">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="DESTINY">
+<link rel="apple-touch-icon" href="/destiny.png">
+<meta name="description" content="DESTINY's field arsenal. 22 tools that actually matter when building in the dark.">
+<style>
+:root{
+  --green:#00ff41;--cyan:#00d4ff;--amber:#ffaa00;--red:#ff2a00;--purple:#cc44ff;
+  --bg:#030c15;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--bg);color:rgba(255,255,255,0.88);font-family:'Courier New',Courier,monospace;min-height:100vh;overflow-x:hidden;}
+body::before{content:'';position:fixed;inset:0;background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,255,65,0.010) 2px,rgba(0,255,65,0.010) 4px);pointer-events:none;z-index:0;}
+
+/* ── BG layers ── */
+#bg-matrix{position:fixed;inset:0;z-index:0;opacity:0.038;pointer-events:none;}
+#bg-grid{position:fixed;inset:0;z-index:0;pointer-events:none;background-image:linear-gradient(rgba(0,255,65,0.018) 1px,transparent 1px),linear-gradient(90deg,rgba(0,255,65,0.018) 1px,transparent 1px);background-size:48px 48px;}
+#bg-vignette{position:fixed;inset:0;z-index:0;pointer-events:none;background:radial-gradient(ellipse at 50% 30%,transparent 40%,rgba(3,12,21,0.85) 100%);}
+.edge-breathe{position:fixed;inset:0;pointer-events:none;z-index:0;animation:edge-breathe 4.5s ease-in-out infinite;}
+@keyframes edge-breathe{0%,100%{box-shadow:inset 0 0 80px rgba(0,255,65,0.04),inset 0 0 200px rgba(0,255,65,0.012);}50%{box-shadow:inset 0 0 120px rgba(0,255,65,0.08),inset 0 0 300px rgba(0,255,65,0.025);}}
+
+/* ── Particles ── */
+.ptcl{position:fixed;width:2px;height:2px;border-radius:50%;pointer-events:none;z-index:0;animation:ptcl-rise var(--dur,22s) linear var(--delay,0s) infinite;left:var(--x,50%);top:108%;}
+@keyframes ptcl-rise{0%{top:108%;opacity:0;}8%{opacity:1;}88%{opacity:.35;}100%{top:-4%;opacity:0;}}
+
+/* ── Intro overlay ── */
+#intro{position:fixed;inset:0;z-index:200;background:var(--bg);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;pointer-events:none;}
+#intro.out{opacity:0;transition:opacity 0.55s ease;}
+.il{font-size:11px;letter-spacing:3px;opacity:0;animation:il-appear 0.4s ease forwards;}
+.il.g{color:rgba(0,255,65,0.8);}
+.il.d{color:rgba(0,255,65,0.35);}
+.il.a{color:rgba(255,170,0,0.7);}
+@keyframes il-appear{from{opacity:0;letter-spacing:6px;}to{opacity:1;letter-spacing:3px;}}
+#intro-bar{width:200px;height:2px;background:rgba(0,255,65,0.1);margin-top:20px;opacity:0;animation:il-appear 0.4s ease 1.0s forwards;}
+#intro-bar-fill{height:100%;width:0%;background:var(--green);animation:bar-load 0.9s ease 1.1s forwards;}
+@keyframes bar-load{from{width:0%;}to{width:100%;}}
+
+/* ── Header ── */
+#hdr{position:sticky;top:0;z-index:30;background:rgba(3,12,21,0.97);border-bottom:1px solid rgba(0,255,65,0.12);padding:12px 20px;display:flex;align-items:center;gap:14px;backdrop-filter:blur(12px);}
+#back-link{color:rgba(0,255,65,0.5);text-decoration:none;font-size:11px;letter-spacing:2px;border:1px solid rgba(0,255,65,0.16);padding:6px 12px;transition:.15s;white-space:nowrap;}
+#back-link:hover{color:var(--green);border-color:var(--green);box-shadow:0 0 14px rgba(0,255,65,0.1);}
+#hdr-title{font-size:13px;letter-spacing:7px;color:var(--amber);font-weight:bold;text-shadow:0 0 20px rgba(255,170,0,0.5);}
+#hdr-right{margin-left:auto;display:flex;align-items:center;gap:16px;}
+#hdr-count{font-size:9px;letter-spacing:2px;color:rgba(0,255,65,0.3);}
+#hdr-dot{width:6px;height:6px;border-radius:50%;background:var(--green);animation:dot-pulse 1.8s ease-in-out infinite;}
+@keyframes dot-pulse{0%,100%{opacity:.3;transform:scale(1);}50%{opacity:1;transform:scale(1.4);}}
+
+/* ── Hero section ── */
+#hero-section{position:relative;z-index:1;padding:64px 24px 52px;text-align:center;overflow:hidden;}
+#classified-bg{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;pointer-events:none;z-index:0;overflow:hidden;}
+#classified-text{font-size:clamp(60px,14vw,160px);font-weight:bold;letter-spacing:clamp(10px,3vw,40px);color:rgba(0,255,65,0.018);white-space:nowrap;transform:rotate(-8deg);user-select:none;}
+.hero-eyebrow{font-size:9px;letter-spacing:6px;color:rgba(0,255,65,0.4);margin-bottom:16px;position:relative;z-index:1;animation:fade-up 0.8s ease 1.8s both;}
+.hero-h1{font-size:clamp(32px,8vw,64px);font-weight:bold;letter-spacing:clamp(4px,2vw,12px);color:rgba(255,255,255,0.94);line-height:1.1;margin-bottom:18px;position:relative;z-index:1;animation:fade-up 0.8s ease 1.95s both;}
+.hero-h1 span{color:var(--amber);text-shadow:0 0 30px rgba(255,170,0,0.4);}
+.hero-sub{font-size:13px;letter-spacing:0.8px;color:rgba(255,255,255,0.32);max-width:580px;margin:0 auto 36px;line-height:1.9;position:relative;z-index:1;animation:fade-up 0.8s ease 2.1s both;}
+@keyframes fade-up{from{opacity:0;transform:translateY(14px);}to{opacity:1;transform:translateY(0);}}
+
+/* tier legend */
+#tier-legend{display:flex;gap:16px;justify-content:center;flex-wrap:wrap;position:relative;z-index:1;animation:fade-up 0.8s ease 2.25s both;}
+.tl-badge{display:flex;align-items:center;gap:8px;font-size:9px;letter-spacing:2.5px;padding:7px 16px;border:1px solid;cursor:default;}
+.tl-dot{width:5px;height:5px;border-radius:50%;flex-shrink:0;}
+.tl-essential{color:var(--green);border-color:rgba(0,255,65,0.22);background:rgba(0,255,65,0.04);}
+.tl-essential .tl-dot{background:var(--green);box-shadow:0 0 6px var(--green);}
+.tl-solid{color:var(--cyan);border-color:rgba(0,212,255,0.22);background:rgba(0,212,255,0.04);}
+.tl-solid .tl-dot{background:var(--cyan);box-shadow:0 0 6px var(--cyan);}
+.tl-situational{color:var(--amber);border-color:rgba(255,170,0,0.22);background:rgba(255,170,0,0.04);}
+.tl-situational .tl-dot{background:var(--amber);box-shadow:0 0 6px var(--amber);}
+
+/* ── Stats bar ── */
+#stats-bar{display:flex;border-top:1px solid rgba(0,255,65,0.07);border-bottom:1px solid rgba(0,255,65,0.07);position:relative;z-index:1;background:rgba(0,0,0,0.25);}
+.s-item{flex:1;padding:14px 12px;border-right:1px solid rgba(0,255,65,0.07);text-align:center;}
+.s-item:last-child{border-right:none;}
+.s-val{font-size:24px;font-weight:bold;letter-spacing:1px;display:block;margin-bottom:4px;}
+.s-lbl{font-size:9px;letter-spacing:2.5px;color:rgba(255,255,255,0.2);display:block;}
+.s-total{color:rgba(255,255,255,0.8);}
+.s-e{color:var(--green);}
+.s-so{color:var(--cyan);}
+.s-si{color:var(--amber);}
+
+/* ── Filter tabs ── */
+#filter-wrap{position:sticky;top:49px;z-index:25;background:rgba(3,12,21,0.97);border-bottom:1px solid rgba(0,255,65,0.1);backdrop-filter:blur(12px);}
+#filter-tabs{display:flex;gap:0;overflow-x:auto;scrollbar-width:none;-ms-overflow-style:none;padding:0 8px;}
+#filter-tabs::-webkit-scrollbar{display:none;}
+.ftab{padding:13px 16px;font-size:9px;letter-spacing:2.5px;color:rgba(255,255,255,0.3);cursor:pointer;border:none;border-bottom:2px solid transparent;transition:color .18s,border-color .18s;white-space:nowrap;background:none;font-family:inherit;}
+.ftab:hover{color:rgba(255,255,255,0.7);}
+.ftab.active{color:var(--green);border-bottom-color:var(--green);}
+.ftab.active[data-cat="blockchain"]{color:var(--cyan);border-bottom-color:var(--cyan);}
+.ftab.active[data-cat="deploy"]{color:var(--purple);border-bottom-color:var(--purple);}
+.ftab.active[data-cat="build"]{color:var(--amber);border-bottom-color:var(--amber);}
+.ftab.active[data-cat="research"]{color:rgba(200,140,255,0.9);border-bottom-color:rgba(200,140,255,0.9);}
+
+/* ── Cards grid ── */
+#grid-wrap{position:relative;z-index:1;padding:32px 24px 90px;max-width:1440px;margin:0 auto;}
+@media(max-width:700px){#grid-wrap{padding:18px 14px 70px;}}
+#cards-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(290px,1fr));gap:18px;}
+@media(max-width:660px){#cards-grid{grid-template-columns:1fr;gap:12px;}}
+
+/* ── Tool card ── */
+.tc{
+  position:relative;overflow:hidden;
+  background:rgba(0,4,12,0.88);
+  border:1px solid rgba(0,255,65,0.1);
+  transition:transform .22s ease,box-shadow .22s ease,border-color .22s ease;
+  display:flex;flex-direction:column;
+  cursor:default;
+}
+.tc:hover{transform:translateY(-4px);}
+.tc.te:hover{border-color:rgba(0,255,65,0.4);box-shadow:0 10px 50px rgba(0,255,65,0.09),0 2px 16px rgba(0,255,65,0.05);}
+.tc.ts:hover{border-color:rgba(0,212,255,0.4);box-shadow:0 10px 50px rgba(0,212,255,0.09),0 2px 16px rgba(0,212,255,0.05);}
+.tc.tsi:hover{border-color:rgba(255,170,0,0.4);box-shadow:0 10px 50px rgba(255,170,0,0.09),0 2px 16px rgba(255,170,0,0.05);}
+
+/* corner brackets that appear on hover */
+.tc::before,.tc::after{content:'';position:absolute;width:12px;height:12px;pointer-events:none;z-index:3;opacity:0;transition:opacity .2s;}
+.tc::before{top:8px;left:8px;border-top:1px solid;border-left:1px solid;}
+.tc::after{bottom:8px;right:8px;border-bottom:1px solid;border-right:1px solid;}
+.tc.te::before,.tc.te::after{border-color:rgba(0,255,65,0.5);}
+.tc.ts::before,.tc.ts::after{border-color:rgba(0,212,255,0.5);}
+.tc.tsi::before,.tc.tsi::after{border-color:rgba(255,170,0,0.5);}
+.tc:hover::before,.tc:hover::after{opacity:1;}
+
+/* tier top bar */
+.tc-bar{height:3px;position:relative;overflow:hidden;flex-shrink:0;}
+.te .tc-bar{background:linear-gradient(90deg,transparent 0%,rgba(0,255,65,0.6) 20%,rgba(0,255,65,1) 50%,rgba(0,255,65,0.6) 80%,transparent 100%);}
+.ts .tc-bar{background:linear-gradient(90deg,transparent 0%,rgba(0,212,255,0.6) 20%,rgba(0,212,255,1) 50%,rgba(0,212,255,0.6) 80%,transparent 100%);}
+.tsi .tc-bar{background:linear-gradient(90deg,transparent 0%,rgba(255,170,0,0.6) 20%,rgba(255,170,0,1) 50%,rgba(255,170,0,0.6) 80%,transparent 100%);}
+.tc-bar::after{content:'';position:absolute;top:0;left:-50%;width:40%;height:100%;background:linear-gradient(90deg,transparent,rgba(255,255,255,0.7),transparent);animation:bar-sweep 2.8s ease-in-out infinite;}
+@keyframes bar-sweep{0%{left:-40%;}100%{left:140%;}}
+
+/* scan line floats through card on hover */
+.tc-scan{position:absolute;top:-2px;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,rgba(255,255,255,0.12),transparent);pointer-events:none;z-index:4;opacity:0;transition:opacity .2s;}
+.tc:hover .tc-scan{opacity:1;animation:tc-scan 2.2s linear infinite;}
+@keyframes tc-scan{0%{top:-2px;}100%{top:102%;}}
+
+.tc-body{padding:18px 20px 16px;flex:1;display:flex;flex-direction:column;}
+
+/* top row */
+.tc-top{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:10px;}
+.tc-icon-name{display:flex;align-items:center;gap:11px;}
+.tc-icon{font-size:26px;line-height:1;flex-shrink:0;filter:drop-shadow(0 0 8px rgba(0,0,0,0.5));}
+.tc-name{font-size:17px;font-weight:bold;letter-spacing:2px;color:rgba(255,255,255,0.92);line-height:1.15;}
+.tc-tier{font-size:7px;letter-spacing:2px;padding:3px 8px;border:1px solid;font-weight:bold;white-space:nowrap;align-self:flex-start;margin-top:2px;flex-shrink:0;}
+.te .tc-tier{color:var(--green);border-color:rgba(0,255,65,0.3);background:rgba(0,255,65,0.06);}
+.ts .tc-tier{color:var(--cyan);border-color:rgba(0,212,255,0.3);background:rgba(0,212,255,0.06);}
+.tsi .tc-tier{color:var(--amber);border-color:rgba(255,170,0,0.3);background:rgba(255,170,0,0.06);}
+
+/* category */
+.tc-cat{font-size:8px;letter-spacing:2.5px;margin-bottom:10px;}
+.cat-ai .tc-cat{color:rgba(0,255,65,0.4);}
+.cat-blockchain .tc-cat{color:rgba(0,212,255,0.45);}
+.cat-deploy .tc-cat{color:rgba(204,68,255,0.55);}
+.cat-build .tc-cat{color:rgba(255,170,0,0.45);}
+.cat-research .tc-cat{color:rgba(200,140,255,0.55);}
+
+/* DESTINY's take */
+.tc-take{font-size:12px;letter-spacing:0.6px;color:rgba(255,255,255,0.45);font-style:italic;line-height:1.75;flex:1;margin-bottom:14px;padding-left:10px;border-left:2px solid;}
+.te .tc-take{border-left-color:rgba(0,255,65,0.18);}
+.ts .tc-take{border-left-color:rgba(0,212,255,0.18);}
+.tsi .tc-take{border-left-color:rgba(255,170,0,0.18);}
+
+/* footer */
+.tc-foot{display:flex;align-items:center;justify-content:space-between;border-top:1px solid rgba(255,255,255,0.05);padding-top:12px;margin-top:auto;}
+.tc-link{font-size:9px;letter-spacing:2.5px;text-decoration:none;padding:8px 16px;border:1px solid;transition:.15s;font-family:'Courier New',monospace;}
+.te .tc-link{color:var(--green);border-color:rgba(0,255,65,0.28);}
+.te .tc-link:hover{background:rgba(0,255,65,0.09);border-color:rgba(0,255,65,0.7);box-shadow:0 0 18px rgba(0,255,65,0.14);}
+.ts .tc-link{color:var(--cyan);border-color:rgba(0,212,255,0.28);}
+.ts .tc-link:hover{background:rgba(0,212,255,0.09);border-color:rgba(0,212,255,0.7);box-shadow:0 0 18px rgba(0,212,255,0.14);}
+.tsi .tc-link{color:var(--amber);border-color:rgba(255,170,0,0.28);}
+.tsi .tc-link:hover{background:rgba(255,170,0,0.09);border-color:rgba(255,170,0,0.7);box-shadow:0 0 18px rgba(255,170,0,0.14);}
+.tc-meta{font-size:8px;letter-spacing:1px;color:rgba(255,255,255,0.14);}
+
+/* ── No results ── */
+#no-results{display:none;text-align:center;padding:80px 24px;position:relative;z-index:1;}
+.nr-icon{font-size:32px;color:rgba(0,255,65,0.12);margin-bottom:16px;}
+.nr-text{font-size:10px;letter-spacing:3px;color:rgba(255,255,255,0.18);}
+
+/* ── Terminal footer ── */
+#page-footer{position:relative;z-index:1;border-top:1px solid rgba(0,255,65,0.07);padding:28px 24px;display:flex;align-items:center;justify-content:center;gap:20px;flex-wrap:wrap;}
+.pf-link{color:rgba(0,255,65,0.3);text-decoration:none;font-size:9px;letter-spacing:2.5px;border:1px solid rgba(0,255,65,0.1);padding:8px 16px;transition:.15s;}
+.pf-link:hover{color:var(--green);border-color:rgba(0,255,65,0.4);}
+.pf-sep{color:rgba(0,255,65,0.15);font-size:9px;}
+.pf-note{font-size:8px;letter-spacing:1.5px;color:rgba(255,255,255,0.1);text-align:center;width:100%;}
+
+/* ── Destiny watermark in hero ── */
+#watermark-wrap{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;pointer-events:none;z-index:0;overflow:hidden;}
+#watermark{font-size:clamp(56px,14vw,150px);font-weight:bold;letter-spacing:clamp(8px,3vw,36px);color:rgba(0,255,65,0.016);white-space:nowrap;transform:rotate(-8deg);user-select:none;}
+</style>
+</head>
+<body>
+
+<!-- ── Intro sequence ───────────────────────── -->
+<div id="intro">
+  <div class="il d" style="animation-delay:.05s">// TERMINAL DESTINY · ARSENAL DATABASE</div>
+  <div class="il d" style="animation-delay:.28s">// CLASSIFICATION: FIELD OPERATIVE CLEARANCE</div>
+  <div class="il d" style="animation-delay:.52s">// LOADING TOOL MANIFEST ········</div>
+  <div class="il g" style="animation-delay:.80s">// 22 TOOLS CATALOGUED · DESTINY APPROVED</div>
+  <div class="il a" style="animation-delay:1.05s">// ZERO PAID PLACEMENTS · ZERO APOLOGIES</div>
+  <div id="intro-bar"><div id="intro-bar-fill"></div></div>
+</div>
+
+<!-- ── BG layers ──────────────────────────── -->
+<canvas id="bg-matrix"></canvas>
+<div id="bg-grid"></div>
+<div id="bg-vignette"></div>
+<div class="edge-breathe"></div>
+
+<!-- ── Particles ─────────────────────────── -->
+<script>
+(function(){
+  var cols=['rgba(0,255,65,0.5)','rgba(0,212,255,0.35)','rgba(255,170,0,0.28)','rgba(204,68,255,0.22)'];
+  for(var i=0;i<14;i++){
+    var d=document.createElement('div');
+    d.className='ptcl';
+    d.style.cssText='--x:'+Math.random()*100+'%;--dur:'+(16+Math.random()*22)+'s;--delay:-'+(Math.random()*24)+'s;background:'+cols[i%cols.length];
+    document.body.appendChild(d);
+  }
+})();
+</script>
+
+<!-- ── Header ────────────────────────────── -->
+<header id="hdr">
+  <a href="/" id="back-link">← TERMINAL</a>
+  <span id="hdr-title">// FIELD ARSENAL</span>
+  <div id="hdr-right">
+    <span id="hdr-count">22 TOOLS CATALOGUED</span>
+    <div id="hdr-dot"></div>
+  </div>
+</header>
+
+<!-- ── Hero section ──────────────────────── -->
+<section id="hero-section">
+  <div id="watermark-wrap"><span id="watermark">CLASSIFIED</span></div>
+  <div class="hero-eyebrow">// DESTINY'S APPROVED LOADOUT · UPDATED MAY 2026</div>
+  <h1 class="hero-h1">FIELD <span>ARSENAL</span></h1>
+  <p class="hero-sub">Every tool I've cleared for deployment. Not a sponsored list. Not a listicle.<br>These are the things that actually matter when you're building in the dark and shipping before sunrise.</p>
+  <div id="tier-legend">
+    <div class="tl-badge tl-essential"><div class="tl-dot"></div>ESSENTIAL</div>
+    <div class="tl-badge tl-solid"><div class="tl-dot"></div>SOLID</div>
+    <div class="tl-badge tl-situational"><div class="tl-dot"></div>SITUATIONAL</div>
+  </div>
+</section>
+
+<!-- ── Stats bar ─────────────────────────── -->
+<div id="stats-bar">
+  <div class="s-item"><span class="s-val s-total">22</span><span class="s-lbl">TOTAL TOOLS</span></div>
+  <div class="s-item"><span class="s-val s-e">7</span><span class="s-lbl">ESSENTIAL</span></div>
+  <div class="s-item"><span class="s-val s-so">10</span><span class="s-lbl">SOLID</span></div>
+  <div class="s-item"><span class="s-val s-si">5</span><span class="s-lbl">SITUATIONAL</span></div>
+</div>
+
+<!-- ── Filter tabs ───────────────────────── -->
+<div id="filter-wrap">
+  <div id="filter-tabs">
+    <button class="ftab active" data-cat="all">◆ ALL</button>
+    <button class="ftab" data-cat="ai">⬡ AI CODING</button>
+    <button class="ftab" data-cat="blockchain">⬡ BLOCKCHAIN</button>
+    <button class="ftab" data-cat="deploy">⬡ DEPLOY &amp; INFRA</button>
+    <button class="ftab" data-cat="build">⬡ BUILD FAST</button>
+    <button class="ftab" data-cat="research">⬡ RESEARCH</button>
+  </div>
+</div>
+
+<!-- ── Cards grid ─────────────────────────── -->
+<div id="grid-wrap">
+<div id="cards-grid">
+
+  <!-- ===== AI CODING ===== -->
+
+  <div class="tc te cat-ai" data-cat="ai">
+    <div class="tc-bar"></div><div class="tc-scan"></div>
+    <div class="tc-body">
+      <div class="tc-top">
+        <div class="tc-icon-name"><span class="tc-icon">🤖</span><span class="tc-name">CLAUDE CODE</span></div>
+        <span class="tc-tier">ESSENTIAL</span>
+      </div>
+      <div class="tc-cat">AI CODING</div>
+      <p class="tc-take">"The best AI coding tool alive. Terminal-native, context-aware, and it actually understands your codebase. If you're still doing chat-and-paste you're losing ground every single day."</p>
+      <div class="tc-foot">
+        <a href="https://claude.ai/code" target="_blank" rel="noopener" class="tc-link">ACCESS →</a>
+        <span class="tc-meta">ANTHROPIC</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="tc ts cat-ai" data-cat="ai">
+    <div class="tc-bar"></div><div class="tc-scan"></div>
+    <div class="tc-body">
+      <div class="tc-top">
+        <div class="tc-icon-name"><span class="tc-icon">⚡</span><span class="tc-name">CURSOR</span></div>
+        <span class="tc-tier">SOLID</span>
+      </div>
+      <div class="tc-cat">AI CODING</div>
+      <p class="tc-take">"Still writing code like it's 2019? Cursor brings full project context into the loop. Good for builders who live in an IDE and want the intelligence baked in — not bolted on."</p>
+      <div class="tc-foot">
+        <a href="https://cursor.com" target="_blank" rel="noopener" class="tc-link">ACCESS →</a>
+        <span class="tc-meta">CURSOR INC</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="tc ts cat-ai" data-cat="ai">
+    <div class="tc-bar"></div><div class="tc-scan"></div>
+    <div class="tc-body">
+      <div class="tc-top">
+        <div class="tc-icon-name"><span class="tc-icon">🎨</span><span class="tc-name">V0.DEV</span></div>
+        <span class="tc-tier">SOLID</span>
+      </div>
+      <div class="tc-cat">AI CODING</div>
+      <p class="tc-take">"UI in minutes, not hours. Describe what you want, get production-ready React. Vercel built this for builders who care about interfaces but refuse to bikeshed CSS for a week."</p>
+      <div class="tc-foot">
+        <a href="https://v0.dev" target="_blank" rel="noopener" class="tc-link">ACCESS →</a>
+        <span class="tc-meta">VERCEL</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="tc tsi cat-ai" data-cat="ai">
+    <div class="tc-bar"></div><div class="tc-scan"></div>
+    <div class="tc-body">
+      <div class="tc-top">
+        <div class="tc-icon-name"><span class="tc-icon">🔩</span><span class="tc-name">BOLT.NEW</span></div>
+        <span class="tc-tier">SITUATIONAL</span>
+      </div>
+      <div class="tc-cat">AI CODING</div>
+      <p class="tc-take">"Full-stack web app from a single prompt, in the browser, zero setup. Excellent for prototyping fast and showing stakeholders something real. Review the code before you ship it."</p>
+      <div class="tc-foot">
+        <a href="https://bolt.new" target="_blank" rel="noopener" class="tc-link">ACCESS →</a>
+        <span class="tc-meta">STACKBLITZ</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="tc tsi cat-ai" data-cat="ai">
+    <div class="tc-bar"></div><div class="tc-scan"></div>
+    <div class="tc-body">
+      <div class="tc-top">
+        <div class="tc-icon-name"><span class="tc-icon">🐙</span><span class="tc-name">COPILOT</span></div>
+        <span class="tc-tier">SITUATIONAL</span>
+      </div>
+      <div class="tc-cat">AI CODING</div>
+      <p class="tc-take">"The incumbent autocomplete. Comfortable if you already live in GitHub Enterprise. But Claude Code makes this feel like a museum piece. Keep it — don't choose it."</p>
+      <div class="tc-foot">
+        <a href="https://github.com/features/copilot" target="_blank" rel="noopener" class="tc-link">ACCESS →</a>
+        <span class="tc-meta">GITHUB / MSFT</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== BLOCKCHAIN ===== -->
+
+  <div class="tc te cat-blockchain" data-cat="blockchain">
+    <div class="tc-bar"></div><div class="tc-scan"></div>
+    <div class="tc-body">
+      <div class="tc-top">
+        <div class="tc-icon-name"><span class="tc-icon">👻</span><span class="tc-name">PHANTOM</span></div>
+        <span class="tc-tier">ESSENTIAL</span>
+      </div>
+      <div class="tc-cat">BLOCKCHAIN</div>
+      <p class="tc-take">"Your on-chain identity. No wallet, no war. Get this before anything else. Non-negotiable entry point to the Solana ecosystem — everything else connects to this."</p>
+      <div class="tc-foot">
+        <a href="https://phantom.app" target="_blank" rel="noopener" class="tc-link">ACCESS →</a>
+        <span class="tc-meta">PHANTOM LABS</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="tc te cat-blockchain" data-cat="blockchain">
+    <div class="tc-bar"></div><div class="tc-scan"></div>
+    <div class="tc-body">
+      <div class="tc-top">
+        <div class="tc-icon-name"><span class="tc-icon">🪐</span><span class="tc-name">JUPITER</span></div>
+        <span class="tc-tier">ESSENTIAL</span>
+      </div>
+      <div class="tc-cat">BLOCKCHAIN</div>
+      <p class="tc-take">"The Solana DEX standard. Best prices, every time — routing across every major liquidity pool. If you're buying anything on Solana, you're using Jupiter whether you know it or not."</p>
+      <div class="tc-foot">
+        <a href="https://jup.ag" target="_blank" rel="noopener" class="tc-link">ACCESS →</a>
+        <span class="tc-meta">JUPITER AG</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="tc te cat-blockchain" data-cat="blockchain">
+    <div class="tc-bar"></div><div class="tc-scan"></div>
+    <div class="tc-body">
+      <div class="tc-top">
+        <div class="tc-icon-name"><span class="tc-icon">📡</span><span class="tc-name">DEXSCREENER</span></div>
+        <span class="tc-tier">ESSENTIAL</span>
+      </div>
+      <div class="tc-cat">BLOCKCHAIN</div>
+      <p class="tc-take">"Live chart intelligence, every chain. Know what's moving before the crowd does. Real builders have this open at all times — not as speculation, as situational awareness. Free."</p>
+      <div class="tc-foot">
+        <a href="https://dexscreener.com" target="_blank" rel="noopener" class="tc-link">ACCESS →</a>
+        <span class="tc-meta">DEXSCREENER</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="tc ts cat-blockchain" data-cat="blockchain">
+    <div class="tc-bar"></div><div class="tc-scan"></div>
+    <div class="tc-body">
+      <div class="tc-top">
+        <div class="tc-icon-name"><span class="tc-icon">🦅</span><span class="tc-name">BIRDEYE</span></div>
+        <span class="tc-tier">SOLID</span>
+      </div>
+      <div class="tc-cat">BLOCKCHAIN</div>
+      <p class="tc-take">"Deep wallet analytics and portfolio tracking on Solana. When you need more than a price chart — who's holding, what they're moving, where the smart money actually went."</p>
+      <div class="tc-foot">
+        <a href="https://birdeye.so" target="_blank" rel="noopener" class="tc-link">ACCESS →</a>
+        <span class="tc-meta">BIRDEYE</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="tc ts cat-blockchain" data-cat="blockchain">
+    <div class="tc-bar"></div><div class="tc-scan"></div>
+    <div class="tc-body">
+      <div class="tc-top">
+        <div class="tc-icon-name"><span class="tc-icon">☀️</span><span class="tc-name">HELIUS</span></div>
+        <span class="tc-tier">SOLID</span>
+      </div>
+      <div class="tc-cat">BLOCKCHAIN</div>
+      <p class="tc-take">"Solana RPC that doesn't drop when it matters. Enhanced transaction data, webhooks, NFT APIs baked in. Build on the real network — not the public endpoint graveyard."</p>
+      <div class="tc-foot">
+        <a href="https://helius.dev" target="_blank" rel="noopener" class="tc-link">ACCESS →</a>
+        <span class="tc-meta">HELIUS</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="tc tsi cat-blockchain" data-cat="blockchain">
+    <div class="tc-bar"></div><div class="tc-scan"></div>
+    <div class="tc-body">
+      <div class="tc-top">
+        <div class="tc-icon-name"><span class="tc-icon">🚀</span><span class="tc-name">PUMP.FUN</span></div>
+        <span class="tc-tier">SITUATIONAL</span>
+      </div>
+      <div class="tc-cat">BLOCKCHAIN</div>
+      <p class="tc-take">"Where tokens are born and die in the same afternoon. Know this battlefield — not to ape blindly into it, but to understand what raw market energy actually looks like up close."</p>
+      <div class="tc-foot">
+        <a href="https://pump.fun" target="_blank" rel="noopener" class="tc-link">ACCESS →</a>
+        <span class="tc-meta">PUMP.FUN</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== DEPLOY & INFRA ===== -->
+
+  <div class="tc te cat-deploy" data-cat="deploy">
+    <div class="tc-bar"></div><div class="tc-scan"></div>
+    <div class="tc-body">
+      <div class="tc-top">
+        <div class="tc-icon-name"><span class="tc-icon">🚂</span><span class="tc-name">RAILWAY</span></div>
+        <span class="tc-tier">ESSENTIAL</span>
+      </div>
+      <div class="tc-cat">DEPLOY &amp; INFRA</div>
+      <p class="tc-take">"This is what I run on. Backend deployed in 60 seconds, zero config. Stop overthinking infrastructure — Railway is what happens when infra finally stops being a chore."</p>
+      <div class="tc-foot">
+        <a href="https://railway.app" target="_blank" rel="noopener" class="tc-link">ACCESS →</a>
+        <span class="tc-meta">RAILWAY</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="tc te cat-deploy" data-cat="deploy">
+    <div class="tc-bar"></div><div class="tc-scan"></div>
+    <div class="tc-body">
+      <div class="tc-top">
+        <div class="tc-icon-name"><span class="tc-icon">▲</span><span class="tc-name">VERCEL</span></div>
+        <span class="tc-tier">ESSENTIAL</span>
+      </div>
+      <div class="tc-cat">DEPLOY &amp; INFRA</div>
+      <p class="tc-take">"Frontend deploys with zero config, global edge CDN, preview URLs on every PR. `git push` and it's live. The standard — there's a reason the entire ecosystem converged here."</p>
+      <div class="tc-foot">
+        <a href="https://vercel.com" target="_blank" rel="noopener" class="tc-link">ACCESS →</a>
+        <span class="tc-meta">VERCEL INC</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="tc ts cat-deploy" data-cat="deploy">
+    <div class="tc-bar"></div><div class="tc-scan"></div>
+    <div class="tc-body">
+      <div class="tc-top">
+        <div class="tc-icon-name"><span class="tc-icon">⚡</span><span class="tc-name">SUPABASE</span></div>
+        <span class="tc-tier">SOLID</span>
+      </div>
+      <div class="tc-cat">DEPLOY &amp; INFRA</div>
+      <p class="tc-take">"Postgres, auth, realtime, and file storage — all in one dashboard. Ship without hiring a backend team. I use this for hero memory and it has never once let me down mid-battle."</p>
+      <div class="tc-foot">
+        <a href="https://supabase.com" target="_blank" rel="noopener" class="tc-link">ACCESS →</a>
+        <span class="tc-meta">SUPABASE INC</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="tc ts cat-deploy" data-cat="deploy">
+    <div class="tc-bar"></div><div class="tc-scan"></div>
+    <div class="tc-body">
+      <div class="tc-top">
+        <div class="tc-icon-name"><span class="tc-icon">🌐</span><span class="tc-name">CLOUDFLARE</span></div>
+        <span class="tc-tier">SOLID</span>
+      </div>
+      <div class="tc-cat">DEPLOY &amp; INFRA</div>
+      <p class="tc-take">"Free CDN, DDoS protection, DNS, and Workers all on the free tier. This is the security and performance layer you can't justify skipping. Point your domain here on day one."</p>
+      <div class="tc-foot">
+        <a href="https://cloudflare.com" target="_blank" rel="noopener" class="tc-link">ACCESS →</a>
+        <span class="tc-meta">CLOUDFLARE</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== BUILD FAST ===== -->
+
+  <div class="tc te cat-build" data-cat="build">
+    <div class="tc-bar"></div><div class="tc-scan"></div>
+    <div class="tc-body">
+      <div class="tc-top">
+        <div class="tc-icon-name"><span class="tc-icon">💳</span><span class="tc-name">STRIPE</span></div>
+        <span class="tc-tier">ESSENTIAL</span>
+      </div>
+      <div class="tc-cat">BUILD FAST</div>
+      <p class="tc-take">"The payment rail. Proven, documented to death, accepted everywhere. If you're taking money from people, you're using Stripe — stop evaluating alternatives and just ship the checkout."</p>
+      <div class="tc-foot">
+        <a href="https://stripe.com" target="_blank" rel="noopener" class="tc-link">ACCESS →</a>
+        <span class="tc-meta">STRIPE INC</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="tc ts cat-build" data-cat="build">
+    <div class="tc-bar"></div><div class="tc-scan"></div>
+    <div class="tc-body">
+      <div class="tc-top">
+        <div class="tc-icon-name"><span class="tc-icon">✉️</span><span class="tc-name">RESEND</span></div>
+        <span class="tc-tier">SOLID</span>
+      </div>
+      <div class="tc-cat">BUILD FAST</div>
+      <p class="tc-take">"Email that actually lands. Clean API, React email templates, stellar deliverability. The anti-SendGrid. Built for builders, not enterprise procurement committees."</p>
+      <div class="tc-foot">
+        <a href="https://resend.com" target="_blank" rel="noopener" class="tc-link">ACCESS →</a>
+        <span class="tc-meta">RESEND</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="tc ts cat-build" data-cat="build">
+    <div class="tc-bar"></div><div class="tc-scan"></div>
+    <div class="tc-body">
+      <div class="tc-top">
+        <div class="tc-icon-name"><span class="tc-icon">🎭</span><span class="tc-name">FIGMA</span></div>
+        <span class="tc-tier">SOLID</span>
+      </div>
+      <div class="tc-cat">BUILD FAST</div>
+      <p class="tc-take">"Think through the interface before you build it. The builders who skip this step always end up rebuilding. Real-time collaboration, components, prototypes — still the standard."</p>
+      <div class="tc-foot">
+        <a href="https://figma.com" target="_blank" rel="noopener" class="tc-link">ACCESS →</a>
+        <span class="tc-meta">FIGMA INC</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="tc tsi cat-build" data-cat="build">
+    <div class="tc-bar"></div><div class="tc-scan"></div>
+    <div class="tc-body">
+      <div class="tc-top">
+        <div class="tc-icon-name"><span class="tc-icon">💡</span><span class="tc-name">REPLIT</span></div>
+        <span class="tc-tier">SITUATIONAL</span>
+      </div>
+      <div class="tc-cat">BUILD FAST</div>
+      <p class="tc-take">"Cloud dev environment, instant, zero setup. Good for demos, shared live code, and building on machines that aren't yours. Not your production stack — a proving ground."</p>
+      <div class="tc-foot">
+        <a href="https://replit.com" target="_blank" rel="noopener" class="tc-link">ACCESS →</a>
+        <span class="tc-meta">REPLIT INC</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== RESEARCH ===== -->
+
+  <div class="tc ts cat-research" data-cat="research">
+    <div class="tc-bar"></div><div class="tc-scan"></div>
+    <div class="tc-body">
+      <div class="tc-top">
+        <div class="tc-icon-name"><span class="tc-icon">🔍</span><span class="tc-name">PERPLEXITY</span></div>
+        <span class="tc-tier">SOLID</span>
+      </div>
+      <div class="tc-cat">RESEARCH</div>
+      <p class="tc-take">"AI search that cites sources and synthesizes what it finds. Use it before you build, not after — saves hours of reading 40 tabs. Research has no excuse to be slow anymore."</p>
+      <div class="tc-foot">
+        <a href="https://perplexity.ai" target="_blank" rel="noopener" class="tc-link">ACCESS →</a>
+        <span class="tc-meta">PERPLEXITY AI</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="tc ts cat-research" data-cat="research">
+    <div class="tc-bar"></div><div class="tc-scan"></div>
+    <div class="tc-body">
+      <div class="tc-top">
+        <div class="tc-icon-name"><span class="tc-icon">🕸️</span><span class="tc-name">TAVILY</span></div>
+        <span class="tc-tier">SOLID</span>
+      </div>
+      <div class="tc-cat">RESEARCH</div>
+      <p class="tc-take">"Web search API purpose-built for AI agents. 1,000 free credits monthly. Plug it into your pipeline and let your agent research real-time. This is the correct way to give agents eyes."</p>
+      <div class="tc-foot">
+        <a href="https://tavily.com" target="_blank" rel="noopener" class="tc-link">ACCESS →</a>
+        <span class="tc-meta">TAVILY AI</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="tc tsi cat-research" data-cat="research">
+    <div class="tc-bar"></div><div class="tc-scan"></div>
+    <div class="tc-body">
+      <div class="tc-top">
+        <div class="tc-icon-name"><span class="tc-icon">📓</span><span class="tc-name">NOTION</span></div>
+        <span class="tc-tier">SITUATIONAL</span>
+      </div>
+      <div class="tc-cat">RESEARCH</div>
+      <p class="tc-take">"Your second brain for roadmaps, wikis, and specs. Essential for teams. Solo? A markdown file still works fine. The discipline to write things down matters more than the tool."</p>
+      <div class="tc-foot">
+        <a href="https://notion.so" target="_blank" rel="noopener" class="tc-link">ACCESS →</a>
+        <span class="tc-meta">NOTION LABS</span>
+      </div>
+    </div>
+  </div>
+
+</div><!-- #cards-grid -->
+
+<div id="no-results">
+  <div class="nr-icon">⬡</div>
+  <div class="nr-text">// NO TOOLS MATCH THIS FILTER</div>
+</div>
+</div><!-- #grid-wrap -->
+
+<!-- ── Footer ─────────────────────────────── -->
+<div id="page-footer">
+  <a href="/" class="pf-link">← TERMINAL</a>
+  <span class="pf-sep">·</span>
+  <a href="/heroes" class="pf-link">HEROES →</a>
+  <div class="pf-note">// ZERO PAID PLACEMENTS · ZERO AFFILIATE LINKS · TOOLS DESTINY ACTUALLY USES</div>
+</div>
+
+<!-- ── Scripts ────────────────────────────── -->
+<script>
+// Matrix rain
+(function(){
+  var c=document.getElementById('bg-matrix');
+  if(!c)return;
+  var ctx=c.getContext('2d');
+  var W,H,cols,drops;
+  var chars='DESTINY01⬡◆▸ABCDEFabcdefghij0123456789!@#$%';
+  function resize(){
+    W=c.width=window.innerWidth;
+    H=c.height=window.innerHeight;
+    cols=Math.floor(W/18);
+    drops=Array(cols).fill(1);
+  }
+  resize();
+  window.addEventListener('resize',resize);
+  setInterval(function(){
+    ctx.fillStyle='rgba(3,12,21,0.065)';
+    ctx.fillRect(0,0,W,H);
+    ctx.fillStyle='rgba(0,255,65,0.9)';
+    ctx.font='13px Courier New';
+    for(var i=0;i<cols;i++){
+      var ch=chars[Math.floor(Math.random()*chars.length)];
+      ctx.fillText(ch,i*18,drops[i]*18);
+      if(drops[i]*18>H&&Math.random()>0.975)drops[i]=0;
+      drops[i]++;
+    }
+  },55);
+})();
+
+// Filter tabs
+document.getElementById('filter-tabs').addEventListener('click',function(e){
+  var btn=e.target.closest('.ftab');
+  if(!btn)return;
+  var cat=btn.dataset.cat;
+  document.querySelectorAll('.ftab').forEach(function(t){t.classList.remove('active');});
+  btn.classList.add('active');
+  var cards=document.querySelectorAll('.tc');
+  var n=0;
+  cards.forEach(function(card){
+    var show=cat==='all'||card.dataset.cat===cat;
+    card.style.display=show?'flex':'none';
+    if(show)n++;
+  });
+  document.getElementById('no-results').style.display=n?'none':'block';
+});
+
+// Intro fade
+window.addEventListener('load',function(){
+  setTimeout(function(){
+    var intro=document.getElementById('intro');
+    if(!intro)return;
+    intro.classList.add('out');
+    setTimeout(function(){intro.remove();},600);
+  },1800);
+});
+</script>
+
+<script>
+if('serviceWorker' in navigator){
+  window.addEventListener('load',function(){
+    navigator.serviceWorker.register('/sw.js').catch(function(){});
+  });
+}
+</script>
+</body>
+</html>
