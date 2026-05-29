@@ -205,7 +205,7 @@ var VALID_ROLES     = ['','BUILDER','TRADER','DEGEN','FOUNDER','SCOUT','SHADOW',
 async function ensureHero(wallet, codename, balance) {
   if (!supabase) return null;
   try {
-    var { data: existing } = await supabase.from('heroes').select('*').eq('wallet', wallet).single();
+    var { data: existing } = await supabase.from('heroes').select('codename,balance').eq('wallet', wallet).single();
     if (existing) {
       await supabase.from('heroes').update({
         codename: (codename && codename !== 'HERO') ? codename : existing.codename,
@@ -226,7 +226,7 @@ async function ensureHero(wallet, codename, balance) {
 async function updateHeroActivity(wallet, message, hour, sessionBalance) {
   if (!supabase) return;
   try {
-    var { data: hero } = await supabase.from('heroes').select('*').eq('wallet', wallet).single();
+    var { data: hero } = await supabase.from('heroes').select('total_conversations,active_dates,titles,balance').eq('wallet', wallet).single();
     if (!hero) return;
     var today = new Date().toISOString().slice(0, 10);
     var activeDates = hero.active_dates || [];
@@ -370,6 +370,7 @@ function guardMapSize(map, limit) {
 }
 
 function checkChallengeLimit(ip) {
+  guardMapSize(challengeLog, 2000);
   var now = Date.now(), ago = now - 60000;
   var ts = challengeLog.get(ip) || [];
   while (ts.length && ts[0] < ago) ts.shift();
@@ -381,6 +382,7 @@ function checkChallengeLimit(ip) {
 
 // H2: rate limit for magic-verify (10 attempts/min per IP)
 function checkVerifyLimit(ip) {
+  guardMapSize(verifyLog, 2000);
   var now = Date.now(), ago = now - 60000;
   var ts = verifyLog.get(ip) || [];
   while (ts.length && ts[0] < ago) ts.shift();
@@ -392,6 +394,7 @@ function checkVerifyLimit(ip) {
 
 // rate limit for /api/scan (30 requests/min per IP)
 function checkScanLimit(ip) {
+  guardMapSize(scanLog, 2000);
   var now = Date.now(), ago = now - 60000;
   var ts = scanLog.get(ip) || [];
   while (ts.length && ts[0] < ago) ts.shift();
@@ -403,6 +406,7 @@ function checkScanLimit(ip) {
 
 // rate limit for /api/admin/stats (5 attempts/min per IP — H1)
 function checkAdminLimit(ip) {
+  guardMapSize(adminLog, 2000);
   var now = Date.now(), ago = now - 60000;
   var ts = adminLog.get(ip) || [];
   while (ts.length && ts[0] < ago) ts.shift();
@@ -412,7 +416,12 @@ function checkAdminLimit(ip) {
   return true;
 }
 
+var _balanceCache = new Map(); // wallet → { balance, ts }
+var BALANCE_CACHE_TTL = 300000; // 5 minutes
+
 async function getSolanaTokenBalance(walletAddress) {
+  var cached = _balanceCache.get(walletAddress);
+  if (cached && Date.now() - cached.ts < BALANCE_CACHE_TTL) return cached.balance;
   var res = await fetch(SOLANA_RPC, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
@@ -424,8 +433,9 @@ async function getSolanaTokenBalance(walletAddress) {
   });
   var data = await res.json();
   var accounts = (data.result && data.result.value) ? data.result.value : [];
-  if (!accounts.length) return 0;
-  return accounts[0].account.data.parsed.info.tokenAmount.uiAmount || 0;
+  var balance = accounts.length ? (accounts[0].account.data.parsed.info.tokenAmount.uiAmount || 0) : 0;
+  _balanceCache.set(walletAddress, { balance, ts: Date.now() });
+  return balance;
 }
 
 // ── H1: Prompt injection detection ───────────────────────────────────────
@@ -738,16 +748,16 @@ app.post('/api/chat', jsonLarge, async function(req, res) {
         res.write('data: ' + JSON.stringify({ t: text }) + '\n\n');
       });
       await msgStream.finalMessage();
+      res.write('data: ' + JSON.stringify({ done: true, remaining: remaining, model: modelKey }) + '\n\n');
+      res.end();
       if (tier === 'operative' && walletAddress) {
         var sTextMessages = messages.map(function(m) {
           return { role: m.role, content: typeof m.content === 'string' ? m.content : message };
         });
         sTextMessages.push({ role: 'assistant', content: fullText });
-        await saveHistory(walletAddress, sTextMessages.slice(-40));
+        saveHistory(walletAddress, sTextMessages.slice(-40)).catch(function(e) { console.error('saveHistory:', e.message); });
         updateHeroActivity(walletAddress, message, new Date().getUTCHours(), heroBalance);
       }
-      res.write('data: ' + JSON.stringify({ done: true, remaining: remaining, model: modelKey }) + '\n\n');
-      res.end();
     } catch (err) {
       console.error('Stream error:', err.message || err);
       try { res.write('data: ' + JSON.stringify({ error: true }) + '\n\n'); res.end(); } catch(e) {}
@@ -763,16 +773,15 @@ app.post('/api/chat', jsonLarge, async function(req, res) {
     });
     var text = (msg.content && msg.content[0] && msg.content[0].text) ? msg.content[0].text.trim() : 'Signal unclear.';
 
+    res.json({ response: text, remaining: remaining, model: modelKey });
     if (tier === 'operative' && walletAddress) {
       var textMessages = messages.map(function(m) {
         return { role: m.role, content: typeof m.content === 'string' ? m.content : message };
       });
       textMessages.push({ role: 'assistant', content: text });
-      await saveHistory(walletAddress, textMessages.slice(-40));
+      saveHistory(walletAddress, textMessages.slice(-40)).catch(function(e) { console.error('saveHistory:', e.message); });
       updateHeroActivity(walletAddress, message, new Date().getUTCHours(), heroBalance);
     }
-
-    res.json({ response: text, remaining: remaining, model: modelKey });
   } catch (err) {
     console.error('Chat API error:', err.message || err);
     res.status(500).json({ error: 'api_error', response: 'Static on the line. Try again.' });
@@ -810,16 +819,20 @@ app.get('/api/scan/:address', function(req, res) {
 // ── /api/price ────────────────────────────────────────────────────────────
 var _priceCache = null;
 var _priceCacheTime = 0;
-app.get('/api/price', function(req, res) {
+var _priceInFlight = null;
+
+app.get('/api/price', async function(req, res) {
   var now = Date.now();
-  if (_priceCache && now - _priceCacheTime < 300000) {
-    return res.json(_priceCache);
+  if (_priceCache && now - _priceCacheTime < 300000) return res.json(_priceCache);
+  if (_priceInFlight) {
+    try { return res.json(await _priceInFlight); }
+    catch(e) { return res.status(500).json({ error: 'price_error' }); }
   }
-  fetch('https://api.dexscreener.com/latest/dex/tokens/3AwkJnZL7xrf8ffUwEsSkKndQkPSj2vfR3CqvyFpk8UP')
+  _priceInFlight = fetch('https://api.dexscreener.com/latest/dex/tokens/3AwkJnZL7xrf8ffUwEsSkKndQkPSj2vfR3CqvyFpk8UP')
     .then(function(r) { return r.json(); })
     .then(function(data) {
       var pairs = (data.pairs || []).filter(function(p) { return p.chainId === 'solana'; });
-      if (!pairs.length) return res.status(404).json({ error: 'no_pairs' });
+      if (!pairs.length) throw new Error('no_pairs');
       var pair = pairs.sort(function(a, b) {
         return parseFloat(b.liquidity && b.liquidity.usd || 0) - parseFloat(a.liquidity && a.liquidity.usd || 0);
       })[0];
@@ -830,10 +843,12 @@ app.get('/api/price', function(req, res) {
         marketCap: pair.marketCap || 0
       };
       _priceCache = result;
-      _priceCacheTime = now;
-      res.json(result);
+      _priceCacheTime = Date.now();
+      return result;
     })
-    .catch(function() { res.status(500).json({ error: 'price_error' }); });
+    .finally(function() { _priceInFlight = null; });
+  try { res.json(await _priceInFlight); }
+  catch(e) { res.status(500).json({ error: 'price_error' }); }
 });
 
 // ── /api/auth/link-email ──────────────────────────────────────────────────
@@ -940,9 +955,21 @@ app.post('/api/auth/magic-verify', jsonSmall, async function(req, res) {
   }
 });
 
-// ── /api/heroes — community wall (public) ────────────────────────────────
+// ── /api/heroes — community wall (public, 60s cache) ─────────────────────
+var _heroesCache = null;
+var _heroesCacheTime = 0;
+var HEROES_CACHE_TTL = 60000;
+
+function invalidateHeroesCache() { _heroesCache = null; }
+
 app.get('/api/heroes', async function(req, res) {
+  var now = Date.now();
+  if (_heroesCache && now - _heroesCacheTime < HEROES_CACHE_TTL) {
+    return res.json({ heroes: _heroesCache, count: _heroesCache.length });
+  }
   var heroes = await getAllHeroes();
+  _heroesCache = heroes;
+  _heroesCacheTime = now;
   res.json({ heroes: heroes, count: heroes.length });
 });
 
@@ -1015,8 +1042,8 @@ app.patch('/api/heroes/me', jsonSmall, async function(req, res) {
   }
   if (!Object.keys(updates).length) return res.status(400).json({ error: 'nothing_to_update' });
   try {
-    await ensureHero(session.wallet, updates.codename || null, session.balance || 0);
     await supabase.from('heroes').update(updates).eq('wallet', session.wallet);
+    invalidateHeroesCache();
     res.json({ ok: true });
   } catch (e) {
     res.status(500).json({ error: 'server_error' });
@@ -1040,12 +1067,13 @@ app.post('/api/admin/stats', jsonSmall, async function(req, res) {
   }
   if (!supabase) return res.status(503).json({ error: 'no_supabase' });
   try {
-    var { data: heroes, error: hErr } = await supabase
-      .from('heroes')
-      .select('wallet,codename,balance,total_conversations,days_active,joined_at,last_active_at')
-      .order('total_conversations', { ascending: false });
-    if (hErr) throw hErr;
-    var heroesList = heroes || [];
+    var [heroesResult, sessionResult] = await Promise.all([
+      supabase.from('heroes').select('wallet,codename,balance,total_conversations,days_active,joined_at,last_active_at').order('total_conversations', { ascending: false }),
+      supabase.from('sessions').select('tier').gt('expires_at', new Date().toISOString())
+    ]);
+    if (heroesResult.error) throw heroesResult.error;
+    var heroesList = heroesResult.data || [];
+    var sessionRows = sessionResult.data || [];
 
     var tiers = { legend: 0, commander: 0, agent: 0, operative: 0 };
     heroesList.forEach(function(h) {
@@ -1056,11 +1084,7 @@ app.post('/api/admin/stats', jsonSmall, async function(req, res) {
       else tiers.operative++;
     });
 
-    var { data: sessionRows } = await supabase
-      .from('sessions')
-      .select('tier')
-      .gt('expires_at', new Date().toISOString());
-    var sessionsActive = (sessionRows || []).length;
+    var sessionsActive = sessionRows.length;
     var sessionsByTier = { operative: 0, recruit: 0 };
     (sessionRows || []).forEach(function(s) {
       if (s.tier === 'operative') sessionsByTier.operative++;

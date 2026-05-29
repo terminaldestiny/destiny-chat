@@ -1388,8 +1388,9 @@ async function connectWallet(){
   var SZ=14,cols,drops,last=0;
   function resize(){c.width=window.innerWidth;c.height=window.innerHeight;cols=Math.floor(c.width/SZ);drops=Array.from({length:cols},function(){return Math.random()*-60|0;});}
   resize();window.addEventListener('resize',resize);
+  var _mraf;
   function draw(ts){
-    if(ts-last<110){requestAnimationFrame(draw);return;}last=ts;
+    if(ts-last<110){_mraf=requestAnimationFrame(draw);return;}last=ts;
     ctx.fillStyle='rgba(3,12,21,0.065)';ctx.fillRect(0,0,c.width,c.height);
     for(var i=0;i<cols;i++){
       var isRed=Math.random()<0.011;
@@ -1399,9 +1400,13 @@ async function connectWallet(){
       if(drops[i]*SZ>c.height&&Math.random()>0.972)drops[i]=0;
       drops[i]++;
     }
-    requestAnimationFrame(draw);
+    _mraf=requestAnimationFrame(draw);
   }
-  requestAnimationFrame(draw);
+  _mraf=requestAnimationFrame(draw);
+  document.addEventListener('visibilitychange',function(){
+    if(document.hidden)cancelAnimationFrame(_mraf);
+    else _mraf=requestAnimationFrame(draw);
+  });
 })();
 
 // ── Red energy streaks ────────────────────────────────────────────
@@ -2046,8 +2051,9 @@ function addDestiny(text,typewriter,modelTag){
       ctxt.classList.add('tcur');
       var i=0,speed=Math.max(8,Math.min(26,2000/text.length));
       var iv=setInterval(function(){
+        if(!ctxt.isConnected){clearInterval(iv);return;}
         ctxt.textContent+=text[i++];
-        feed.scrollTop=feed.scrollHeight;
+        if(i%4===0)feed.scrollTop=feed.scrollHeight;
         if(i>=text.length){
           clearInterval(iv);
           cw.classList.remove('transmitting');
@@ -2164,7 +2170,11 @@ function fetchPrice(){
     .catch(function(){});
 }
 fetchPrice();
-setInterval(fetchPrice,300000);
+var _priceIv=setInterval(fetchPrice,300000);
+document.addEventListener('visibilitychange',function(){
+  if(document.hidden){clearInterval(_priceIv);}
+  else{fetchPrice();_priceIv=setInterval(fetchPrice,300000);}
+});
 
 // ── Sound engine ─────────────────────────────────────────────────
 var _actx=null,_muted=false;
@@ -2962,10 +2972,16 @@ document.addEventListener('keydown',function(e){if(e.key==='Escape'){closeHelp()
 // ── iOS keyboard viewport fix ─────────────────────────────────────
 if(window.visualViewport){
   var _ui=document.getElementById('ui');
+  var _vpPending=false;
   function _vpFix(){
-    _ui.style.height=window.visualViewport.height+'px';
-    _ui.style.top=window.visualViewport.offsetTop+'px';
-    feed.scrollTop=feed.scrollHeight;
+    if(_vpPending)return;
+    _vpPending=true;
+    requestAnimationFrame(function(){
+      _ui.style.height=window.visualViewport.height+'px';
+      _ui.style.top=window.visualViewport.offsetTop+'px';
+      feed.scrollTop=feed.scrollHeight;
+      _vpPending=false;
+    });
   }
   window.visualViewport.addEventListener('resize',_vpFix);
 }

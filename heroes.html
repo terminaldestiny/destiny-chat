@@ -2257,6 +2257,7 @@ function renderGhostCard(slotNum){
 }
 
 // ── Auto-refresh ──────────────────────────────────────────────────────────
+var _gridDirty=false;
 async function refreshHeroes(){
   var dot=document.getElementById('sync-dot');
   dot.classList.add('on');
@@ -2267,22 +2268,36 @@ async function refreshHeroes(){
     var newSerials=new Set();
     fresh.forEach(function(h){if(!prevSerials.has(h.serial))newSerials.add(h.serial);});
     allHeroes=fresh;
-
     populateStats(allHeroes);
-
-
     buildTicker(allHeroes);
-    if(constellationMode)renderConstellation();else renderGrid(newSerials);
+    if(document.hidden){_gridDirty=true;}
+    else if(constellationMode){renderConstellation();}
+    else{renderGrid(newSerials);}
   }catch(e){}
   setTimeout(function(){dot.classList.remove('on');},800);
 }
 
+document.addEventListener('visibilitychange',function(){
+  if(!document.hidden&&_gridDirty){
+    _gridDirty=false;
+    if(constellationMode)renderConstellation();else renderGrid();
+  }
+});
+
 // ── Init ──────────────────────────────────────────────────────────────────
 async function load(){
   var sess=getSession();
-  if(sess&&sess.sessionToken&&sess.tier==='operative'){
+  var isOperative=sess&&sess.sessionToken&&sess.tier==='operative';
+
+  // Fire both fetches in parallel
+  var mePromise=isOperative
+    ?fetch(BACKEND+'/api/heroes/me',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({sessionToken:sess.sessionToken})})
+    :null;
+  var heroesPromise=fetch(BACKEND+'/api/heroes');
+
+  if(mePromise){
     try{
-      var mr=await fetch(BACKEND+'/api/heroes/me',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({sessionToken:sess.sessionToken})});
+      var mr=await mePromise;
       if(mr.ok){
         myHero=await mr.json();
         populateMyCard(myHero);
@@ -2305,7 +2320,7 @@ async function load(){
   }
 
   try{
-    var data=await fetch(BACKEND+'/api/heroes').then(function(r){return r.json();});
+    var data=await heroesPromise.then(function(r){return r.json();});
     allHeroes=data.heroes||[];
     document.getElementById('loading').style.display='none';
     if(myHero){var _me=allHeroes.find(function(h){return h.serial===myHero.serial;});if(_me&&_me.rank!==myHero.rank){myHero.rank=_me.rank;document.getElementById('pc-rank').textContent='▸ '+_me.rank;updatePreview();}}
@@ -2583,7 +2598,15 @@ async function runReveal(h){
 }
 
 load();
-setInterval(refreshHeroes,60000);
+var _heroIv=setInterval(refreshHeroes,60000);
+document.addEventListener('visibilitychange',function(){
+  if(document.hidden){
+    clearInterval(_heroIv);
+  }else{
+    refreshHeroes();
+    _heroIv=setInterval(refreshHeroes,60000);
+  }
+});
 </script>
 <script>
 if('serviceWorker' in navigator){
