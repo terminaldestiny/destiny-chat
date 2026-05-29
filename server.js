@@ -49,8 +49,11 @@ var ALLOWED_ORIGINS = process.env.NODE_ENV === 'development'
 app.use(cors({
   origin: function(origin, callback) {
     if (!origin) {
-      // No Origin header = server-to-server call; CORS not applicable, allow through
+      // No Origin header = true server-to-server; CORS not applicable, allow through
       callback(null, false);
+    } else if (origin === 'null') {
+      // Sandboxed iframe sends literal "null" origin — reject
+      callback(new Error('CORS: sandboxed origin rejected'));
     } else if (ALLOWED_ORIGINS.indexOf(origin) !== -1) {
       callback(null, true);
     } else {
@@ -564,7 +567,7 @@ app.post('/api/verify', jsonSmall, async function(req, res) {
     await createSession(sessionToken, wallet, tier, balance);
     if (tier === 'operative') {
       var codename = (body.codename || '').toString().trim().slice(0, 24).replace(/[^\x20-\x7E]/g, '');
-      ensureHero(wallet, codename, balance);
+      await ensureHero(wallet, codename, balance);
     }
     res.json({ tier: tier, balance: balance, sessionToken: sessionToken, minTokens: MIN_TOKENS });
   } catch (e) {
@@ -616,7 +619,7 @@ app.post('/api/chat', jsonLarge, async function(req, res) {
   var tier = 'recruit';
   var walletAddress = null;
   var session = null;
-  if (sessionToken) {
+  if (sessionToken && UUID_RE.test(sessionToken)) {
     session = await getSession(sessionToken);
     if (session) {
       tier = session.tier;
@@ -794,6 +797,8 @@ app.get('/api/scan/:address', function(req, res) {
     .then(function(upstream) {
       clearTimeout(t);
       if (!upstream.ok) return res.status(upstream.status).json({ error: 'upstream_error' });
+      var cl = upstream.headers.get('content-length');
+      if (cl && parseInt(cl, 10) > 524288) return res.status(502).json({ error: 'upstream_too_large' });
       return upstream.json().then(function(data) { res.json(data); });
     })
     .catch(function(e) {
@@ -838,7 +843,7 @@ app.post('/api/auth/link-email', jsonSmall, async function(req, res) {
   var email        = (body.email || '').toString().trim().toLowerCase().slice(0, 254);
 
   // L1: proper email validation
-  if (!sessionToken || !email || !EMAIL_RE.test(email)) {
+  if (!sessionToken || !UUID_RE.test(sessionToken) || !email || !EMAIL_RE.test(email)) {
     return res.status(400).json({ error: 'missing_fields' });
   }
   if (!supabase) return res.status(503).json({ error: 'no_supabase' });
@@ -926,7 +931,7 @@ app.post('/api/auth/magic-verify', jsonSmall, async function(req, res) {
 
     var sessionToken = crypto.randomUUID();
     await createSession(sessionToken, user.wallet, tier, balance);
-    if (tier === 'operative') ensureHero(user.wallet, null, balance);
+    if (tier === 'operative') await ensureHero(user.wallet, null, balance);
 
     res.json({ tier, balance, sessionToken, wallet: user.wallet, email, minTokens: MIN_TOKENS });
   } catch (e) {
@@ -945,7 +950,7 @@ app.get('/api/heroes', async function(req, res) {
 app.post('/api/heroes/me', jsonSmall, async function(req, res) {
   var body = req.body || {};
   var sessionToken = (body.sessionToken || '').toString().trim().slice(0, 64);
-  if (!sessionToken) return res.status(401).json({ error: 'unauthorized' });
+  if (!sessionToken || !UUID_RE.test(sessionToken)) return res.status(401).json({ error: 'unauthorized' });
   var session = await getSession(sessionToken);
   if (!session) return res.status(401).json({ error: 'session_expired' });
   if (!supabase) return res.status(503).json({ error: 'no_supabase' });
@@ -968,7 +973,7 @@ app.post('/api/heroes/me', jsonSmall, async function(req, res) {
 app.patch('/api/heroes/me', jsonSmall, async function(req, res) {
   var body = req.body || {};
   var sessionToken = (body.sessionToken || '').toString().trim().slice(0, 64);
-  if (!sessionToken) return res.status(401).json({ error: 'unauthorized' });
+  if (!sessionToken || !UUID_RE.test(sessionToken)) return res.status(401).json({ error: 'unauthorized' });
   var session = await getSession(sessionToken);
   if (!session) return res.status(401).json({ error: 'session_expired' });
   if (!supabase) return res.status(503).json({ error: 'no_supabase' });

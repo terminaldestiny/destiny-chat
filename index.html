@@ -3226,7 +3226,7 @@ function _renderMenuHeroCard(h){
     titlesEl.innerHTML=titles.map(function(t){
       var icon=_MHC_BADGE[t]||'◈';
       var tip=t;
-      return '<div class="mhc-chip" title="'+tip+'">'+icon+'</div>';
+      return '<div class="mhc-chip" title="'+escHtml(tip)+'">'+icon+'</div>';
     }).join('');
   }
   if(statsEl){

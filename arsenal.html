@@ -871,7 +871,7 @@ function activateLoadout(btn){
   var name=card.querySelector('.lc-title').textContent.trim();
   var tools=card.dataset.tools.split(',').map(function(t){return t.trim().toUpperCase();});
 
-  clearLoadout(true);
+  clearLoadout();
 
   // Reset filter to ALL
   document.querySelectorAll('.ftab').forEach(function(t){t.classList.remove('active');});
@@ -900,7 +900,7 @@ function activateLoadout(btn){
   },120);
 }
 
-function clearLoadout(silent){
+function clearLoadout(){
   document.querySelectorAll('.tc').forEach(function(tc){tc.classList.remove('lc-hi','lc-dim');});
   document.getElementById('lo-banner').classList.remove('on');
 }

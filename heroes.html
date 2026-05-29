@@ -1001,7 +1001,7 @@ var BADGE={
   'PHANTOM':        {icon:'🌑', tip:'PHANTOM — active on 30+ different days'},
   'SOVEREIGN':      {icon:'👑', tip:'SOVEREIGN — holds 10M+ $DESTINY'}
 };
-function bdgHtml(t){var b=BADGE[t];return '<span class="bdg" title="'+(b?b.tip:escHtml(t))+'">'+(b?b.icon:'◈')+'</span>';}
+function bdgHtml(t){var b=BADGE[t];return '<span class="bdg" title="'+(b?escHtml(b.tip):escHtml(t))+'">'+(b?b.icon:'◈')+'</span>';}
 var RANK_HEX={LEGEND:'#ffaa00',COMMANDER:'#cc44ff',AGENT:'#00d4ff',OPERATIVE:'#00ff41'};
 var RANK_RGBA={LEGEND:function(a){return 'rgba(255,170,0,'+a+')';},COMMANDER:function(a){return 'rgba(204,68,255,'+a+')';},AGENT:function(a){return 'rgba(0,212,255,'+a+')';},OPERATIVE:function(a){return 'rgba(0,255,65,'+a+')';}};
 var THEME_HEX={green:'#00ff41',cyan:'#00d4ff',amber:'#ffaa00',red:'#ff2a00',purple:'#cc44ff',blue:'#0088ff',pink:'#ff2288',orange:'#ff6600',solar:'#ffff00',jade:'#00ff99',flux:'#ff00cc',warp:'#9933ff',ghost:'#e0e0e0',ember:'#ff8800'};
@@ -2322,7 +2322,7 @@ async function load(){
     renderGrid();
     var params=new URLSearchParams(location.search);
     var deepSerial=params.get('serial');
-    var deepName=params.get('hero');
+    var deepName=(params.get('hero')||'').slice(0,24);
     if(deepSerial||deepName){
       var target=allHeroes.find(function(h){
         return deepSerial?String(h.serial)===deepSerial:h.codename.toLowerCase()===(deepName||'').toLowerCase();
