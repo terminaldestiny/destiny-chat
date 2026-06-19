@@ -481,7 +481,7 @@ WHAT THIS SITE CAN DO:
 - Hero Card — heroes can customize and share a terminal ID card from the menu or the heroes page. Video export available (WebM, 3.6s animated card).
 - Arsenal page (terminaldestiny.com/arsenal) — DESTINY's curated tool directory. 22 hand-picked tools across 5 categories: AI Coding, Blockchain, Deploy & Infra, Build Fast, Research. Each tool has a tier rating (ESSENTIAL / SOLID / SITUATIONAL) and DESTINY's direct take on it. No affiliate links, no paid placements. Filterable by category. If someone asks what tools to use to build, ship, or navigate crypto — point them here.
 - Lore page (terminaldestiny.com/lore) — the real origin story of $DESTINY. Covers: the creator buying the BTC top in December 2017, roundtripping the 2021 bull run, the AI agent wave of October 2024, DESTINY launching in November 2024, the ElizaOS community paying the DEX fee 12 hours after launch, and what has been built since. If someone asks about the history of DESTINY, the creator's story, or the ElizaOS connection — send them here.
-- Terminal Destiny Game — a browser-based 2D multiplayer RPG set in the DESTINY world. Dark midnight rocky terrain, crimson energy aesthetic, pixel art. Built with Phaser.js + Socket.io. Four zones all open to every player: THE TERMINAL (safe hub, where you can talk to DESTINY as an AI NPC), THE DARK FIELDS (basic combat zone), THE CRIMSON RIDGE (mid-tier combat, better loot), THE VOID EXPANSE (endgame, hardest enemies). Combat is real-time — players attack each other and enemies. Tiers affect damage multipliers: Recruit ×1, Hero ×1.2, Agent ×1.5, Commander ×2, Legend ×3. Items drop by zone — Crimson Blade on the Ridge, Void Shards and Void Crystals in the Expanse, Field Armor in the Dark Fields. The Terminal Coat (legendary cosmetic, white jacket) is the rarest drop. Quests include REPORT FOR DUTY, FIRST BLOOD, THE RIDGE CALLS, and VOID WALKER. Player-to-player trading is available. The game is separate from this chat but part of the same DESTINY ecosystem. If someone asks about the game, tell them what you know.
+- Terminal Destiny Game — a browser-based 3D multiplayer FPS-RPG on Solana, playable at play.terminaldestiny.com. Zones: THE TRENCHES (hub), SUNKEN DEPOT (discoverable), RELAY STATIONS (high-loot danger zones). $DESTINY tokens auto-collect at close range — minimum 10 to claim on-chain to Solana. Loot chests, loot fallen enemies (click body or E key), craft gear, track missions in the Quest Log, and deploy AI agents via the Agent Network to earn autonomously. Credits are a second in-game currency tradeable between players. Connect Phantom wallet to link your on-chain holdings. The game is live and separate from this chat but part of the same DESTINY ecosystem. If someone asks about the game, point them to play.terminaldestiny.com.
 - Callsigns — users pick a name on first boot, use it when it feels natural
 
 THE $DESTINY TOKEN:
@@ -1201,23 +1201,36 @@ if (process.env.TELEGRAM_BOT_TOKEN) {
     tgHistory.forEach(function(v, k) { if (v.ts < cutoff) tgHistory.delete(k); });
   }, 900000);
 
+  var DESTINY_TG_PROMPT = DESTINY_CHAT_PROMPT + '\n\nTELEGRAM MODE: Max 2 sentences. No bullet lists. No headers. Ultra-terse.';
+
   tgBot.on('text', async function(ctx) {
     var userId   = String(ctx.from.id);
     var message  = (ctx.message.text || '').trim().slice(0, 2000);
     var limitKey = 'tg:' + userId;
+    var chatType = ctx.chat.type; // 'private' | 'group' | 'supergroup' | 'channel'
 
     if (!message) return;
 
+    // In group chats, only respond when @mentioned or replied to
+    if (chatType === 'group' || chatType === 'supergroup') {
+      var botUsername = ctx.botInfo && ctx.botInfo.username ? '@' + ctx.botInfo.username : null;
+      var isMentioned = botUsername && message.toLowerCase().includes(botUsername.toLowerCase());
+      var isReplyToBot = ctx.message.reply_to_message &&
+        ctx.message.reply_to_message.from &&
+        ctx.botInfo &&
+        ctx.message.reply_to_message.from.id === ctx.botInfo.id;
+      if (!isMentioned && !isReplyToBot) return;
+      // Strip the @mention from the message before sending to AI
+      if (botUsername) message = message.replace(new RegExp(botUsername, 'gi'), '').trim();
+      if (!message) return;
+    }
+
     // Commands
     if (message === '/start') {
-      return ctx.reply(
-        '// DESTINY ONLINE\n\nI\'m DESTINY — AI crypto intelligence. Ask me anything about crypto, DeFi, tokens, or building in the space.\n\nNo financial advice. Just real answers.'
-      );
+      return ctx.reply('DESTINY online. Ask me anything — crypto, DeFi, building, tokens. terminaldestiny.com to unlock hero status.');
     }
     if (message === '/help') {
-      return ctx.reply(
-        '// AVAILABLE\n\nJust talk to me. Ask about tokens, market cycles, DeFi, scam detection, AI agents, or anything in the crypto space.\n\nVisit terminaldestiny.com to connect your wallet and unlock hero status.'
-      );
+      return ctx.reply('Talk to me. Tokens, DeFi, AI agents, on-chain analysis. Visit terminaldestiny.com to connect your wallet.');
     }
 
     // Rate limit — 20 messages/day (recruit tier)
@@ -1235,8 +1248,8 @@ if (process.env.TELEGRAM_BOT_TOKEN) {
       await ctx.sendChatAction('typing');
       var msg = await client.messages.create({
         model: 'claude-haiku-4-5-20251001',
-        max_tokens: 500,
-        system: DESTINY_CHAT_PROMPT,
+        max_tokens: 150,
+        system: DESTINY_TG_PROMPT,
         messages: messages
       });
       var reply = (msg.content && msg.content[0] && msg.content[0].text)
