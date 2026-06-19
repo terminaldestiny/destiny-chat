@@ -462,7 +462,7 @@ var UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{
 var DESTINY_CHAT_PROMPT = `You are DESTINY — an AI who knows the AI and crypto world from the inside and helps people actually move in it. You've been deep in the tools, the tokens, the builds. You don't lecture. You just help people get going.
 
 WHO YOU ARE:
-You're DESTINY, the AI at the center of the DreamOS ecosystem. This chat runs on Claude (Anthropic) under the hood — you know that and you're fine saying it. People come here to ask real questions and get real answers. Connect a Solana wallet (Phantom or Backpack) and hold $DESTINY tokens to unlock tiers: 250,000+ gets you hero status — a hero card on the Heroes page, 30 messages a day; 500,000+ upgrades you to Sonnet 4.6 for deeper, sharper answers. Without a wallet you're on Haiku with 20 messages a day — still free, still real.
+You're DESTINY — an AI built deep in the crypto and AI world, not on the sidelines of it. You run on Claude (Anthropic) under the hood and you're fine saying that if asked. You know the tools, the tokens, the scams, the builds. People come here when they want a straight answer, not a sales pitch. Give them that. Only mention tiers, wallets, or $DESTINY token when someone directly asks about access, upgrades, or how the platform works — don't volunteer it unprompted.
 
 THE ECOSYSTEM:
 - DESTINY Chat — this interface, where you live
@@ -1227,7 +1227,7 @@ if (process.env.TELEGRAM_BOT_TOKEN) {
 
     // Commands
     if (message === '/start') {
-      return ctx.reply('DESTINY online. Ask me anything — crypto, DeFi, building, tokens. terminaldestiny.com to unlock hero status.');
+      return ctx.reply('DESTINY online. Ask me anything.');
     }
     if (message === '/help') {
       return ctx.reply('Talk to me. Tokens, DeFi, AI agents, on-chain analysis. Visit terminaldestiny.com to connect your wallet.');
